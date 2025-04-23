@@ -1,10 +1,10 @@
 package UserStates;
 
-import Graphic.GraphicalManager;
+import Graphic.GMDistributor;
 
 public class RegistrationState extends UserState {
     public RegistrationState() {
-        super(new GraphicalManager(){});
+        gManager= GMDistributor.getGM(this.getClass().getName());
     }
     public void update() {
         super.update();

@@ -13,9 +13,7 @@ public abstract class StateBasic
         this.gManager = gManager;
     }
     */
-    public StateBasic(GraphicalManager gManager) {
-        this.gManager = gManager;
-    }
+    public StateBasic() {}
 
     public void enter() {
         gManager.initialize();

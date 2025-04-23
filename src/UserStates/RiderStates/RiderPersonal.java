@@ -1,9 +1,16 @@
 package UserStates.RiderStates;
 
-import Graphic.GraphicalManager;
+import Graphic.GMDistributor;
 
 public class RiderPersonal extends RiderBasic {
     public RiderPersonal() {
-        super(new GraphicalManager(){});
+        gManager= GMDistributor.getGM(this.getClass().getName());
+    }
+    public void update() {
+        super.update();
+        if(gManager.onClickButtonName().equals("OrdersManage")) {
+            RiderStatemachine.changeState(new RiderOrdersManage());
+            return;
+        }
     }
 }

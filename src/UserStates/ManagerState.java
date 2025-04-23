@@ -1,11 +1,11 @@
 package UserStates;
 
-import Graphic.GraphicalManager;
+import Graphic.GMDistributor;
 import UserStates.ManagerStates.ManagerStatemachine;
 
 public class ManagerState extends UserState {
     public ManagerState() {
-        super(new GraphicalManager(){});
+        gManager= GMDistributor.getGM(this.getClass().getName());
     }
     public void enter() {
         super.enter();

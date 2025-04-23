@@ -1,12 +1,12 @@
 package UserStates;
 
 import DataBase.DataBaseManager;
-import Graphic.GraphicalManager;
+import Graphic.GMDistributor;
 import Users.User;
 
 public class LoginState extends UserState {
     public LoginState() {
-        super(new GraphicalManager(){});
+        gManager= GMDistributor.getGM(this.getClass().getName());
     }
     public void update() {
         super.update();

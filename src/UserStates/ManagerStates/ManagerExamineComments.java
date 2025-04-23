@@ -1,9 +1,20 @@
 package UserStates.ManagerStates;
 
-import Graphic.GraphicalManager;
+import Graphic.GMDistributor;
 
 public class ManagerExamineComments extends ManagerBasic {
     public ManagerExamineComments() {
-        super(new GraphicalManager(){});
+        gManager= GMDistributor.getGM(this.getClass().getName());
+    }
+    public void update() {
+        super.update();
+        if(gManager.onClickButtonName().equals("ExamineItems")) {
+            ManagerStatemachine.changeState(new ManagerExamineItems());
+            return;
+        }
+        if(gManager.onClickButtonName().equals("ExamineSellers")) {
+            ManagerStatemachine.changeState(new ManagerExamineSellers());
+            return;
+        }
     }
 }

@@ -1,12 +1,6 @@
 package UserStates;
 
-import Graphic.GraphicalManager;
-
-public abstract class UserState extends StateBasic
-{
-    public UserState(GraphicalManager gManager) {
-        super(gManager);
-    }
+public abstract class UserState extends StateBasic {
 
     public void enter() {
         super.enter();

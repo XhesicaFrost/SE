@@ -1,11 +1,11 @@
 package UserStates;
 
-import Graphic.GraphicalManager;
+import Graphic.GMDistributor;
 import UserStates.RiderStates.RiderStatemachine;
 
 public class RiderState extends UserState {
     public RiderState() {
-        super(new GraphicalManager(){});
+        gManager= GMDistributor.getGM(this.getClass().getName());
     }
     public void enter() {
         super.enter();

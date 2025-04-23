@@ -1,10 +1,10 @@
 package UserStates.BuyerStates;
 
-import Graphic.GraphicalManager;
+import Graphic.GMDistributor;
 
 public class BuyerPersonal extends BuyerBasic {
     public BuyerPersonal() {
-        super(new GraphicalManager(){});
+        gManager=GMDistributor.getGM(this.getClass().getName());
     }
     public void update() {
         super.update();
