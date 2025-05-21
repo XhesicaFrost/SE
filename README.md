@@ -28,17 +28,17 @@ vue+vuex+router
 - **请求地址**：`${BASE_URL}/register`
 - **请求参数**（Query String）：
 
-| 参数名      | 类型   | 说明         | 是否必填 |
-| ----------- | ------ | ------------ | -------- |
-| userName    | string | 用户名       | 是       |
-| userEmail   | string | 用户邮箱     | 是       |
-| userKind    | string | 用户类型     | 是       |
-| password    | string | 用户密码     | 是       |
+| 参数名    | 类型   | 说明         | 是否必填 |
+| --------- | ------ | ------------ | -------- |
+| username  | string | 用户名       | 是       |
+| phone     | string | 用户手机号   | 是       |
+| password  | string | 用户密码     | 是       |
+| userKind  | string | 用户类型（user/rider/merchant） | 是 |
 
 - **请求示例**：
 
 ```
-GET http://localhost:3000/register?userName=张三&userEmail=zhangsan@example.com&userKind=normal&password=123456
+GET http://localhost:3000/register?username=张三&phone=13812345678&userKind=user&password=123456
 ```
 
 - **返回结果**（JSON）：
@@ -48,6 +48,7 @@ GET http://localhost:3000/register?userName=张三&userEmail=zhangsan@example.co
 {
   "code": 200,
   "success": true,
+  "id": "用户ID",
   "message": "注册成功"
 }
 ```
@@ -56,7 +57,7 @@ GET http://localhost:3000/register?userName=张三&userEmail=zhangsan@example.co
 {
   "code": 400,
   "success": false,
-  "message": "邮箱已被注册"
+  "message": "手机号已被注册"
 }
 ```
 
@@ -68,17 +69,17 @@ GET http://localhost:3000/register?userName=张三&userEmail=zhangsan@example.co
 - **请求地址**：`${BASE_URL}/login`
 - **请求参数**（Query String）：
 
-| 参数名      | 类型   | 说明         | 是否必填 |
-| ----------- | ------ | ------------ | -------- |
-| userName    | string | 用户名       | 否，但是会有一个默认值，可能为空|
-| userEmail   | string | 用户邮箱     | 是        |
-| password    | string | 用户密码     | 是       |
-| userKind    | string | 用户类型     | 是       |
+| 参数名    | 类型   | 说明         | 是否必填 |
+| --------- | ------ | ------------ | -------- |
+| username  | string | 用户名       | 是       |
+| phone     | string | 用户手机号   | 是       |
+| password  | string | 用户密码     | 是       |
+| userKind  | string | 用户类型（user/rider/merchant） | 是 |
 
 - **请求示例**：
 
 ```
-GET http://localhost:3000/login?userName=张三&password=123456
+GET http://localhost:3000/login?username=张三&phone=13812345678&userKind=user&password=123456
 ```
 
 - **返回结果**（JSON）：
@@ -88,6 +89,7 @@ GET http://localhost:3000/login?userName=张三&password=123456
 {
   "code": 200,
   "success": true,
+  "id": "用户ID",
   "message": "登录成功"
 }
 ```

@@ -3,8 +3,8 @@
 
   本组件用于用户登录和注册表单的展示与数据收集。
   - 根据传入的 formType 属性（"login" 或 "register"）动态切换表单内容。
-  - 注册时显示用户名、邮箱、密码、用户类型选择（用户/骑手/商家）。
-  - 登录时显示邮箱、密码、用户类型选择。
+  - 注册时显示用户名、手机号、密码、用户类型选择（用户/骑手/商家）。
+  - 登录时显示手机号、密码、用户类型选择。
   - 用户类型下拉框默认值为“用户”。
   - 表单提交时通过 submit 事件将表单数据传递给父组件。
   - 包含基础样式美化输入框和按钮。
@@ -16,15 +16,15 @@
       <input v-model="formData.username" type="text" required />
     </div>
     <div class="form-group">
-      <label>Email:</label>
-      <input v-model="formData.email" type="email" required />
+      <label>Phone:</label>
+      <input v-model="formData.phone" type="tel" required pattern="^1\d{10}$" placeholder="请输入11位手机号" />
     </div>
     <div class="form-group">
       <label>Password:</label>
       <input v-model="formData.password" type="password" required />
     </div>
-    <!-- 新增用户类型选择 -->
-    <div  class="form-group">
+    <!-- 用户类型选择 -->
+    <div class="form-group">
       <label>用户类型:</label>
       <select v-model="formData.userKind">
         <option value="user">用户</option>
@@ -52,9 +52,9 @@ export default {
     return {
       formData: {
         username: '',
-        email: '',
+        phone: '',      // 改为手机号
         password: '',
-        userKind: 'user' // 默认是商家
+        userKind: 'user'
       }
     }
   },
@@ -81,7 +81,7 @@ export default {
 }
 
 input[type="text"],
-input[type="email"],
+input[type="tel"],
 input[type="password"] {
   display: inline-block;
   box-sizing: border-box;
@@ -101,7 +101,7 @@ input[type="password"] {
 }
 
 input[type="text"]:focus,
-input[type="email"]:focus,
+input[type="tel"]:focus,
 input[type="password"]:focus {
   border-color: #3498db;
 }
