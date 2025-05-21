@@ -2,7 +2,8 @@ export default {
   namespaced: true,
   state: () => ({
     merchantId: '',
-    merchantName: ''
+    merchantName: '',
+    merchantStatus: '',
   }),
   mutations: {
     SET_MERCHANT_ID(state, id) {

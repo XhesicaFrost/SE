@@ -111,13 +111,17 @@ GET http://localhost:3000/login?username=张三&phone=13812345678&userKind=user&
   | ------ | ------ | -------- | -------- |
   | userId | string | 用户ID   | 是       |
 - **返回示例**：
-如果未创建店铺，商家ID应该为-1
+  | 参数名 | 类型   | 说明     | 是否必填 |
+  | ------ | ------ | -------- | -------- |
+  | merchantStatus | string | 可以为“未注册/正常/审批中/封禁中”   | 是       |
+
 ```json
 {
   "code": 200,
   "success": true,
   "merchantId": "商家ID",
-  "merchantName": "商家名称"
+  "merchantName": "商家名称",
+  "merchantStatus":"正常"
 }
 ```
 
@@ -141,5 +145,45 @@ GET http://localhost:3000/login?username=张三&phone=13812345678&userKind=user&
       // ...共10条
     ]
   }
+}
+```
+### 商家注册接口
+
+- **请求方式**：POST  
+- **请求地址**：`/merchant/register`  
+- **请求参数**（FormData 格式）：
+
+| 参数名      | 类型    | 说明         | 是否必填 |
+| ----------- | ------- | ------------ | -------- |
+| shopName    | string  | 店铺名称     | 是       |
+| shopAddress | string  | 店铺地址     | 是       |
+| shopImage   | file    | 店铺图片     | 是       |
+
+- **请求示例**：
+
+以 FormData 方式提交：
+
+```
+POST /merchant/register
+Content-Type: multipart/form-data
+
+shopName=xxx
+shopAddress=xxx
+shopImage=文件
+```
+
+- **返回结果**（JSON）：
+
+成功：
+```json
+{
+  "status": "success"
+}
+```
+
+失败：
+```json
+{
+  "status": "fail"
 }
 ```

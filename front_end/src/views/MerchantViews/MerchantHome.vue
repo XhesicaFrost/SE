@@ -84,9 +84,9 @@ export default {
     },
     /**
      * fetchMerchantInfo
-     * 进入页面时调用，通过当前用户ID请求 /userToMerchant 接口，获取商家ID和商家名称，
-     * 并保存到 merchantStore，随后自动调用 fetchMerchantHomeData 获取首页数据。
-     * 如果商家ID为-1，说明未注册店铺，此时导航栏只显示“创建店铺”按钮。
+     * 进入页面时调用，通过当前用户ID请求 /userToMerchant 接口，获取商家ID、商家名称和商家状态，
+     * 并保存到 merchantStore，随后根据 merchantStatus 决定导航栏内容和是否获取首页数据。
+     * merchantStatus 可为“未注册/审批中/封禁中/正常”
      */
     async fetchMerchantInfo() {
       try {
@@ -96,19 +96,33 @@ export default {
         if (result.success && result.code === 200) {
           this.SET_MERCHANT_ID(result.merchantId || '')
           this.SET_MERCHANT_NAME(result.merchantName || '')
-          if (result.merchantId === '-1' || result.merchantId === -1) {
+          const status = result.merchantStatus
+          if (status === '未注册') {
             // 未注册店铺，仅显示“创建店铺”
             this.navItems = [
               { label: '创建店铺', action: () => this.goTo('register') }
             ]
-            console.log("Merchant ID is -1, no shop registered.")
-            // 清空数据
             this.todayRevenue = 0
             this.todayOrderCount = 0
             this.latestComments = []
-          } else {
-            console.log("Merchant ID is valid, shop registered.")
-            // 已注册店铺，显示正常导航
+          } else if (status === '审批中') {
+            // 审批中，仅显示提示
+            this.navItems = [
+              { label: '正在审批', action: () => {} }
+            ]
+            this.todayRevenue = 0
+            this.todayOrderCount = 0
+            this.latestComments = []
+          } else if (status === '封禁中') {
+            // 封禁中，仅显示提示
+            this.navItems = [
+              { label: '封禁，请联系管理员', action: () => {} }
+            ]
+            this.todayRevenue = 0
+            this.todayOrderCount = 0
+            this.latestComments = []
+          } else if (status === '正常') {
+            // 正常，显示全部功能
             this.navItems = [
               { label: '管理店铺', action: () => this.goTo('shop') },
               { label: '管理订单', action: () => this.goTo('order') },
@@ -122,18 +136,18 @@ export default {
       } catch (error) {
         this.$toast && this.$toast('网络异常，商家信息获取失败')
       }
-      if(debug_merchant_created){
+      if (debug_merchant_created) {
         this.navItems = [
-              { label: '管理店铺', action: () => this.goTo('shop') },
-              { label: '管理订单', action: () => this.goTo('order') },
-              { label: '查看数据', action: () => this.goTo('data') }
-            ]
+          { label: '管理店铺', action: () => this.goTo('shop') },
+          { label: '管理订单', action: () => this.goTo('order') },
+          { label: '查看数据', action: () => this.goTo('data') }
+        ]
       }
     }
   },
   mounted() {
     this.navItems = [
-        { label: '创建店铺', action: () => this.goTo('register') }
+      { label: '创建店铺', action: () => this.goTo('register') }
     ]
     this.fetchMerchantInfo()
   }

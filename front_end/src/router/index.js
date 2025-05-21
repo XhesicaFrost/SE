@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import store from '@/store' // 导入vuex store
-import { AuthCheck } from '@/config'
+import { debug_AuthCheck } from '@/config'
 
 const routes = [
   {
@@ -17,26 +17,38 @@ const routes = [
   {
     path: '/user',
     name: 'UserHome',
-    component: () => import('@/views/UserHome.vue'),
+    component: () => import('@/views/UserViews/UserHome.vue'),
     meta: { allow: ['user'] }
   },
   // 示例：只有商家能进入
   {
     path: '/merchant',
     name: 'MerchantHome',
-    component: () => import('@/views/MerchantHome.vue'),
+    component: () => import('@/views/MerchantViews/MerchantHome.vue'),
+    meta: { allow: ['merchant'] }
+  },
+  {
+    path: '/merchant/register',
+    name: 'MerchantRegister',
+    component: () => import('@/views/MerchantViews/MerchantRegister.vue'),
     meta: { allow: ['merchant'] }
   },
   {
     path: '/rider',
     name: 'RiderHome',
-    component: () => import('@/views/RiderHome.vue'),
+    component: () => import('@/views/RiderViews/RiderHome.vue'),
     meta: { allow: ['rider'] }
+  },
+  {
+    path: '/admin',
+    name: 'AdminHome',
+    component: () => import('@/views/AdminViews/AdminHome.vue'),
+    meta: { allow: ['admin'] }
   },
   {
     path: '/',
     redirect: '/login'
-  }
+  },
 ]
 
 const router = createRouter({
@@ -47,7 +59,7 @@ const router = createRouter({
 // 全局前置守卫
 //进行跳转的权限检查
 router.beforeEach((to, from, next) => {
-    if(AuthCheck==false){
+    if(debug_AuthCheck==false){
         next()
         return
     }
