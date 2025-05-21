@@ -3,6 +3,12 @@
 </template>
 
 <style>
+body {
+  background: #e8f5e9; /* 浅绿色 */
+  min-height: 100vh;
+  margin: 0;
+}
+
 #app {
   max-width: 400px;
   margin: 0 auto;
