@@ -101,3 +101,45 @@ GET http://localhost:3000/login?username=张三&phone=13812345678&userKind=user&
   "message": "用户名或密码错误"
 }
 ```
+## 商家相关接口
+
+### 1. `/userToMerchant`  
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/userToMerchant?userId=xxx`  
+- **请求参数**：  
+  | 参数名 | 类型   | 说明     | 是否必填 |
+  | ------ | ------ | -------- | -------- |
+  | userId | string | 用户ID   | 是       |
+- **返回示例**：
+如果未创建店铺，商家ID应该为-1
+```json
+{
+  "code": 200,
+  "success": true,
+  "merchantId": "商家ID",
+  "merchantName": "商家名称"
+}
+```
+
+### 2. `/merchantHome`
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/merchant?userId=xxx`  
+- **请求参数**：  
+  | 参数名 | 类型   | 说明     | 是否必填 |
+  | ------ | ------ | -------- | -------- |
+  | userId | string | 用户ID   | 是       |
+- **返回示例**：
+```json
+{
+  "code": 200,
+  "success": true,
+  "data": {
+    "todayRevenue": 1234.56,
+    "todayOrderCount": 42,
+    "latestComments": [
+      { "username": "用户A", "content": "菜品很好吃！" }
+      // ...共10条
+    ]
+  }
+}
+```
