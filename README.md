@@ -187,3 +187,51 @@ shopImage=文件
   "status": "fail"
 }
 ```
+
+### 获取商品列表接口
+
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/item`  
+- **请求参数**（Query String）：
+
+| 参数名     | 类型   | 说明       | 是否必填 |
+| ---------- | ------ | ---------- | -------- |
+| merchantId | string | 商家ID     | 是       |
+
+- **返回示例**：
+
+```json
+{
+  "code": 200,
+  "success": true,
+  "data": [
+    { "id": 1, "image": "https://via.placeholder.com/60", "name": "商品A", "price": 10, "sales": 100 },
+    { "id": 2, "image": "https://via.placeholder.com/60", "name": "商品B", "price": 20, "sales": 80 },
+    { "id": 3, "image": "https://via.placeholder.com/60", "name": "商品C", "price": 15, "sales": 120 }
+  ]
+}
+```
+
+### 获取店铺信息接口
+
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/shop`  
+- **请求参数**（Query String）：
+
+| 参数名     | 类型   | 说明       | 是否必填 |
+| ---------- | ------ | ---------- | -------- |
+| merchantId | string | 商家ID     | 是       |
+
+- **返回示例**：
+
+```json
+{
+  "code": 200,
+  "success": true,
+  "data": {
+    "shopName": "示例店铺",
+    "shopImg": "https://xxx.com/shop.jpg",
+    "shopAddress": "示例地址"
+  }
+}
+```

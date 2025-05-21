@@ -34,6 +34,18 @@ const routes = [
     meta: { allow: ['merchant'] }
   },
   {
+    path: '/merchant/shop',
+    name: 'MerchantShop',
+    component: () => import('@/views/MerchantViews/MerchantShop.vue'),
+    meta: { allow: ['merchant'] }
+  },
+  {
+    path: '/merchant/item/:id',
+    name: 'MerchantItemEdit',
+    component: () => import('@/views/MerchantViews/MerchantItemEdit.vue'),
+    meta: { allow: ['merchant'] }
+  },
+  {
     path: '/rider',
     name: 'RiderHome',
     component: () => import('@/views/RiderViews/RiderHome.vue'),

@@ -54,9 +54,15 @@
 
 <script>
 import { BASE_URL } from '@/config.js'
+import { mapState } from 'vuex'
 
 export default {
   name: 'MerchantRegister',
+  computed: {
+    ...mapState('userStore', {
+      userId: state => state.userInfo.userId
+    })
+  },
   data() {
     return {
       shopName: '',
@@ -86,6 +92,7 @@ export default {
       formData.append('shopName', this.shopName)
       formData.append('shopAddress', this.shopAddress)
       formData.append('shopImage', this.shopImage)
+      formData.append('userId', this.userId) // 发送商家id
 
       try {
         const response = await fetch(`${BASE_URL}/merchant/register`, {
