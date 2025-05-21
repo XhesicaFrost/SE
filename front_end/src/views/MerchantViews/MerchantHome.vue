@@ -50,6 +50,7 @@ export default {
   methods: {
     ...mapMutations('merchantStore', ['SET_MERCHANT_ID', 'SET_MERCHANT_NAME']),
     goTo(type) {
+        console.log('goTo', type)
       if (type === 'shop') {
         this.$router.push('/merchant/shop')
       } else if (type === 'order') {
@@ -68,6 +69,7 @@ export default {
      */
     async fetchMerchantHomeData(merchantId) {
       try {
+        console.log('fetchMerchantHomeData')
         const params = new URLSearchParams({ merchantId: merchantId }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/merchantHome?${params}`)
         const result = await response.json()
@@ -90,6 +92,7 @@ export default {
      */
     async fetchMerchantInfo() {
       try {
+        console.log('fetchMerchantInfo')
         const params = new URLSearchParams({ userId: this.userInfo.userId }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/userToMerchant?${params}`)
         const result = await response.json()
@@ -146,6 +149,8 @@ export default {
     }
   },
   mounted() {
+    console.log('MerchantHome mounted')
+    // 检查是否已创建商家
     this.navItems = [
       { label: '创建店铺', action: () => this.goTo('register') }
     ]

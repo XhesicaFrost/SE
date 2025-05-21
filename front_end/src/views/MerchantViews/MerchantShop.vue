@@ -122,6 +122,7 @@ export default {
      */
     async fetchShopInfo() {
       try {
+        console.log('fetchShopInfo')
         const params = new URLSearchParams({ merchantId: this.merchantId }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/shop?${params}`)
         const result = await response.json()
@@ -151,6 +152,7 @@ export default {
      * 向 /item 接口发送 merchantId，获取商品列表
      */
     async fetchGoods() {
+        console.log('fetchGoods')
       try {
         const params = new URLSearchParams({ merchantId: this.merchantId }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/item?${params}`)
