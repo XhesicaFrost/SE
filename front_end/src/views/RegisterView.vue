@@ -1,3 +1,14 @@
+<!--
+  RegisterView.vue 组件说明
+
+  本页面用于展示用户注册界面，包含：
+  - 顶部 logo 和标题
+  - 注册表单（支持用户名、邮箱、密码、用户类型选择：用户/骑手/商家，默认商家）
+  - 错误信息提示
+  - 跳转到登录页面的链接
+  - 页面底部支持信息
+  页面切换时会自动清空错误信息。
+-->
 <template>
   <div class="register-view">
     <div class="login-header">
@@ -31,6 +42,11 @@ export default {
   },
   methods: {
     ...mapActions('userStore', ['registerUser']),
+      /**
+     * 处理注册表单提交
+     * @param {Object} userData - 注册表单收集到的数据（包含用户名、邮箱、密码、用户类型等）
+     * 调用 registerUser action 进行注册，成功后跳转到登录页面，失败时自动显示错误信息
+     */
     async handleRegister(userData) {
       console.log('RegisterView:Register data:', userData)
       const success = await this.registerUser(userData)
@@ -73,3 +89,4 @@ export default {
   color: #888;
 }
 </style>
+

@@ -21,9 +21,28 @@ export default {
     }
   },
   actions: {
+    /**
+     * registerUser
+     * 用户注册方法，向后端 /register 接口发送注册请求。
+     * 
+     * 作用：注册新用户，提交用户名、邮箱、密码、用户类型等信息，返回注册结果。
+     * 
+     * 传入参数 userData（对象）格式：
+     * {
+     *   userName: string,   // 用户名，必填
+     *   userEmail: string,  // 用户邮箱，必填
+     *   userKind: string,   // 用户类型（user/rider/merchant），必填
+     *   password: string    // 用户密码，必填
+     * }
+     * 
+     * 返回值格式：
+     * {
+     *   code: number,       // 状态码，如 200 表示成功
+     *   success: boolean    // 是否成功
+     * }
+     */
     async registerUser({ commit }, userData) {
       try {
-        console.log("userState:registerUser", userData)
         const params = new URLSearchParams(userData).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/register?${params}`)
         const result = await response.json()
@@ -32,21 +51,46 @@ export default {
           commit('SET_ERROR', '')
           return { code: result.code, success: true }
         } else {
-          commit('SET_ERROR', result.message || 'Registration failed')
+          let msg = result.message || 'Registration failed'
+          if (result.code === 500) {
+            msg += '，请检查网络连接'
+          }
+          commit('SET_ERROR', msg)
           return { code: result.code || 500, success: false }
         }
       } catch (error) {
+        let msg = 'Registration failed'
         if (error.name === 'AbortError') {
-          commit('SET_ERROR', '请求超时')
+          msg = '请求超时，请检查网络连接'
         } else {
-          commit('SET_ERROR', 'Registration failed')
+          msg += '，请检查网络连接'
         }
+        commit('SET_ERROR', msg)
         return { code: 500, success: false }
       }
     },
+    /**
+     * loginUser
+     * 用户登录方法，向后端 /login 接口发送登录请求。
+     * 
+     * 作用：用户登录，提交邮箱、密码、用户类型等信息，返回登录结果。
+     * 
+     * 传入参数 loginData（对象）格式：
+     * {
+     *   userName: string,   // 用户名，非必填，可能为空
+     *   userEmail: string,  // 用户邮箱，必填
+     *   password: string,   // 用户密码，必填
+     *   userKind: string    // 用户类型（user/rider/merchant），必填
+     * }
+     * 
+     * 返回值格式：
+     * {
+     *   code: number,       // 状态码，如 200 表示成功
+     *   success: boolean    // 是否成功
+     * }
+     */
     async loginUser({ commit }, loginData) {
       try {
-        console.log("userState:loginUser", loginData)
         const params = new URLSearchParams(loginData).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/login?${params}`)
         const result = await response.json()
@@ -59,15 +103,21 @@ export default {
           commit('SET_ERROR', '')
           return { code: result.code, success: true }
         } else {
-          commit('SET_ERROR', result.message || 'Login failed')
+          let msg = result.message || 'Login failed'
+          if (result.code === 500) {
+            msg += '，请检查网络连接'
+          }
+          commit('SET_ERROR', msg)
           return { code: result.code || 500, success: false }
         }
       } catch (error) {
+        let msg = 'Login failed'
         if (error.name === 'AbortError') {
-          commit('SET_ERROR', '请求超时')
+          msg = '请求超时，请检查网络连接'
         } else {
-          commit('SET_ERROR', 'Login failed')
+          msg += '，请检查网络连接'
         }
+        commit('SET_ERROR', msg)
         return { code: 500, success: false }
       }
     }

@@ -1,3 +1,15 @@
+<!--
+  LoginView.vue 组件说明
+
+  本页面用于展示用户登录界面，包含：
+  - 顶部 logo 和标题
+  - 登录表单（支持用户类型选择）
+  - 错误信息提示
+  - 跳转到注册页面的链接
+  - 页面底部支持信息
+  页面切换时会自动清空错误信息。
+-->
+
 <template>
   <div class="login-view">
     <div class="login-header">
@@ -32,13 +44,17 @@ export default {
   methods: {
     ...mapActions('userStore', ['loginUser']),
     ...mapMutations('userStore', ['SET_ERROR']),
+    /**
+     * 处理登录表单提交
+     * @param {Object} userData - 登录表单收集到的数据（包含邮箱、密码、用户类型等）
+     * 调用 loginUser action 进行登录，成功后跳转页面，失败时自动显示错误信息
+     */
     async handleLogin(userData) {
       console.log('LoginView:Login data:', userData)
       const success = await this.loginUser(userData)
       if (success.success) {
         console.log('LoginView:Login success:', success)
         this.$router.push('/login')
-        //事实上，应该按照用户的类型进行跳转
       } else {
         console.log('LoginView:Login failed:', success)
       }
