@@ -1,8 +1,27 @@
 <template>
   <router-view />
 </template>
+<script>
+import * as config from '@/config.js'
 
+export default {
+  mounted() {
+    // 只打印以 debug 开头的变量和值
+    Object.entries(config)
+      .filter(([key]) => key.startsWith('debug'))
+      .forEach(([key, value]) => {
+        console.log(`${key}:`, value)
+      })
+  }
+}
+</script>
 <style>
+body {
+  background: #e8f5e9; /* 浅绿色 */
+  min-height: 100vh;
+  margin: 0;
+}
+
 #app {
   max-width: 400px;
   margin: 0 auto;
