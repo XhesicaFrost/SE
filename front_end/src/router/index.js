@@ -40,9 +40,51 @@ const routes = [
     meta: { allow: ['merchant'] }
   },
   {
+    path: '/merchant/shop/edit',
+    name: 'MerchantShopEdit',
+    component: () => import('@/views/MerchantViews/MerchantShopEdit.vue'),
+    meta: { allow: ['merchant'] }
+  },
+  {
+    path: '/merchant/item/register',
+    name: 'MerchantItemRegister',
+    component: () => import('@/views/MerchantViews/MerchantItemRegister.vue'),
+    meta: { allow: ['merchant'] }
+  },
+  {
     path: '/merchant/item/:id',
     name: 'MerchantItemEdit',
     component: () => import('@/views/MerchantViews/MerchantItemEdit.vue'),
+    meta: { allow: ['merchant'] }
+  },
+  {
+    path: '/merchant/order',
+    name: 'MerchantOrder',
+    component: () => import('@/views/MerchantViews/MerchantOrder.vue'),
+    meta: { allow: ['merchant'] }
+  },
+  {
+    path:'/merchant/Approval',
+    name:'MerchantApproval',
+    component: () => import('@/views/MerchantViews/MerchantApproval.vue'),
+    meta: { allow: ['merchant'] }
+  },
+  {
+    path:'/merchant/promotion',
+    name:'MerchantPromotion',
+    component: () => import('@/views/MerchantViews/MerchantPromotion.vue'),
+    meta: { allow: ['merchant'] }
+  },
+  {
+    path:'/merchant/promotion/:id',
+    name:'MerchantPromotionEdit',
+    component: () => import('@/views/MerchantViews/MerchantPromotionEdit.vue'),
+    meta: { allow: ['merchant'] }
+  },
+  {
+    path:'/merchant/promotion/register',
+    name:'MerchantPromotionRegister',
+    component: () => import('@/views/MerchantViews/MerchantPromotionRegister.vue'),
     meta: { allow: ['merchant'] }
   },
   {

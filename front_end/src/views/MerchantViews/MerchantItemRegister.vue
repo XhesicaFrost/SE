@@ -40,7 +40,7 @@
 </template>
 
 <script>
-import { BASE_URL } from '@/config.js'
+import { BASE_URL, fetchWithTimeout } from '@/config.js'
 import { mapState } from 'vuex'
 
 export default {
@@ -82,7 +82,7 @@ export default {
       formData.append('merchantId', this.merchantId)
 
       try {
-        const response = await fetch(`${BASE_URL}/merchant/item/register`, {
+        const response = await fetchWithTimeout(`${BASE_URL}/merchant/item/register`, {
           method: 'POST',
           body: formData
         })
@@ -98,7 +98,7 @@ export default {
           this.itemPrice = ''
         }
       } catch (e) {
-        this.errorMessage = '网络错误，未能成功发送'
+        this.errorMessage = '网络错误或超时，未能成功发送'
         // 清空所有已填信息
         this.itemName = ''
         this.itemImage = null

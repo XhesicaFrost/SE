@@ -119,6 +119,7 @@ export default {
   },
   mounted() {
     // 从路由获取商品ID
+    console.log("MerchantItemEdit mounted")
     this.itemId = this.$route.params.id
     this.fetchItemInfo()
   }

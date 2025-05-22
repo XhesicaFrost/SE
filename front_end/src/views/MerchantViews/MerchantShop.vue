@@ -29,7 +29,10 @@
             <span class="goods-sales">销量：{{ item.sales }}</span>
           </div>
         </div>
-        <button class="edit-btn" @click="editItem(item.id)">编辑</button>
+        <div class="goods-actions">
+          <button class="edit-btn" @click="editItem(item.id)">编辑</button>
+          <button class="delete-btn" @click="deleteItem(item.id)">删除</button>
+        </div>
       </div>
     </div>
 
@@ -101,6 +104,24 @@ export default {
     editItem(id) {
       this.$router.push(`/merchant/item/${id}`)
     },
+    async deleteItem(id) {
+      if (!confirm('确定要删除该商品吗？')) return
+      try {
+        const response = await fetchWithTimeout(`${BASE_URL}/merchant/item`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        })
+        const result = await response.json()
+        if (result.success) {
+          this.fetchGoods()
+        } else {
+          alert('删除失败')
+        }
+      } catch (e) {
+        alert('网络错误，删除失败')
+      }
+    },
     sortGoods() {
       this.page = 1
     },
@@ -119,10 +140,6 @@ export default {
     goToApproval() {
       this.$router.push('/merchant/approval')
     },
-    /**
-     * 获取店铺信息
-     * 向 /shop 接口发送 merchantId，获取店铺名称、图片、地址
-     */
     async fetchShopInfo() {
       try {
         const params = new URLSearchParams({ merchantId: this.merchantId }).toString()
@@ -149,10 +166,6 @@ export default {
         }
       }
     },
-    /**
-     * 获取商品列表
-     * 向 /item 接口发送 merchantId，获取商品列表
-     */
     async fetchGoods() {
       try {
         const params = new URLSearchParams({ merchantId: this.merchantId }).toString()
@@ -171,7 +184,6 @@ export default {
   mounted() {
     this.fetchShopInfo()
     this.fetchGoods()
-    // 设置底部导航栏选项
     this.navItems = [
       { label: '增加商品', action: this.goToAddItem },
       { label: '管理促销活动', action: this.goToPromotion },
@@ -318,5 +330,25 @@ export default {
 }
 .nav-item:hover {
   background: #f0f8ff;
+}
+.goods-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  margin-left: 1em;
+}
+.delete-btn {
+  background: #e53935;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4em 1.2em;
+  font-size: 1em;
+  cursor: pointer;
+  margin-top: 0.2em;
+  transition: background 0.2s;
+}
+.delete-btn:hover {
+  background: #b71c1c;
 }
 </style>
