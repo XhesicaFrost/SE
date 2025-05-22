@@ -5,17 +5,17 @@
 - **请求地址**：`${BASE_URL}/register`
 - **请求参数**（Query String）：
 
-| 参数名      | 类型   | 说明         | 是否必填 |
-| ----------- | ------ | ------------ | -------- |
-| userName    | string | 用户名       | 是       |
-| userEmail   | string | 用户邮箱     | 是       |
-| userKind    | string | 用户类型     | 是       |
-| password    | string | 用户密码     | 是       |
+| 参数名    | 类型   | 说明         | 是否必填 |
+| --------- | ------ | ------------ | -------- |
+| username  | string | 用户名       | 是       |
+| phone     | string | 用户手机号   | 是       |
+| password  | string | 用户密码     | 是       |
+| userKind  | string | 用户类型（user/rider/merchant） | 是 |
 
 - **请求示例**：
 
 ```
-GET http://localhost:3000/register?userName=张三&userEmail=zhangsan@example.com&userKind=normal&password=123456
+GET http://localhost:3000/register?username=张三&phone=13812345678&userKind=user&password=123456
 ```
 
 - **返回结果**（JSON）：
@@ -25,6 +25,7 @@ GET http://localhost:3000/register?userName=张三&userEmail=zhangsan@example.co
 {
   "code": 200,
   "success": true,
+  "id": "用户ID",
   "message": "注册成功"
 }
 ```
@@ -33,7 +34,7 @@ GET http://localhost:3000/register?userName=张三&userEmail=zhangsan@example.co
 {
   "code": 400,
   "success": false,
-  "message": "邮箱已被注册"
+  "message": "手机号已被注册"
 }
 ```
 
@@ -45,17 +46,17 @@ GET http://localhost:3000/register?userName=张三&userEmail=zhangsan@example.co
 - **请求地址**：`${BASE_URL}/login`
 - **请求参数**（Query String）：
 
-| 参数名      | 类型   | 说明         | 是否必填 |
-| ----------- | ------ | ------------ | -------- |
-| userName    | string | 用户名       | 否，但是会有一个默认值，可能为空|
-| userEmail   | string | 用户邮箱     | 是        |
-| password    | string | 用户密码     | 是       |
-| userKind    | string | 用户类型     | 是       |
+| 参数名    | 类型   | 说明         | 是否必填 |
+| --------- | ------ | ------------ | -------- |
+| username  | string | 用户名       | 是       |
+| phone     | string | 用户手机号   | 是       |
+| password  | string | 用户密码     | 是       |
+| userKind  | string | 用户类型（user/rider/merchant） | 是 |
 
 - **请求示例**：
 
 ```
-GET http://localhost:3000/login?userName=张三&password=123456
+GET http://localhost:3000/login?username=张三&phone=13812345678&userKind=user&password=123456
 ```
 
 - **返回结果**（JSON）：
@@ -65,6 +66,7 @@ GET http://localhost:3000/login?userName=张三&password=123456
 {
   "code": 200,
   "success": true,
+  "id": "用户ID",
   "message": "登录成功"
 }
 ```
@@ -74,5 +76,364 @@ GET http://localhost:3000/login?userName=张三&password=123456
   "code": 401,
   "success": false,
   "message": "用户名或密码错误"
+}
+```
+## 商家相关接口
+
+### 1. `/userToMerchant`  
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/userToMerchant?userId=xxx`  
+- **请求参数**：  
+  | 参数名 | 类型   | 说明     | 是否必填 |
+  | ------ | ------ | -------- | -------- |
+  | userId | string | 用户ID   | 是       |
+- **返回示例**：
+  | 参数名 | 类型   | 说明     | 是否必填 |
+  | ------ | ------ | -------- | -------- |
+  | merchantStatus | string | 可以为“未注册/正常/审批中/封禁中”   | 是       |
+
+```json
+{
+  "code": 200,
+  "success": true,
+  "merchantId": "商家ID",
+  "merchantName": "商家名称",
+  "merchantStatus":"正常"
+}
+```
+
+### 2. `/merchantHome`
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/merchant?userId=xxx`  
+- **请求参数**：  
+  | 参数名 | 类型   | 说明     | 是否必填 |
+  | ------ | ------ | -------- | -------- |
+  | userId | string | 用户ID   | 是       |
+- **返回示例**：
+```json
+{
+  "code": 200,
+  "success": true,
+  "data": {
+    "todayRevenue": 1234.56,
+    "todayOrderCount": 42,
+    "latestComments": [
+      { "username": "用户A", "content": "菜品很好吃！" }
+      // ...共10条
+    ]
+  }
+}
+```
+### 商家注册接口
+
+- **请求方式**：POST  
+- **请求地址**：`/merchant/register`  
+- **请求参数**（FormData 格式）：
+
+| 参数名      | 类型    | 说明         | 是否必填 |
+| ----------- | ------- | ------------ | -------- |
+| shopName    | string  | 店铺名称     | 是       |
+| shopAddress | string  | 店铺地址     | 是       |
+| shopImage   | file    | 店铺图片     | 是       |
+
+- **请求示例**：
+
+以 FormData 方式提交：
+
+```
+POST /merchant/register
+Content-Type: multipart/form-data
+
+shopName=xxx
+shopAddress=xxx
+shopImage=文件
+```
+
+- **返回结果**（JSON）：
+
+成功：
+```json
+{
+  "status": "success"
+}
+```
+
+失败：
+```json
+{
+  "status": "fail"
+}
+```
+
+### 获取正常商品列表接口
+（指的是通过审批的商品）
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/item`  
+- **请求参数**（Query String）：
+
+| 参数名     | 类型   | 说明       | 是否必填 |
+| ---------- | ------ | ---------- | -------- |
+| merchantId | string | 商家ID     | 是       |
+
+- **返回示例**：
+
+```json
+{
+  "code": 200,
+  "success": true,
+  "data": [
+    { "id": 1, "image": "https://via.placeholder.com/60", "name": "商品A", "price": 10, "sales": 100 },
+    { "id": 2, "image": "https://via.placeholder.com/60", "name": "商品B", "price": 20, "sales": 80 },
+    { "id": 3, "image": "https://via.placeholder.com/60", "name": "商品C", "price": 15, "sales": 120 }
+  ]
+}
+```
+
+### 获取店铺信息接口
+
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/shop`  
+- **请求参数**（Query String）：
+
+| 参数名     | 类型   | 说明       | 是否必填 |
+| ---------- | ------ | ---------- | -------- |
+| merchantId | string | 商家ID     | 是       |
+
+- **返回示例**：
+
+```json
+{
+  "code": 200,
+  "success": true,
+  "data": {
+    "shopName": "示例店铺",
+    "shopImg": "https://xxx.com/shop.jpg",
+    "shopAddress": "示例地址"
+  }
+}
+```
+
+### 本文件用到的网络接口格式说明
+
+#### 1. 获取商品信息接口
+
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/merchant/item`  
+- **请求参数**（Query String）：
+
+| 参数名 | 类型   | 说明     | 是否必填 |
+| ------ | ------ | -------- | -------- |
+| id     | string | 商品ID   | 是       |
+
+- **请求示例**：
+```
+GET /merchant/item?id=123
+```
+
+- **返回数据格式**（JSON，图片为 base64 字符串）：
+```json
+{
+  "success": true,
+  "code": 200,
+  "data": {
+    "itemName": "商品A",
+    "itemPrice": 10.5,
+    "itemImage": "iVBORw0KGgoAAAANSUhEUgAA..."  // base64字符串
+  }
+}
+```
+
+---
+
+#### 2. 编辑商品信息接口
+
+- **请求方式**：POST  
+- **请求地址**：`${BASE_URL}/merchant/item/register`  
+- **发送数据格式**：FormData（multipart/form-data）
+
+| 参数名    | 类型   | 说明         | 是否必填 |
+| --------- | ------ | ------------ | -------- |
+| itemId    | string | 商品ID       | 是       |
+| itemName  | string | 商品名称     | 是       |
+| itemPrice | number | 商品单价     | 是       |
+| itemImage | file   | 商品图片     | 否（如未更改可不传） |
+
+- **请求示例**：
+```
+POST /merchant/item/register
+Content-Type: multipart/form-data
+
+itemId=123
+itemName=商品A
+itemPrice=10.5
+itemImage=文件（可选）
+```
+
+- **返回数据格式**（JSON）：
+```json
+{
+  "status": "success"
+}
+```
+或
+```json
+{
+  "status": "fail"
+}
+```
+
+### 新增商品接口说明
+
+#### 1. 新增商品接口
+
+- **请求方式**：POST  
+- **请求地址**：`${BASE_URL}/merchant/item/register`  
+- **发送数据格式**：FormData（`multipart/form-data`）
+
+| 参数名      | 类型   | 说明         | 是否必填 |
+| ----------- | ------ | ------------ | -------- |
+| itemName    | string | 商品名称     | 是       |
+| itemImage   | file   | 商品图片     | 是       |
+| itemPrice   | number | 商品单价     | 是       |
+| merchantId  | string | 商家ID       | 是       |
+
+- **请求示例**：
+```
+POST /merchant/item/register
+Content-Type: multipart/form-data
+
+itemName=商品A
+itemImage=文件
+itemPrice=10.5
+merchantId=xxx
+```
+
+- **返回数据格式**（JSON）：
+
+成功：
+```json
+{
+  "status": "success"
+}
+```
+
+失败：
+```json
+{
+  "status": "fail"
+}
+```
+
+### 本页面用到的网络接口格式说明
+
+#### 1. 获取店铺信息接口
+
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/shop`  
+- **请求参数**（Query String）：
+
+| 参数名     | 类型   | 说明     | 是否必填 |
+| ---------- | ------ | -------- | -------- |
+| merchantId | string | 商家ID   | 是       |
+
+- **请求示例**：
+```
+GET /shop?merchantId=xxx
+```
+
+- **返回数据格式**（JSON，图片为 base64 字符串）：
+```json
+{
+  "success": true,
+  "code": 200,
+  "data": {
+    "shopName": "示例店铺",
+    "shopAddress": "示例地址",
+    "shopImg": "iVBORw0KGgoAAAANSUhEUgAA..."  // base64字符串
+  }
+}
+```
+
+---
+
+#### 2. 编辑店铺信息接口
+
+- **请求方式**：POST  
+- **请求地址**：`${BASE_URL}/merchant/edit`  
+- **发送数据格式**：FormData（`multipart/form-data`）
+
+| 参数名      | 类型   | 说明         | 是否必填 |
+| ----------- | ------ | ------------ | -------- |
+| shopName    | string | 店铺名称     | 是       |
+| shopAddress | string | 店铺地址     | 是       |
+| shopImage   | file   | 店铺图片     | 否（如未更改可不传） |
+| merchantId  | string | 商家ID       | 是       |
+
+- **请求示例**：
+```
+POST /merchant/edit
+Content-Type: multipart/form-data
+
+shopName=示例店铺
+shopAddress=示例地址
+shopImage=文件（可选）
+merchantId=xxx
+```
+
+- **返回数据格式**（JSON）：
+
+成功：
+```json
+{
+  "status": "success"
+}
+```
+
+失败：
+```json
+{
+  "status": "fail"
+}
+```
+
+### 新增商品接口说明
+
+#### 1. 新增商品接口
+
+- **请求方式**：POST  
+- **请求地址**：`${BASE_URL}/merchant/item/register`  
+- **发送数据格式**：FormData（`multipart/form-data`）
+
+| 参数名      | 类型    | 说明         | 是否必填 |
+| ----------- | ------- | ------------ | -------- |
+| itemName    | string  | 商品名称     | 是       |
+| itemImage   | file    | 商品图片     | 是       |
+| itemPrice   | number  | 商品单价     | 是       |
+| merchantId  | string  | 商家ID       | 是       |
+
+- **请求示例**：
+```
+POST /merchant/item/register
+Content-Type: multipart/form-data
+
+itemName=商品A
+itemImage=文件
+itemPrice=10.5
+merchantId=xxx
+```
+
+- **返回数据格式**（JSON）：
+
+成功：
+```json
+{
+  "status": "success"
+}
+```
+
+失败：
+```json
+{
+  "status": "fail"
 }
 ```
