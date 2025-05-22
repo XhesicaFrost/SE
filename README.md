@@ -461,6 +461,45 @@ merchantId=xxx
 }
 ```
 
+### 删除商品接口说明
+
+#### 1. 删除商品
+
+- **请求方式**：DELETE  
+- **请求地址**：`${BASE_URL}/merchant/item`  
+- **发送数据格式**：JSON
+
+| 参数名 | 类型   | 说明     | 是否必填 |
+| ------ | ------ | -------- | -------- |
+| id     | string | 商品ID   | 是       |
+
+- **请求示例**：
+```
+DELETE /merchant/item
+Content-Type: application/json
+
+{
+  "id": "123"
+}
+```
+
+- **返回数据格式**（JSON）：
+
+成功：
+```json
+{
+  "success": true
+}
+```
+
+失败：
+```json
+{
+  "success": false,
+  "message": "删除失败"
+}
+```
+
 ### 审批相关接口说明
 
 #### 1. 获取店铺信息修改审批列表
