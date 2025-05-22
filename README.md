@@ -188,8 +188,8 @@ shopImage=文件
 }
 ```
 
-### 获取商品列表接口
-
+### 获取正常商品列表接口
+（指的是通过审批的商品）
 - **请求方式**：GET  
 - **请求地址**：`${BASE_URL}/item`  
 - **请求参数**（Query String）：
@@ -233,5 +233,230 @@ shopImage=文件
     "shopImg": "https://xxx.com/shop.jpg",
     "shopAddress": "示例地址"
   }
+}
+```
+
+### 本文件用到的网络接口格式说明
+
+#### 1. 获取商品信息接口
+
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/merchant/item`  
+- **请求参数**（Query String）：
+
+| 参数名 | 类型   | 说明     | 是否必填 |
+| ------ | ------ | -------- | -------- |
+| id     | string | 商品ID   | 是       |
+
+- **请求示例**：
+```
+GET /merchant/item?id=123
+```
+
+- **返回数据格式**（JSON，图片为 base64 字符串）：
+```json
+{
+  "success": true,
+  "code": 200,
+  "data": {
+    "itemName": "商品A",
+    "itemPrice": 10.5,
+    "itemImage": "iVBORw0KGgoAAAANSUhEUgAA..."  // base64字符串
+  }
+}
+```
+
+---
+
+#### 2. 编辑商品信息接口
+
+- **请求方式**：POST  
+- **请求地址**：`${BASE_URL}/merchant/item/register`  
+- **发送数据格式**：FormData（multipart/form-data）
+
+| 参数名    | 类型   | 说明         | 是否必填 |
+| --------- | ------ | ------------ | -------- |
+| itemId    | string | 商品ID       | 是       |
+| itemName  | string | 商品名称     | 是       |
+| itemPrice | number | 商品单价     | 是       |
+| itemImage | file   | 商品图片     | 否（如未更改可不传） |
+
+- **请求示例**：
+```
+POST /merchant/item/register
+Content-Type: multipart/form-data
+
+itemId=123
+itemName=商品A
+itemPrice=10.5
+itemImage=文件（可选）
+```
+
+- **返回数据格式**（JSON）：
+```json
+{
+  "status": "success"
+}
+```
+或
+```json
+{
+  "status": "fail"
+}
+```
+
+### 新增商品接口说明
+
+#### 1. 新增商品接口
+
+- **请求方式**：POST  
+- **请求地址**：`${BASE_URL}/merchant/item/register`  
+- **发送数据格式**：FormData（`multipart/form-data`）
+
+| 参数名      | 类型   | 说明         | 是否必填 |
+| ----------- | ------ | ------------ | -------- |
+| itemName    | string | 商品名称     | 是       |
+| itemImage   | file   | 商品图片     | 是       |
+| itemPrice   | number | 商品单价     | 是       |
+| merchantId  | string | 商家ID       | 是       |
+
+- **请求示例**：
+```
+POST /merchant/item/register
+Content-Type: multipart/form-data
+
+itemName=商品A
+itemImage=文件
+itemPrice=10.5
+merchantId=xxx
+```
+
+- **返回数据格式**（JSON）：
+
+成功：
+```json
+{
+  "status": "success"
+}
+```
+
+失败：
+```json
+{
+  "status": "fail"
+}
+```
+
+### 本页面用到的网络接口格式说明
+
+#### 1. 获取店铺信息接口
+
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/shop`  
+- **请求参数**（Query String）：
+
+| 参数名     | 类型   | 说明     | 是否必填 |
+| ---------- | ------ | -------- | -------- |
+| merchantId | string | 商家ID   | 是       |
+
+- **请求示例**：
+```
+GET /shop?merchantId=xxx
+```
+
+- **返回数据格式**（JSON，图片为 base64 字符串）：
+```json
+{
+  "success": true,
+  "code": 200,
+  "data": {
+    "shopName": "示例店铺",
+    "shopAddress": "示例地址",
+    "shopImg": "iVBORw0KGgoAAAANSUhEUgAA..."  // base64字符串
+  }
+}
+```
+
+---
+
+#### 2. 编辑店铺信息接口
+
+- **请求方式**：POST  
+- **请求地址**：`${BASE_URL}/merchant/edit`  
+- **发送数据格式**：FormData（`multipart/form-data`）
+
+| 参数名      | 类型   | 说明         | 是否必填 |
+| ----------- | ------ | ------------ | -------- |
+| shopName    | string | 店铺名称     | 是       |
+| shopAddress | string | 店铺地址     | 是       |
+| shopImage   | file   | 店铺图片     | 否（如未更改可不传） |
+| merchantId  | string | 商家ID       | 是       |
+
+- **请求示例**：
+```
+POST /merchant/edit
+Content-Type: multipart/form-data
+
+shopName=示例店铺
+shopAddress=示例地址
+shopImage=文件（可选）
+merchantId=xxx
+```
+
+- **返回数据格式**（JSON）：
+
+成功：
+```json
+{
+  "status": "success"
+}
+```
+
+失败：
+```json
+{
+  "status": "fail"
+}
+```
+
+### 新增商品接口说明
+
+#### 1. 新增商品接口
+
+- **请求方式**：POST  
+- **请求地址**：`${BASE_URL}/merchant/item/register`  
+- **发送数据格式**：FormData（`multipart/form-data`）
+
+| 参数名      | 类型    | 说明         | 是否必填 |
+| ----------- | ------- | ------------ | -------- |
+| itemName    | string  | 商品名称     | 是       |
+| itemImage   | file    | 商品图片     | 是       |
+| itemPrice   | number  | 商品单价     | 是       |
+| merchantId  | string  | 商家ID       | 是       |
+
+- **请求示例**：
+```
+POST /merchant/item/register
+Content-Type: multipart/form-data
+
+itemName=商品A
+itemImage=文件
+itemPrice=10.5
+merchantId=xxx
+```
+
+- **返回数据格式**（JSON）：
+
+成功：
+```json
+{
+  "status": "success"
+}
+```
+
+失败：
+```json
+{
+  "status": "fail"
 }
 ```

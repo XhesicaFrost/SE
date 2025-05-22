@@ -46,19 +46,18 @@
     </div>
 
     <!-- 底部导航栏 -->
-    <div class="bottom-nav">
-      <div class="nav-item" @click="goToAddItem">增加商品</div>
-      <div class="nav-item" @click="goToPromotion">管理促销活动</div>
-    </div>
+    <BottomNav :navItems="navItems" />
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex'
 import { BASE_URL, fetchWithTimeout } from '@/config.js'
+import BottomNav from '@/components/bottomNav.vue'
 
 export default {
   name: 'MerchantShop',
+  components: { BottomNav },
   data() {
     return {
       shopInfo: {
@@ -70,7 +69,8 @@ export default {
       sortType: 'name',
       page: 1,
       pageSize: 10,
-      jumpPage: 1
+      jumpPage: 1,
+      navItems: []
     }
   },
   computed: {
@@ -116,13 +116,15 @@ export default {
     goToPromotion() {
       this.$router.push('/merchant/promotion')
     },
+    goToApproval() {
+      this.$router.push('/merchant/approval')
+    },
     /**
      * 获取店铺信息
      * 向 /shop 接口发送 merchantId，获取店铺名称、图片、地址
      */
     async fetchShopInfo() {
       try {
-        console.log('fetchShopInfo')
         const params = new URLSearchParams({ merchantId: this.merchantId }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/shop?${params}`)
         const result = await response.json()
@@ -152,7 +154,6 @@ export default {
      * 向 /item 接口发送 merchantId，获取商品列表
      */
     async fetchGoods() {
-        console.log('fetchGoods')
       try {
         const params = new URLSearchParams({ merchantId: this.merchantId }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/item?${params}`)
@@ -170,6 +171,12 @@ export default {
   mounted() {
     this.fetchShopInfo()
     this.fetchGoods()
+    // 设置底部导航栏选项
+    this.navItems = [
+      { label: '增加商品', action: this.goToAddItem },
+      { label: '管理促销活动', action: this.goToPromotion },
+      { label: '查看审批', action: this.goToApproval }
+    ]
   }
 }
 </script>
