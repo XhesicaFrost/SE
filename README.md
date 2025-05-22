@@ -762,3 +762,79 @@ merchantId=xxx
   "status": "fail"
 }
 ```
+
+### 商家订单页面相关接口说明
+
+#### 1. 获取订单列表
+
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/merchant/order`  
+- **请求参数**（Query String）：
+
+| 参数名     | 类型   | 说明     | 是否必填 |
+| ---------- | ------ | -------- | -------- |
+| merchantId | string | 商家ID   | 是       |
+
+- **请求示例**：
+```
+GET /merchant/order?merchantId=xxx
+```
+
+- **返回数据格式**（JSON）：
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1005,
+      "totalPrice": 58.5,
+      "served": false,
+      "items": [
+        { "name": "汉堡", "count": 2, "price": 15 },
+        { "name": "薯条", "count": 1, "price": 8.5 },
+        { "name": "可乐", "count": 1, "price": 20 }
+      ]
+    }
+    // ...更多订单
+  ]
+}
+```
+
+---
+
+#### 2. 设置订单为已出餐
+
+- **请求方式**：POST  
+- **请求地址**：`${BASE_URL}/merchant/order/serve`  
+- **发送数据格式**：JSON
+
+| 参数名   | 类型   | 说明     | 是否必填 |
+| -------- | ------ | -------- | -------- |
+| orderId  | string | 订单ID   | 是       |
+
+- **请求示例**：
+```
+POST /merchant/order/serve
+Content-Type: application/json
+
+{
+  "orderId": "1005"
+}
+```
+
+- **返回数据格式**（JSON）：
+
+成功：
+```json
+{
+  "success": true
+}
+```
+
+失败：
+```json
+{
+  "success": false,
+  "message": "操作失败"
+}
+```
