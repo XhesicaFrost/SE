@@ -838,3 +838,104 @@ Content-Type: application/json
   "message": "操作失败"
 }
 ```
+
+### 商家数据统计页面相关接口说明
+
+#### 1. 获取销售额与订单数数据
+
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/merchant/data/sales`  
+- **请求参数**（Query String）：
+
+| 参数名     | 类型   | 说明         | 是否必填 |
+| ---------- | ------ | ------------ | -------- |
+| merchantId | string | 商家ID       | 是       |
+| startDate  | string | 开始日期（yyyy-mm-dd） | 是 |
+| endDate    | string | 结束日期（yyyy-mm-dd） | 是 |
+
+- **请求示例**：
+```
+GET /merchant/data/sales?merchantId=xxx&startDate=2025-05-01&endDate=2025-05-07
+```
+
+- **返回数据格式**（JSON）：
+```json
+{
+  "success": true,
+  "data": {
+    "totalSales": 12345,
+    "totalOrders": 234,
+    "labels": ["2025-05-01", "2025-05-02", "2025-05-03", "2025-05-04", "2025-05-05", "2025-05-06", "2025-05-07"],
+    "series": [
+      { "sales": 2000, "orders": 30 },
+      { "sales": 1800, "orders": 28 },
+      { "sales": 2500, "orders": 40 },
+      { "sales": 1600, "orders": 25 },
+      { "sales": 2100, "orders": 35 },
+      { "sales": 1700, "orders": 30 },
+      { "sales": 1645, "orders": 46 }
+    ]
+  }
+}
+```
+
+---
+
+#### 2. 获取用户评价数据
+
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/merchant/data/comment`  
+- **请求参数**（Query String）：
+
+| 参数名     | 类型   | 说明         | 是否必填 |
+| ---------- | ------ | ------------ | -------- |
+| merchantId | string | 商家ID       | 是       |
+| startDate  | string | 开始日期（yyyy-mm-dd） | 是 |
+| endDate    | string | 结束日期（yyyy-mm-dd） | 是 |
+
+- **请求示例**：
+```
+GET /merchant/data/comment?merchantId=xxx&startDate=2025-05-01&endDate=2025-05-07
+```
+
+- **返回数据格式**（JSON）：
+```json
+{
+  "success": true,
+  "data": {
+    "totalGood": 180,
+    "totalBad": 12,
+    "labels": ["2025-05-01", "2025-05-02", "2025-05-03", "2025-05-04", "2025-05-05", "2025-05-06", "2025-05-07"],
+    "series": [
+      { "good": 30, "bad": 2 },
+      { "good": 28, "bad": 1 },
+      { "good": 35, "bad": 3 },
+      { "good": 25, "bad": 2 },
+      { "good": 32, "bad": 1 },
+      { "good": 15, "bad": 2 },
+      { "good": 15, "bad": 1 }
+    ]
+  }
+}
+```
+
+---
+
+#### 3. 下载详细数据
+
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/merchant/data/download`  
+- **请求参数**（Query String）：
+
+| 参数名     | 类型   | 说明         | 是否必填 |
+| ---------- | ------ | ------------ | -------- |
+| merchantId | string | 商家ID       | 是       |
+| startDate  | string | 开始日期（yyyy-mm-dd） | 是 |
+| endDate    | string | 结束日期（yyyy-mm-dd） | 是 |
+
+- **请求示例**：
+```
+GET /merchant/data/download?merchantId=xxx&startDate=2025-05-01&endDate=2025-05-07
+```
+
+- **返回内容**：文件下载（如 Excel、CSV 等格式的详细数据）
