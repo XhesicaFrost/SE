@@ -939,3 +939,404 @@ GET /merchant/data/download?merchantId=xxx&startDate=2025-05-01&endDate=2025-05-
 ```
 
 - **返回内容**：文件下载（如 Excel、CSV 等格式的详细数据）
+
+### 骑手主页相关接口说明
+
+#### 1. 获取已接订单
+
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/rider/acceptedorders`  
+- **请求参数**（Query String）：
+
+| 参数名   | 类型   | 说明     | 是否必填 |
+| -------- | ------ | -------- | -------- |
+| riderId  | string | 骑手ID   | 是       |
+
+- **请求示例**：
+```
+GET /rider/acceptedorders?riderId=xxx
+```
+
+- **返回数据格式**（JSON）：
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1001,
+      "merchantName": "麦当劳",
+      "merchantAddress": "美食街18号",
+      "userAddress": "学生公寓3号楼201",
+      "createTime": "2025-05-23 12:30",
+      "status": "accepted"  // accepted: 已接单, picked: 已接餐
+    }
+    // ...更多订单
+  ]
+}
+```
+
+---
+
+#### 2. 获取推荐订单
+
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/rider/recommendedorders`  
+- **请求参数**（Query String）：
+
+| 参数名    | 类型   | 说明       | 是否必填 |
+| --------- | ------ | ---------- | -------- |
+| riderId   | string | 骑手ID     | 是       |
+| latitude  | number | 纬度       | 是       |
+| longitude | number | 经度       | 是       |
+
+- **请求示例**：
+```
+GET /rider/recommendedorders?riderId=xxx&latitude=39.9042&longitude=116.4074
+```
+
+- **返回数据格式**（JSON）：
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 2001,
+      "merchantName": "北门餐厅",
+      "merchantAddress": "北门商业街5号",
+      "userAddress": "图书馆二楼",
+      "createTime": "2025-05-23 14:00"
+    }
+    // ...更多订单（最多10条）
+  ]
+}
+```
+
+---
+
+#### 3. 抢单
+
+- **请求方式**：POST  
+- **请求地址**：`${BASE_URL}/rider/chooseorder`  
+- **发送数据格式**：JSON
+
+| 参数名   | 类型   | 说明     | 是否必填 |
+| -------- | ------ | -------- | -------- |
+| riderId  | string | 骑手ID   | 是       |
+| orderId  | string | 订单ID   | 是       |
+
+- **请求示例**：
+```
+POST /rider/chooseorder
+Content-Type: application/json
+
+{
+  "riderId": "xxx",
+  "orderId": "2001"
+}
+```
+
+- **返回数据格式**（JSON）：
+
+成功：
+```json
+{
+  "success": true
+}
+```
+
+失败：
+```json
+{
+  "success": false,
+  "message": "该订单可能已被其他骑手接取"
+}
+```
+
+---
+
+#### 4. 更新订单状态
+
+- **请求方式**：POST  
+- **请求地址**：`${BASE_URL}/rider/updateorder`  
+- **发送数据格式**：JSON
+
+| 参数名   | 类型   | 说明                           | 是否必填 |
+| -------- | ------ | ------------------------------ | -------- |
+| riderId  | string | 骑手ID                         | 是       |
+| orderId  | string | 订单ID                         | 是       |
+| status   | string | 新状态（picked/completed）     | 是       |
+
+- **请求示例**：
+```
+POST /rider/updateorder
+Content-Type: application/json
+
+{
+  "riderId": "xxx",
+  "orderId": "1001",
+  "status": "picked"
+}
+```
+
+- **返回数据格式**（JSON）：
+
+成功：
+```json
+{
+  "success": true
+}
+```
+
+失败：
+```json
+{
+  "success": false,
+  "message": "状态更新失败"
+}
+```
+
+---
+
+### 骑手订单搜索页面相关接口说明
+
+#### 1. 获取可抢订单（带筛选）
+
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/rider/orderfiltered`  
+- **请求参数**（Query String）：
+
+| 参数名       | 类型   | 说明       | 是否必填 |
+| ------------ | ------ | ---------- | -------- |
+| userId       | string | 用户ID     | 是       |
+| merchantName | string | 商家名称   | 否       |
+| userAddress  | string | 用户地址   | 否       |
+
+- **请求示例**：
+```
+GET /rider/orderfiltered?userId=xxx&merchantName=麦当劳&userAddress=学生公寓
+```
+
+- **返回数据格式**（JSON）：
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 3001,
+      "merchantName": "麦当劳",
+      "merchantAddress": "美食街18号",
+      "userAddress": "学生公寓3号楼201",
+      "createTime": "2025-05-23 14:00"
+    },
+    {
+      "id": 3002,
+      "merchantName": "肯德基",
+      "merchantAddress": "中心广场2楼",
+      "userAddress": "教学楼A座办公室",
+      "createTime": "2025-05-23 14:30"
+    }
+    // ...更多订单
+  ]
+}
+```
+
+---
+
+#### 2. 抢单
+
+- **请求方式**：POST  
+- **请求地址**：`${BASE_URL}/rider/chooseorder`  
+- **发送数据格式**：JSON
+
+| 参数名   | 类型   | 说明     | 是否必填 |
+| -------- | ------ | -------- | -------- |
+| riderId  | string | 骑手ID   | 是       |
+| orderId  | string | 订单ID   | 是       |
+
+- **请求示例**：
+```
+POST /rider/chooseorder
+Content-Type: application/json
+
+{
+  "riderId": "xxx",
+  "orderId": "3001"
+}
+```
+
+- **返回数据格式**（JSON）：
+
+成功：
+```json
+{
+  "success": true
+}
+```
+
+失败：
+```json
+{
+  "success": false,
+  "message": "该订单可能已被其他骑手接取"
+}
+```
+
+## 更新骑手位置
+
+### 接口信息
+- **请求方式**：POST  
+- **请求地址**：`${BASE_URL}/rider/updateLocation`  
+- **发送数据格式**：JSON
+
+### 请求参数
+
+| 参数名    | 类型   | 说明       | 是否必填 | 备注                    |
+| --------- | ------ | ---------- | -------- | ----------------------- |
+| userId    | string | 用户ID     | 是       | 来自 userStore.userId   |
+| latitude  | number | 纬度       | 是       | WGS84坐标系，范围：-90~90  |
+| longitude | number | 经度       | 是       | WGS84坐标系，范围：-180~180 |
+
+### 请求示例
+
+```javascript
+POST /rider/updateLocation
+Content-Type: application/json
+
+{
+  "userId": "rider123",
+  "latitude": 39.9042,
+  "longitude": 116.4074
+}
+
+## 1. 获取订单详情
+
+### 接口信息
+- **请求方式**：GET
+- **请求地址**：`${BASE_URL}/rider/orderdetail`
+- **发送数据格式**：Query String
+
+### 请求参数
+
+| 参数名   | 类型   | 说明     | 是否必填 | 备注                    |
+| -------- | ------ | -------- | -------- | ----------------------- |
+| riderId  | string | 骑手ID   | 是       | 来自 userStore.userId   |
+| orderId  | string | 订单ID   | 是       | 来自路由参数 $route.params.id |
+
+### 请求示例
+
+```javascript
+GET /rider/orderdetail?riderId=rider123&orderId=order456
+```
+
+### 成功响应
+
+```javascript
+{
+  "success": true,
+  "data": {
+    "id": "order456",
+    "merchantName": "麦当劳（中关村店）",
+    "merchantAddress": "北京市海淀区中关村大街1号",
+    "merchantLng": 116.3088,
+    "merchantLat": 39.9828,
+    "userAddress": "清华大学紫荆公寓1号楼",
+    "userLng": 116.3267,
+    "userLat": 40.0031,
+    "userPhone": "138-0000-0000",
+    "createTime": "2025-05-24 14:30:00",
+    "status": "accepted"
+  }
+}
+```
+
+### 失败响应
+
+```javascript
+{
+  "success": false,
+  "message": "订单不存在或无权限访问"
+}
+```
+
+### 返回字段说明
+
+| 字段名         | 类型   | 说明                              | 是否必填 | 备注                    |
+| -------------- | ------ | --------------------------------- | -------- | ----------------------- |
+| id             | string | 订单ID                            | 是       | 唯一标识符              |
+| merchantName   | string | 商家名称                          | 是       | 用于显示和标记          |
+| merchantAddress| string | 商家地址                          | 是       | 用于地理编码解析        |
+| merchantLng    | number | 商家经度坐标                      | 否       | 优先使用，提高精度      |
+| merchantLat    | number | 商家纬度坐标                      | 否       | 优先使用，提高精度      |
+| userAddress    | string | 用户地址                          | 是       | 用于地理编码解析        |
+| userLng        | number | 用户经度坐标                      | 否       | 优先使用，提高精度      |
+| userLat        | number | 用户纬度坐标                      | 否       | 优先使用，提高精度      |
+| userPhone      | string | 用户手机号                        | 是       | 联系用户使用            |
+| createTime     | string | 订单创建时间                      | 是       | 格式：YYYY-MM-DD HH:mm:ss |
+| status         | string | 订单状态                          | 是       | accepted/picked/completed |
+
+## 获取历史订单列表
+
+### 接口信息
+- **请求方式**：GET
+- **请求地址**：`${BASE_URL}/rider/history`
+- **发送数据格式**：Query String
+
+### 请求参数
+
+| 参数名   | 类型   | 说明           | 是否必填 | 备注                    |
+| -------- | ------ | -------------- | -------- | ----------------------- |
+| userId   | string | 用户ID         | 是       | 来自 userStore.userId   |
+| page     | number | 页码           | 否       | 默认为1，从1开始计数    |
+| pageSize | number | 每页条数       | 否       | 默认为10                |
+
+### 请求示例
+
+```javascript
+GET /rider/history?userId=rider123&page=1&pageSize=10
+### 返回数据格式
+#### 成功相应
+{
+  "success": true,
+  "data": {
+    "orders": [
+      {
+        "id": "order456",
+        "merchantName": "麦当劳（中关村店）",
+        "merchantAddress": "北京市海淀区中关村大街1号",
+        "userAddress": "清华大学紫荆公寓1号楼",
+        "userPhone": "138-0000-0000",
+        "createTime": "2025-05-24 14:30:00",
+        "completeTime": "2025-05-24 15:45:00"
+      },
+      {
+        "id": "order789",
+        "merchantName": "肯德基（五道口店）",
+        "merchantAddress": "北京市海淀区五道口购物中心",
+        "userAddress": "北京大学燕园",
+        "userPhone": "139-1111-2222",
+        "createTime": "2025-05-23 12:15:00",
+        "completeTime": "2025-05-23 13:20:00"
+      }
+    ],
+    "total": 25,
+    "page": 1,
+    "pageSize": 10
+  }
+}
+#### 失败响应
+{
+  "success": false,
+  "message": "获取历史订单失败"
+}
+
+#### 订单对象字段说明
+
+| 字段名         | 类型   | 说明                              | 是否必填 | 备注                    |
+| -------------- | ------ | --------------------------------- | -------- | ----------------------- |
+| id             | string | 订单ID                            | 是       | 唯一标识符              |
+| merchantName   | string | 商家名称                          | 是       | 用于显示                |
+| merchantAddress| string | 商家地址                          | 是       | 完整地址信息            |
+| userAddress    | string | 用户地址                          | 是       | 送达地址                |
+| userPhone      | string | 用户手机号                        | 是       | 联系方式                |
+| createTime     | string | 订单创建时间                      | 是       | 格式：YYYY-MM-DD HH:mm:ss |
+| completeTime   | string | 订单完成时间                      | 是       | 格式：YYYY-MM-DD HH:mm:ss |

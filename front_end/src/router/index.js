@@ -100,6 +100,24 @@ const routes = [
     meta: { allow: ['rider'] }
   },
   {
+    path: '/rider/orders',
+    name: 'RiderOrders',
+    component: () => import('@/views/RiderViews/RiderOrdersView.vue'),
+    meta: { allow: ['rider'] }
+  },
+  {
+    path: '/rider/history',
+    name: 'RiderHistory',
+    component: () => import('@/views/RiderViews/RiderHistoryView.vue'),
+    meta: { allow: ['rider'] }
+  },
+  {
+    path: '/rider/order/:id',
+    name: 'RiderOrderDetail',
+    component: () => import('@/views/RiderViews/RiderOrderDetailView.vue'),
+    meta: { allow: ['rider'] }
+  },
+  {
     path: '/admin',
     name: 'AdminHome',
     component: () => import('@/views/AdminViews/AdminHome.vue'),
@@ -131,6 +149,13 @@ router.beforeEach((to, from, next) => {
   } else {
     next()
   }
+})
+// 当用户离开骑手相关页面时停止位置追踪
+router.beforeEach((to, from, next) => {
+  if (from.path.startsWith('/rider') && !to.path.startsWith('/rider')) {
+    store.dispatch('locationStore/stopLocationTracking')
+  }
+  next()
 })
 
 export default router
