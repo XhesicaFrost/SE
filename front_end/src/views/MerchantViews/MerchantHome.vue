@@ -144,7 +144,8 @@ export default {
             this.navItems = [
               { label: '管理店铺', action: () => this.goTo('shop') },
               { label: '管理订单', action: () => this.goTo('order') },
-              { label: '查看数据', action: () => this.goTo('data') }
+              { label: '查看数据', action: () => this.goTo('data') },
+              { label: '快速提现', action: () => this.goTo('withdraw') }
             ]
             this.fetchMerchantHomeData(result.merchantId)
           }
@@ -158,7 +159,8 @@ export default {
         this.navItems = [
           { label: '管理店铺', action: () => this.goTo('shop') },
           { label: '管理订单', action: () => this.goTo('order') },
-          { label: '查看数据', action: () => this.goTo('data') }
+          { label: '查看数据', action: () => this.goTo('data') },
+          { label: '快速提现', action: () => this.goTo('withdraw') }
         ]
       }
     }
