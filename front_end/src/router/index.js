@@ -40,15 +40,81 @@ const routes = [
     meta: { allow: ['merchant'] }
   },
   {
+    path: '/merchant/shop/edit',
+    name: 'MerchantShopEdit',
+    component: () => import('@/views/MerchantViews/MerchantShopEdit.vue'),
+    meta: { allow: ['merchant'] }
+  },
+  {
+    path: '/merchant/item/register',
+    name: 'MerchantItemRegister',
+    component: () => import('@/views/MerchantViews/MerchantItemRegister.vue'),
+    meta: { allow: ['merchant'] }
+  },
+  {
     path: '/merchant/item/:id',
     name: 'MerchantItemEdit',
     component: () => import('@/views/MerchantViews/MerchantItemEdit.vue'),
     meta: { allow: ['merchant'] }
   },
   {
+    path: '/merchant/order',
+    name: 'MerchantOrder',
+    component: () => import('@/views/MerchantViews/MerchantOrder.vue'),
+    meta: { allow: ['merchant'] }
+  },
+  {
+    path:'/merchant/Approval',
+    name:'MerchantApproval',
+    component: () => import('@/views/MerchantViews/MerchantApproval.vue'),
+    meta: { allow: ['merchant'] }
+  },
+  {
+    path:'/merchant/promotion',
+    name:'MerchantPromotion',
+    component: () => import('@/views/MerchantViews/MerchantPromotion.vue'),
+    meta: { allow: ['merchant'] }
+  },
+  {
+    path:'/merchant/promotion/:id',
+    name:'MerchantPromotionEdit',
+    component: () => import('@/views/MerchantViews/MerchantPromotionEdit.vue'),
+    meta: { allow: ['merchant'] }
+  },
+  {
+    path:'/merchant/promotion/register',
+    name:'MerchantPromotionRegister',
+    component: () => import('@/views/MerchantViews/MerchantPromotionRegister.vue'),
+    meta: { allow: ['merchant'] }
+  },
+  {
+    path:'/merchant/data',
+    name:'MerchantData',
+    component: () => import('@/views/MerchantViews/MerchantData.vue'),
+    meta: { allow: ['merchant'] }
+  },
+  {
     path: '/rider',
     name: 'RiderHome',
     component: () => import('@/views/RiderViews/RiderHome.vue'),
+    meta: { allow: ['rider'] }
+  },
+  {
+    path: '/rider/orders',
+    name: 'RiderOrders',
+    component: () => import('@/views/RiderViews/RiderOrdersView.vue'),
+    meta: { allow: ['rider'] }
+  },
+  {
+    path: '/rider/history',
+    name: 'RiderHistory',
+    component: () => import('@/views/RiderViews/RiderHistoryView.vue'),
+    meta: { allow: ['rider'] }
+  },
+  {
+    path: '/rider/order/:id',
+    name: 'RiderOrderDetail',
+    component: () => import('@/views/RiderViews/RiderOrderDetailView.vue'),
     meta: { allow: ['rider'] }
   },
   {
@@ -83,6 +149,13 @@ router.beforeEach((to, from, next) => {
   } else {
     next()
   }
+})
+// 当用户离开骑手相关页面时停止位置追踪
+router.beforeEach((to, from, next) => {
+  if (from.path.startsWith('/rider') && !to.path.startsWith('/rider')) {
+    store.dispatch('locationStore/stopLocationTracking')
+  }
+  next()
 })
 
 export default router

@@ -8,6 +8,8 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@amap/amap-jsapi-loader": "^1.0.1",
+    "chart.js": "^4.4.9",
     "core-js": "^3.8.3",
     "router": "^2.2.0",
     "vue": "^3.2.13",

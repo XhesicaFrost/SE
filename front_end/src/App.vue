@@ -17,7 +17,7 @@ export default {
 </script>
 <style>
 body {
-  background: #e8f5e9; /* 浅绿色 */
+  background: #eff6f0; /* 浅绿色 */
   min-height: 100vh;
   margin: 0;
 }
