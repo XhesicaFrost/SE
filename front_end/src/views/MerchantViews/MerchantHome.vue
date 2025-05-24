@@ -16,10 +16,16 @@
     <div class="comments-section">
       <div class="comments-title">最新评论</div>
       <div class="comments-list">
-        <div class="comment-row" v-for="(comment, idx) in latestComments" :key="idx">
+        <div class="comment-row" v-for="(comment, idx) in pagedComments" :key="idx">
           <div class="comment-username">{{ comment.username }}</div>
           <div class="comment-content">{{ comment.content }}</div>
         </div>
+        <div v-if="pagedComments.length === 0" class="empty-tip">暂无评论</div>
+      </div>
+      <div class="pagination-bar" v-if="totalCommentPages > 1">
+        <button :disabled="commentPage === 1" @click="commentPage--">上一页</button>
+        <span>第 {{ commentPage }} 页 / 共 {{ totalCommentPages }} 页</span>
+        <button :disabled="commentPage === totalCommentPages" @click="commentPage++">下一页</button>
       </div>
     </div>
 
@@ -41,11 +47,20 @@ export default {
       todayRevenue: 0,
       todayOrderCount: 0,
       latestComments: [],
-      navItems: []
+      navItems: [],
+      commentPage: 1,
+      commentPageSize: 10
     }
   },
   computed: {
-    ...mapState('userStore', ['userInfo'])
+    ...mapState('userStore', ['userInfo']),
+    pagedComments() {
+      const start = (this.commentPage - 1) * this.commentPageSize
+      return this.latestComments.slice(start, start + this.commentPageSize)
+    },
+    totalCommentPages() {
+      return Math.ceil(this.latestComments.length / this.commentPageSize) || 1
+    }
   },
   methods: {
     ...mapMutations('merchantStore', ['SET_MERCHANT_ID', 'SET_MERCHANT_NAME']),
@@ -129,7 +144,8 @@ export default {
             this.navItems = [
               { label: '管理店铺', action: () => this.goTo('shop') },
               { label: '管理订单', action: () => this.goTo('order') },
-              { label: '查看数据', action: () => this.goTo('data') }
+              { label: '查看数据', action: () => this.goTo('data') },
+              { label: '个人中心', action: () => this.goTo('withdraw') }
             ]
             this.fetchMerchantHomeData(result.merchantId)
           }
@@ -143,7 +159,8 @@ export default {
         this.navItems = [
           { label: '管理店铺', action: () => this.goTo('shop') },
           { label: '管理订单', action: () => this.goTo('order') },
-          { label: '查看数据', action: () => this.goTo('data') }
+          { label: '查看数据', action: () => this.goTo('data') },
+          { label: '个人中心', action: () => this.goTo('withdraw') }
         ]
       }
     }
@@ -219,6 +236,36 @@ export default {
   width: 65%;
   color: #333;
   text-align: left;
+}
+.empty-tip {
+  color: #aaa;
+  font-size: 0.95em;
+  margin: 1em 0;
+  text-align: center;
+}
+.pagination-bar {
+  margin-top: 1em;
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  font-size: 1em;
+}
+.pagination-btn {
+  background: #3498db;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5em 1em;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.pagination-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+.pagination-info {
+  margin: 0 1em;
+  color: #333;
 }
 .bottom-nav {
   display: flex;

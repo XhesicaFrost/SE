@@ -188,8 +188,8 @@ shopImage=文件
 }
 ```
 
-### 获取商品列表接口
-
+### 获取正常商品列表接口
+（指的是通过审批的商品）
 - **请求方式**：GET  
 - **请求地址**：`${BASE_URL}/item`  
 - **请求参数**（Query String）：
@@ -235,3 +235,1108 @@ shopImage=文件
   }
 }
 ```
+
+### 本文件用到的网络接口格式说明
+
+#### 1. 获取商品信息接口
+
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/merchant/item`  
+- **请求参数**（Query String）：
+
+| 参数名 | 类型   | 说明     | 是否必填 |
+| ------ | ------ | -------- | -------- |
+| id     | string | 商品ID   | 是       |
+
+- **请求示例**：
+```
+GET /merchant/item?id=123
+```
+
+- **返回数据格式**（JSON，图片为 base64 字符串）：
+```json
+{
+  "success": true,
+  "code": 200,
+  "data": {
+    "itemName": "商品A",
+    "itemPrice": 10.5,
+    "itemImage": "iVBORw0KGgoAAAANSUhEUgAA..."  // base64字符串
+  }
+}
+```
+
+---
+
+#### 2. 编辑商品信息接口
+
+- **请求方式**：POST  
+- **请求地址**：`${BASE_URL}/merchant/item/register`  
+- **发送数据格式**：FormData（multipart/form-data）
+
+| 参数名    | 类型   | 说明         | 是否必填 |
+| --------- | ------ | ------------ | -------- |
+| itemId    | string | 商品ID       | 是       |
+| itemName  | string | 商品名称     | 是       |
+| itemPrice | number | 商品单价     | 是       |
+| itemImage | file   | 商品图片     | 否（如未更改可不传） |
+
+- **请求示例**：
+```
+POST /merchant/item/register
+Content-Type: multipart/form-data
+
+itemId=123
+itemName=商品A
+itemPrice=10.5
+itemImage=文件（可选）
+```
+
+- **返回数据格式**（JSON）：
+```json
+{
+  "status": "success"
+}
+```
+或
+```json
+{
+  "status": "fail"
+}
+```
+
+### 新增商品接口说明
+
+#### 1. 新增商品接口
+
+- **请求方式**：POST  
+- **请求地址**：`${BASE_URL}/merchant/item/register`  
+- **发送数据格式**：FormData（`multipart/form-data`）
+
+| 参数名      | 类型   | 说明         | 是否必填 |
+| ----------- | ------ | ------------ | -------- |
+| itemName    | string | 商品名称     | 是       |
+| itemImage   | file   | 商品图片     | 是       |
+| itemPrice   | number | 商品单价     | 是       |
+| merchantId  | string | 商家ID       | 是       |
+
+- **请求示例**：
+```
+POST /merchant/item/register
+Content-Type: multipart/form-data
+
+itemName=商品A
+itemImage=文件
+itemPrice=10.5
+merchantId=xxx
+```
+
+- **返回数据格式**（JSON）：
+
+成功：
+```json
+{
+  "status": "success"
+}
+```
+
+失败：
+```json
+{
+  "status": "fail"
+}
+```
+
+### 本页面用到的网络接口格式说明
+
+#### 1. 获取店铺信息接口
+
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/shop`  
+- **请求参数**（Query String）：
+
+| 参数名     | 类型   | 说明     | 是否必填 |
+| ---------- | ------ | -------- | -------- |
+| merchantId | string | 商家ID   | 是       |
+
+- **请求示例**：
+```
+GET /shop?merchantId=xxx
+```
+
+- **返回数据格式**（JSON，图片为 base64 字符串）：
+```json
+{
+  "success": true,
+  "code": 200,
+  "data": {
+    "shopName": "示例店铺",
+    "shopAddress": "示例地址",
+    "shopImg": "iVBORw0KGgoAAAANSUhEUgAA..."  // base64字符串
+  }
+}
+```
+
+---
+
+#### 2. 编辑店铺信息接口
+
+- **请求方式**：POST  
+- **请求地址**：`${BASE_URL}/merchant/edit`  
+- **发送数据格式**：FormData（`multipart/form-data`）
+
+| 参数名      | 类型   | 说明         | 是否必填 |
+| ----------- | ------ | ------------ | -------- |
+| shopName    | string | 店铺名称     | 是       |
+| shopAddress | string | 店铺地址     | 是       |
+| shopImage   | file   | 店铺图片     | 否（如未更改可不传） |
+| merchantId  | string | 商家ID       | 是       |
+
+- **请求示例**：
+```
+POST /merchant/edit
+Content-Type: multipart/form-data
+
+shopName=示例店铺
+shopAddress=示例地址
+shopImage=文件（可选）
+merchantId=xxx
+```
+
+- **返回数据格式**（JSON）：
+
+成功：
+```json
+{
+  "status": "success"
+}
+```
+
+失败：
+```json
+{
+  "status": "fail"
+}
+```
+
+### 新增商品接口说明
+
+#### 1. 新增商品接口
+
+- **请求方式**：POST  
+- **请求地址**：`${BASE_URL}/merchant/item/register`  
+- **发送数据格式**：FormData（`multipart/form-data`）
+
+| 参数名      | 类型    | 说明         | 是否必填 |
+| ----------- | ------- | ------------ | -------- |
+| itemName    | string  | 商品名称     | 是       |
+| itemImage   | file    | 商品图片     | 是       |
+| itemPrice   | number  | 商品单价     | 是       |
+| merchantId  | string  | 商家ID       | 是       |
+
+- **请求示例**：
+```
+POST /merchant/item/register
+Content-Type: multipart/form-data
+
+itemName=商品A
+itemImage=文件
+itemPrice=10.5
+merchantId=xxx
+```
+
+- **返回数据格式**（JSON）：
+
+成功：
+```json
+{
+  "status": "success"
+}
+```
+
+失败：
+```json
+{
+  "status": "fail"
+}
+```
+
+### 删除商品接口说明
+
+#### 1. 删除商品
+
+- **请求方式**：DELETE  
+- **请求地址**：`${BASE_URL}/merchant/item`  
+- **发送数据格式**：JSON
+
+| 参数名 | 类型   | 说明     | 是否必填 |
+| ------ | ------ | -------- | -------- |
+| id     | string | 商品ID   | 是       |
+
+- **请求示例**：
+```
+DELETE /merchant/item
+Content-Type: application/json
+
+{
+  "id": "123"
+}
+```
+
+- **返回数据格式**（JSON）：
+
+成功：
+```json
+{
+  "success": true
+}
+```
+
+失败：
+```json
+{
+  "success": false,
+  "message": "删除失败"
+}
+```
+
+### 审批相关接口说明
+
+#### 1. 获取店铺信息修改审批列表
+
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/approval/shop`  
+- **请求参数**（Query String）：
+
+| 参数名     | 类型   | 说明     | 是否必填 |
+| ---------- | ------ | -------- | -------- |
+| merchantId | string | 商家ID   | 是       |
+
+- **请求示例**：
+```
+GET /approval/shop?merchantId=xxx
+```
+
+- **返回数据格式**（JSON，图片为 base64 字符串或 url）：
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "image": "iVBORw0KGgoAAAANSUhEUgAA...",  // base64字符串或图片url
+      "name": "店铺A",
+      "address": "地址A",
+      "status": "审批中" // 或 "否决"、"通过"
+    }
+    // ...更多审批项
+  ]
+}
+```
+
+---
+
+#### 2. 获取商品信息修改审批列表
+
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/approval/item`  
+- **请求参数**（Query String）：
+
+| 参数名     | 类型   | 说明     | 是否必填 |
+| ---------- | ------ | -------- | -------- |
+| merchantId | string | 商家ID   | 是       |
+
+- **请求示例**：
+```
+GET /approval/item?merchantId=xxx
+```
+
+- **返回数据格式**（JSON，图片为 base64 字符串或 url）：
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "image": "iVBORw0KGgoAAAANSUhEUgAA...",  // base64字符串或图片url
+      "name": "商品A",
+      "price": 10,
+      "status": "通过" // 或 "审批中"、"否决"
+    }
+    // ...更多审批项
+  ]
+}
+```
+
+### 促销活动相关接口说明
+
+#### 1. 获取促销活动列表
+
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/merchant/promotion`  
+- **请求参数**（Query String）：
+
+| 参数名     | 类型   | 说明     | 是否必填 |
+| ---------- | ------ | -------- | -------- |
+| merchantId | string | 商家ID   | 是       |
+
+- **请求示例**：
+```
+GET /merchant/promotion?merchantId=xxx
+```
+
+- **返回数据格式**（JSON）：
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "promotionId": 1,
+      "promotionName": "满100减20",
+      "full": 100,
+      "minus": 20,
+      "startTime": "2025-05-01 00:00:00",
+      "endTime": "2025-05-31 23:59:59"
+    }
+    // ...更多促销活动
+  ]
+}
+```
+
+---
+
+#### 2. 删除促销活动
+
+- **请求方式**：DELETE  
+- **请求地址**：`${BASE_URL}/merchant/promotion`  
+- **发送数据格式**：JSON
+
+| 参数名       | 类型   | 说明         | 是否必填 |
+| ------------ | ------ | ------------ | -------- |
+| promotionId  | string | 促销活动ID   | 是       |
+
+- **请求示例**：
+```
+DELETE /merchant/promotion
+Content-Type: application/json
+
+{
+  "promotionId": "1"
+}
+```
+
+- **返回数据格式**（JSON）：
+
+成功：
+```json
+{
+  "success": true
+}
+```
+
+失败：
+```json
+{
+  "success": false,
+  "message": "删除失败"
+}
+```
+
+#### 1. 获取促销活动详情
+
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/merchant/promotion/detail`  
+- **请求参数**（Query String）：
+
+| 参数名       | 类型   | 说明         | 是否必填 |
+| ------------ | ------ | ------------ | -------- |
+| promotionId  | string | 促销活动ID   | 是       |
+
+- **请求示例**：
+```
+GET /merchant/promotion/detail?promotionId=xxx
+```
+
+- **返回数据格式**（JSON）：
+```json
+{
+  "success": true,
+  "data": {
+    "promotionName": "满100减20",
+    "full": 100,
+    "minus": 20,
+    "startTime": "2025-05-01T00:00:00",
+    "endTime": "2025-05-31T23:59:59"
+  }
+}
+```
+
+---
+
+#### 2. 编辑促销活动
+
+- **请求方式**：POST  
+- **请求地址**：`${BASE_URL}/merchant/promotion/edit`  
+- **发送数据格式**：FormData（`multipart/form-data`）
+
+| 参数名        | 类型    | 说明         | 是否必填 |
+| ------------- | ------- | ------------ | -------- |
+| promotionId   | string  | 促销活动ID   | 是       |
+| promotionName | string  | 活动名称     | 是       |
+| full          | number  | 满减门槛     | 是       |
+| minus         | number  | 减免金额     | 是       |
+| startTime     | string  | 开始时间     | 是       |
+| endTime       | string  | 结束时间     | 是       |
+| merchantId    | string  | 商家ID       | 是       |
+
+- **请求示例**：
+```
+POST /merchant/promotion/edit
+Content-Type: multipart/form-data
+
+promotionId=xxx
+promotionName=满100减20
+full=100
+minus=20
+startTime=2025-05-01T00:00:00
+endTime=2025-05-31T23:59:59
+merchantId=yyy
+```
+
+- **返回数据格式**（JSON）：
+
+成功：
+```json
+{
+  "status": "success"
+}
+```
+
+失败：
+```json
+{
+  "status": "fail"
+}
+```
+
+#### 1. 新建促销活动
+
+- **请求方式**：POST  
+- **请求地址**：`${BASE_URL}/merchant/promotion/register`  
+- **发送数据格式**：FormData（`multipart/form-data`）
+
+| 参数名        | 类型    | 说明         | 是否必填 |
+| ------------- | ------- | ------------ | -------- |
+| promotionName | string  | 活动名称     | 是       |
+| full          | number  | 满减门槛     | 是       |
+| minus         | number  | 减免金额     | 是       |
+| startTime     | string  | 开始时间     | 是       |
+| endTime       | string  | 结束时间     | 是       |
+| merchantId    | string  | 商家ID       | 是       |
+
+- **请求示例**：
+```
+POST /merchant/promotion/register
+Content-Type: multipart/form-data
+
+promotionName=满100减20
+full=100
+minus=20
+startTime=2025-05-01T00:00:00
+endTime=2025-05-31T23:59:59
+merchantId=xxx
+```
+
+- **返回数据格式**（JSON）：
+
+成功：
+```json
+{
+  "status": "success"
+}
+```
+
+失败：
+```json
+{
+  "status": "fail"
+}
+```
+
+### 商家订单页面相关接口说明
+
+#### 1. 获取订单列表
+
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/merchant/order`  
+- **请求参数**（Query String）：
+
+| 参数名     | 类型   | 说明     | 是否必填 |
+| ---------- | ------ | -------- | -------- |
+| merchantId | string | 商家ID   | 是       |
+
+- **请求示例**：
+```
+GET /merchant/order?merchantId=xxx
+```
+
+- **返回数据格式**（JSON）：
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1005,
+      "totalPrice": 58.5,
+      "served": false,
+      "items": [
+        { "name": "汉堡", "count": 2, "price": 15 },
+        { "name": "薯条", "count": 1, "price": 8.5 },
+        { "name": "可乐", "count": 1, "price": 20 }
+      ]
+    }
+    // ...更多订单
+  ]
+}
+```
+
+---
+
+#### 2. 设置订单为已出餐
+
+- **请求方式**：POST  
+- **请求地址**：`${BASE_URL}/merchant/order/serve`  
+- **发送数据格式**：JSON
+
+| 参数名   | 类型   | 说明     | 是否必填 |
+| -------- | ------ | -------- | -------- |
+| orderId  | string | 订单ID   | 是       |
+
+- **请求示例**：
+```
+POST /merchant/order/serve
+Content-Type: application/json
+
+{
+  "orderId": "1005"
+}
+```
+
+- **返回数据格式**（JSON）：
+
+成功：
+```json
+{
+  "success": true
+}
+```
+
+失败：
+```json
+{
+  "success": false,
+  "message": "操作失败"
+}
+```
+
+### 商家数据统计页面相关接口说明
+
+#### 1. 获取销售额与订单数数据
+
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/merchant/data/sales`  
+- **请求参数**（Query String）：
+
+| 参数名     | 类型   | 说明         | 是否必填 |
+| ---------- | ------ | ------------ | -------- |
+| merchantId | string | 商家ID       | 是       |
+| startDate  | string | 开始日期（yyyy-mm-dd） | 是 |
+| endDate    | string | 结束日期（yyyy-mm-dd） | 是 |
+
+- **请求示例**：
+```
+GET /merchant/data/sales?merchantId=xxx&startDate=2025-05-01&endDate=2025-05-07
+```
+
+- **返回数据格式**（JSON）：
+```json
+{
+  "success": true,
+  "data": {
+    "totalSales": 12345,
+    "totalOrders": 234,
+    "labels": ["2025-05-01", "2025-05-02", "2025-05-03", "2025-05-04", "2025-05-05", "2025-05-06", "2025-05-07"],
+    "series": [
+      { "sales": 2000, "orders": 30 },
+      { "sales": 1800, "orders": 28 },
+      { "sales": 2500, "orders": 40 },
+      { "sales": 1600, "orders": 25 },
+      { "sales": 2100, "orders": 35 },
+      { "sales": 1700, "orders": 30 },
+      { "sales": 1645, "orders": 46 }
+    ]
+  }
+}
+```
+
+---
+
+#### 2. 获取用户评价数据
+
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/merchant/data/comment`  
+- **请求参数**（Query String）：
+
+| 参数名     | 类型   | 说明         | 是否必填 |
+| ---------- | ------ | ------------ | -------- |
+| merchantId | string | 商家ID       | 是       |
+| startDate  | string | 开始日期（yyyy-mm-dd） | 是 |
+| endDate    | string | 结束日期（yyyy-mm-dd） | 是 |
+
+- **请求示例**：
+```
+GET /merchant/data/comment?merchantId=xxx&startDate=2025-05-01&endDate=2025-05-07
+```
+
+- **返回数据格式**（JSON）：
+```json
+{
+  "success": true,
+  "data": {
+    "totalGood": 180,
+    "totalBad": 12,
+    "labels": ["2025-05-01", "2025-05-02", "2025-05-03", "2025-05-04", "2025-05-05", "2025-05-06", "2025-05-07"],
+    "series": [
+      { "good": 30, "bad": 2 },
+      { "good": 28, "bad": 1 },
+      { "good": 35, "bad": 3 },
+      { "good": 25, "bad": 2 },
+      { "good": 32, "bad": 1 },
+      { "good": 15, "bad": 2 },
+      { "good": 15, "bad": 1 }
+    ]
+  }
+}
+```
+
+---
+
+#### 3. 下载详细数据
+
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/merchant/data/download`  
+- **请求参数**（Query String）：
+
+| 参数名     | 类型   | 说明         | 是否必填 |
+| ---------- | ------ | ------------ | -------- |
+| merchantId | string | 商家ID       | 是       |
+| startDate  | string | 开始日期（yyyy-mm-dd） | 是 |
+| endDate    | string | 结束日期（yyyy-mm-dd） | 是 |
+
+- **请求示例**：
+```
+GET /merchant/data/download?merchantId=xxx&startDate=2025-05-01&endDate=2025-05-07
+```
+
+- **返回内容**：文件下载（如 Excel、CSV 等格式的详细数据）
+
+### 骑手主页相关接口说明
+
+#### 1. 获取已接订单
+
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/rider/acceptedorders`  
+- **请求参数**（Query String）：
+
+| 参数名   | 类型   | 说明     | 是否必填 |
+| -------- | ------ | -------- | -------- |
+| riderId  | string | 骑手ID   | 是       |
+
+- **请求示例**：
+```
+GET /rider/acceptedorders?riderId=xxx
+```
+
+- **返回数据格式**（JSON）：
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1001,
+      "merchantName": "麦当劳",
+      "merchantAddress": "美食街18号",
+      "userAddress": "学生公寓3号楼201",
+      "createTime": "2025-05-23 12:30",
+      "status": "accepted"  // accepted: 已接单, picked: 已接餐
+    }
+    // ...更多订单
+  ]
+}
+```
+
+---
+
+#### 2. 获取推荐订单
+
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/rider/recommendedorders`  
+- **请求参数**（Query String）：
+
+| 参数名    | 类型   | 说明       | 是否必填 |
+| --------- | ------ | ---------- | -------- |
+| riderId   | string | 骑手ID     | 是       |
+| latitude  | number | 纬度       | 是       |
+| longitude | number | 经度       | 是       |
+
+- **请求示例**：
+```
+GET /rider/recommendedorders?riderId=xxx&latitude=39.9042&longitude=116.4074
+```
+
+- **返回数据格式**（JSON）：
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 2001,
+      "merchantName": "北门餐厅",
+      "merchantAddress": "北门商业街5号",
+      "userAddress": "图书馆二楼",
+      "createTime": "2025-05-23 14:00"
+    }
+    // ...更多订单（最多10条）
+  ]
+}
+```
+
+---
+
+#### 3. 抢单
+
+- **请求方式**：POST  
+- **请求地址**：`${BASE_URL}/rider/chooseorder`  
+- **发送数据格式**：JSON
+
+| 参数名   | 类型   | 说明     | 是否必填 |
+| -------- | ------ | -------- | -------- |
+| riderId  | string | 骑手ID   | 是       |
+| orderId  | string | 订单ID   | 是       |
+
+- **请求示例**：
+```
+POST /rider/chooseorder
+Content-Type: application/json
+
+{
+  "riderId": "xxx",
+  "orderId": "2001"
+}
+```
+
+- **返回数据格式**（JSON）：
+
+成功：
+```json
+{
+  "success": true
+}
+```
+
+失败：
+```json
+{
+  "success": false,
+  "message": "该订单可能已被其他骑手接取"
+}
+```
+
+---
+
+#### 4. 更新订单状态
+
+- **请求方式**：POST  
+- **请求地址**：`${BASE_URL}/rider/updateorder`  
+- **发送数据格式**：JSON
+
+| 参数名   | 类型   | 说明                           | 是否必填 |
+| -------- | ------ | ------------------------------ | -------- |
+| riderId  | string | 骑手ID                         | 是       |
+| orderId  | string | 订单ID                         | 是       |
+| status   | string | 新状态（picked/completed）     | 是       |
+
+- **请求示例**：
+```
+POST /rider/updateorder
+Content-Type: application/json
+
+{
+  "riderId": "xxx",
+  "orderId": "1001",
+  "status": "picked"
+}
+```
+
+- **返回数据格式**（JSON）：
+
+成功：
+```json
+{
+  "success": true
+}
+```
+
+失败：
+```json
+{
+  "success": false,
+  "message": "状态更新失败"
+}
+```
+
+---
+
+### 骑手订单搜索页面相关接口说明
+
+#### 1. 获取可抢订单（带筛选）
+
+- **请求方式**：GET  
+- **请求地址**：`${BASE_URL}/rider/orderfiltered`  
+- **请求参数**（Query String）：
+
+| 参数名       | 类型   | 说明       | 是否必填 |
+| ------------ | ------ | ---------- | -------- |
+| userId       | string | 用户ID     | 是       |
+| merchantName | string | 商家名称   | 否       |
+| userAddress  | string | 用户地址   | 否       |
+
+- **请求示例**：
+```
+GET /rider/orderfiltered?userId=xxx&merchantName=麦当劳&userAddress=学生公寓
+```
+
+- **返回数据格式**（JSON）：
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 3001,
+      "merchantName": "麦当劳",
+      "merchantAddress": "美食街18号",
+      "userAddress": "学生公寓3号楼201",
+      "createTime": "2025-05-23 14:00"
+    },
+    {
+      "id": 3002,
+      "merchantName": "肯德基",
+      "merchantAddress": "中心广场2楼",
+      "userAddress": "教学楼A座办公室",
+      "createTime": "2025-05-23 14:30"
+    }
+    // ...更多订单
+  ]
+}
+```
+
+---
+
+#### 2. 抢单
+
+- **请求方式**：POST  
+- **请求地址**：`${BASE_URL}/rider/chooseorder`  
+- **发送数据格式**：JSON
+
+| 参数名   | 类型   | 说明     | 是否必填 |
+| -------- | ------ | -------- | -------- |
+| riderId  | string | 骑手ID   | 是       |
+| orderId  | string | 订单ID   | 是       |
+
+- **请求示例**：
+```
+POST /rider/chooseorder
+Content-Type: application/json
+
+{
+  "riderId": "xxx",
+  "orderId": "3001"
+}
+```
+
+- **返回数据格式**（JSON）：
+
+成功：
+```json
+{
+  "success": true
+}
+```
+
+失败：
+```json
+{
+  "success": false,
+  "message": "该订单可能已被其他骑手接取"
+}
+```
+
+## 更新骑手位置
+
+### 接口信息
+- **请求方式**：POST  
+- **请求地址**：`${BASE_URL}/rider/updateLocation`  
+- **发送数据格式**：JSON
+
+### 请求参数
+
+| 参数名    | 类型   | 说明       | 是否必填 | 备注                    |
+| --------- | ------ | ---------- | -------- | ----------------------- |
+| userId    | string | 用户ID     | 是       | 来自 userStore.userId   |
+| latitude  | number | 纬度       | 是       | WGS84坐标系，范围：-90~90  |
+| longitude | number | 经度       | 是       | WGS84坐标系，范围：-180~180 |
+
+### 请求示例
+
+```javascript
+POST /rider/updateLocation
+Content-Type: application/json
+
+{
+  "userId": "rider123",
+  "latitude": 39.9042,
+  "longitude": 116.4074
+}
+
+## 1. 获取订单详情
+
+### 接口信息
+- **请求方式**：GET
+- **请求地址**：`${BASE_URL}/rider/orderdetail`
+- **发送数据格式**：Query String
+
+### 请求参数
+
+| 参数名   | 类型   | 说明     | 是否必填 | 备注                    |
+| -------- | ------ | -------- | -------- | ----------------------- |
+| riderId  | string | 骑手ID   | 是       | 来自 userStore.userId   |
+| orderId  | string | 订单ID   | 是       | 来自路由参数 $route.params.id |
+
+### 请求示例
+
+```javascript
+GET /rider/orderdetail?riderId=rider123&orderId=order456
+```
+
+### 成功响应
+
+```javascript
+{
+  "success": true,
+  "data": {
+    "id": "order456",
+    "merchantName": "麦当劳（中关村店）",
+    "merchantAddress": "北京市海淀区中关村大街1号",
+    "merchantLng": 116.3088,
+    "merchantLat": 39.9828,
+    "userAddress": "清华大学紫荆公寓1号楼",
+    "userLng": 116.3267,
+    "userLat": 40.0031,
+    "userPhone": "138-0000-0000",
+    "createTime": "2025-05-24 14:30:00",
+    "status": "accepted"
+  }
+}
+```
+
+### 失败响应
+
+```javascript
+{
+  "success": false,
+  "message": "订单不存在或无权限访问"
+}
+```
+
+### 返回字段说明
+
+| 字段名         | 类型   | 说明                              | 是否必填 | 备注                    |
+| -------------- | ------ | --------------------------------- | -------- | ----------------------- |
+| id             | string | 订单ID                            | 是       | 唯一标识符              |
+| merchantName   | string | 商家名称                          | 是       | 用于显示和标记          |
+| merchantAddress| string | 商家地址                          | 是       | 用于地理编码解析        |
+| merchantLng    | number | 商家经度坐标                      | 否       | 优先使用，提高精度      |
+| merchantLat    | number | 商家纬度坐标                      | 否       | 优先使用，提高精度      |
+| userAddress    | string | 用户地址                          | 是       | 用于地理编码解析        |
+| userLng        | number | 用户经度坐标                      | 否       | 优先使用，提高精度      |
+| userLat        | number | 用户纬度坐标                      | 否       | 优先使用，提高精度      |
+| userPhone      | string | 用户手机号                        | 是       | 联系用户使用            |
+| createTime     | string | 订单创建时间                      | 是       | 格式：YYYY-MM-DD HH:mm:ss |
+| status         | string | 订单状态                          | 是       | accepted/picked/completed |
+
+## 获取历史订单列表
+
+### 接口信息
+- **请求方式**：GET
+- **请求地址**：`${BASE_URL}/rider/history`
+- **发送数据格式**：Query String
+
+### 请求参数
+
+| 参数名   | 类型   | 说明           | 是否必填 | 备注                    |
+| -------- | ------ | -------------- | -------- | ----------------------- |
+| userId   | string | 用户ID         | 是       | 来自 userStore.userId   |
+| page     | number | 页码           | 否       | 默认为1，从1开始计数    |
+| pageSize | number | 每页条数       | 否       | 默认为10                |
+
+### 请求示例
+
+```javascript
+GET /rider/history?userId=rider123&page=1&pageSize=10
+### 返回数据格式
+#### 成功相应
+{
+  "success": true,
+  "data": {
+    "orders": [
+      {
+        "id": "order456",
+        "merchantName": "麦当劳（中关村店）",
+        "merchantAddress": "北京市海淀区中关村大街1号",
+        "userAddress": "清华大学紫荆公寓1号楼",
+        "userPhone": "138-0000-0000",
+        "createTime": "2025-05-24 14:30:00",
+        "completeTime": "2025-05-24 15:45:00"
+      },
+      {
+        "id": "order789",
+        "merchantName": "肯德基（五道口店）",
+        "merchantAddress": "北京市海淀区五道口购物中心",
+        "userAddress": "北京大学燕园",
+        "userPhone": "139-1111-2222",
+        "createTime": "2025-05-23 12:15:00",
+        "completeTime": "2025-05-23 13:20:00"
+      }
+    ],
+    "total": 25,
+    "page": 1,
+    "pageSize": 10
+  }
+}
+#### 失败响应
+{
+  "success": false,
+  "message": "获取历史订单失败"
+}
+
+#### 订单对象字段说明
+
+| 字段名         | 类型   | 说明                              | 是否必填 | 备注                    |
+| -------------- | ------ | --------------------------------- | -------- | ----------------------- |
+| id             | string | 订单ID                            | 是       | 唯一标识符              |
+| merchantName   | string | 商家名称                          | 是       | 用于显示                |
+| merchantAddress| string | 商家地址                          | 是       | 完整地址信息            |
+| userAddress    | string | 用户地址                          | 是       | 送达地址                |
+| userPhone      | string | 用户手机号                        | 是       | 联系方式                |
+| createTime     | string | 订单创建时间                      | 是       | 格式：YYYY-MM-DD HH:mm:ss |
+| completeTime   | string | 订单完成时间                      | 是       | 格式：YYYY-MM-DD HH:mm:ss |

@@ -2,35 +2,35 @@
   <div class="register-view">
     <div class="login-header">
       <img src="@/assets/logo.jpg" alt="logo" class="login-logo" />
-      <span class="login-title">编辑商品信息</span>
+      <span class="login-title">编辑店铺信息</span>
     </div>
     <form @submit.prevent="handleEdit">
       <div class="form-group">
-        <label>商品名称：</label>
-        <input v-model="itemName" type="text" required placeholder="请输入商品名称" :disabled="submitStatus==='success'" />
+        <label>店铺名称：</label>
+        <input v-model="shopName" type="text" required placeholder="请输入店铺名称" :disabled="submitStatus==='success'" />
       </div>
       <div class="form-group">
-        <label>商品图片：</label>
+        <label>店铺地址：</label>
+        <input v-model="shopAddress" type="text" required placeholder="请输入店铺地址" :disabled="submitStatus==='success'" />
+      </div>
+      <div class="form-group">
+        <label>店铺图片：</label>
         <input type="file" accept="image/*" @change="onImageChange" :disabled="submitStatus==='success'" />
-        <div v-if="itemImageUrl" class="preview-img">
-          <img :src="itemImageUrl" alt="商品图片预览" />
+        <div v-if="shopImageUrl" class="preview-img">
+          <img :src="shopImageUrl" alt="店铺图片预览" />
         </div>
-      </div>
-      <div class="form-group">
-        <label>单价：</label>
-        <input v-model.number="itemPrice" type="number" min="0" step="0.01" required placeholder="请输入单价" :disabled="submitStatus==='success'" />
       </div>
       <button
         v-if="submitStatus==='normal'"
         type="submit"
         class="submit-btn"
-      >保存修改</button>
+      >修改店铺信息</button>
       <button
         v-else
         type="button"
         class="submit-btn"
         @click="goBack"
-      >修改已提交，点击返回商品管理</button>
+      >修改已提交，点击返回主页面</button>
     </form>
     <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
     <div class="login-support">
@@ -41,16 +41,21 @@
 
 <script>
 import { BASE_URL } from '@/config.js'
+import { mapState } from 'vuex'
 
 export default {
-  name: 'MerchantItemEdit',
+  name: 'MerchantShopEdit',
+  computed: {
+    ...mapState('merchantStore', {
+      merchantId: state => state.merchantId
+    })
+  },
   data() {
     return {
-      itemId: '', // 商品ID
-      itemName: '',
-      itemImage: null,
-      itemImageUrl: '',
-      itemPrice: '',
+      shopName: '',
+      shopAddress: '',
+      shopImage: null,
+      shopImageUrl: '',
       errorMessage: '',
       submitStatus: 'normal' // normal | success
     }
@@ -59,47 +64,46 @@ export default {
     onImageChange(e) {
       const file = e.target.files[0]
       if (file) {
-        this.itemImage = file
-        this.itemImageUrl = URL.createObjectURL(file)
+        this.shopImage = file
+        this.shopImageUrl = URL.createObjectURL(file)
       }
     },
-    async fetchItemInfo() {
-      // 获取商品信息用于预填充
+    async fetchShopInfo() {
       try {
-        const params = new URLSearchParams({ id: this.itemId }).toString()
-        const response = await fetch(`${BASE_URL}/merchant/item?${params}`)
+        const params = new URLSearchParams({ merchantId: this.merchantId }).toString()
+        const response = await fetch(`${BASE_URL}/shop?${params}`)
         const result = await response.json()
         if (result.success && result.code === 200 && result.data) {
-          this.itemName = result.data.itemName
-          this.itemPrice = result.data.itemPrice
+          this.shopName = result.data.shopName
+          this.shopAddress = result.data.shopAddress
           // 服务器返回 base64 图片数据
-          this.itemImageUrl = result.data.itemImage
-            ? `data:image/png;base64,${result.data.itemImage}`
+          this.shopImageUrl = result.data.shopImg
+            ? `data:image/png;base64,${result.data.shopImg}`
             : ''
         } else {
-          this.errorMessage = '商品信息获取失败'
+          this.errorMessage = '店铺信息获取失败'
         }
       } catch (e) {
-        this.errorMessage = '网络错误，商品信息获取失败'
+        this.errorMessage = '网络错误，店铺信息获取失败'
       }
     },
     async handleEdit() {
-      if (!this.itemName || this.itemPrice === '' || this.itemPrice === null) {
+      if (!this.shopName || !this.shopAddress) {
         this.errorMessage = '请填写完整信息'
         return
       }
       this.errorMessage = ''
       // 构造 FormData
       const formData = new FormData()
-      formData.append('itemId', this.itemId)
-      formData.append('itemName', this.itemName)
-      formData.append('itemPrice', this.itemPrice)
-      if (this.itemImage) {
-        formData.append('itemImage', this.itemImage)
+      formData.append('shopName', this.shopName)
+      formData.append('shopAddress', this.shopAddress)
+      if (this.shopImage) {
+        formData.append('shopImage', this.shopImage)
       }
+      formData.append('merchantId', this.merchantId) // 发送商家id
 
       try {
-        const response = await fetch(`${BASE_URL}/merchant/item/register`, {
+        const response = await fetch(`${BASE_URL}/merchant/edit`, {
           method: 'POST',
           body: formData
         })
@@ -118,10 +122,7 @@ export default {
     }
   },
   mounted() {
-    // 从路由获取商品ID
-    console.log("MerchantItemEdit mounted")
-    this.itemId = this.$route.params.id
-    this.fetchItemInfo()
+    this.fetchShopInfo()
   }
 }
 </script>
@@ -146,7 +147,7 @@ export default {
 .form-group {
   margin-bottom: 1.2em;
 }
-input[type="text"], input[type="file"], input[type="number"] {
+input[type="text"], input[type="file"] {
   width: 100%;
   padding: 0.5em;
   border-radius: 4px;

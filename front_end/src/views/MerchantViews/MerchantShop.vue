@@ -29,7 +29,10 @@
             <span class="goods-sales">销量：{{ item.sales }}</span>
           </div>
         </div>
-        <button class="edit-btn" @click="editItem(item.id)">编辑</button>
+        <div class="goods-actions">
+          <button class="edit-btn" @click="editItem(item.id)">编辑</button>
+          <button class="delete-btn" @click="deleteItem(item.id)">删除</button>
+        </div>
       </div>
     </div>
 
@@ -46,19 +49,18 @@
     </div>
 
     <!-- 底部导航栏 -->
-    <div class="bottom-nav">
-      <div class="nav-item" @click="goToAddItem">增加商品</div>
-      <div class="nav-item" @click="goToPromotion">管理促销活动</div>
-    </div>
+    <BottomNav :navItems="navItems" />
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex'
 import { BASE_URL, fetchWithTimeout } from '@/config.js'
+import BottomNav from '@/components/bottomNav.vue'
 
 export default {
   name: 'MerchantShop',
+  components: { BottomNav },
   data() {
     return {
       shopInfo: {
@@ -70,7 +72,8 @@ export default {
       sortType: 'name',
       page: 1,
       pageSize: 10,
-      jumpPage: 1
+      jumpPage: 1,
+      navItems: []
     }
   },
   computed: {
@@ -101,6 +104,24 @@ export default {
     editItem(id) {
       this.$router.push(`/merchant/item/${id}`)
     },
+    async deleteItem(id) {
+      if (!confirm('确定要删除该商品吗？')) return
+      try {
+        const response = await fetchWithTimeout(`${BASE_URL}/merchant/item`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        })
+        const result = await response.json()
+        if (result.success) {
+          this.fetchGoods()
+        } else {
+          alert('删除失败')
+        }
+      } catch (e) {
+        alert('网络错误，删除失败')
+      }
+    },
     sortGoods() {
       this.page = 1
     },
@@ -116,13 +137,11 @@ export default {
     goToPromotion() {
       this.$router.push('/merchant/promotion')
     },
-    /**
-     * 获取店铺信息
-     * 向 /shop 接口发送 merchantId，获取店铺名称、图片、地址
-     */
+    goToApproval() {
+      this.$router.push('/merchant/approval')
+    },
     async fetchShopInfo() {
       try {
-        console.log('fetchShopInfo')
         const params = new URLSearchParams({ merchantId: this.merchantId }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/shop?${params}`)
         const result = await response.json()
@@ -147,12 +166,7 @@ export default {
         }
       }
     },
-    /**
-     * 获取商品列表
-     * 向 /item 接口发送 merchantId，获取商品列表
-     */
     async fetchGoods() {
-        console.log('fetchGoods')
       try {
         const params = new URLSearchParams({ merchantId: this.merchantId }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/item?${params}`)
@@ -170,6 +184,11 @@ export default {
   mounted() {
     this.fetchShopInfo()
     this.fetchGoods()
+    this.navItems = [
+      { label: '增加商品', action: this.goToAddItem },
+      { label: '管理促销活动', action: this.goToPromotion },
+      { label: '查看审批', action: this.goToApproval }
+    ]
   }
 }
 </script>
@@ -311,5 +330,25 @@ export default {
 }
 .nav-item:hover {
   background: #f0f8ff;
+}
+.goods-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  margin-left: 1em;
+}
+.delete-btn {
+  background: #e53935;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4em 1.2em;
+  font-size: 1em;
+  cursor: pointer;
+  margin-top: 0.2em;
+  transition: background 0.2s;
+}
+.delete-btn:hover {
+  background: #b71c1c;
 }
 </style>

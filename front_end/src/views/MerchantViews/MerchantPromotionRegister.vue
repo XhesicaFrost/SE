@@ -2,9 +2,9 @@
   <div class="register-view">
     <div class="login-header">
       <img src="@/assets/logo.jpg" alt="logo" class="login-logo" />
-      <span class="login-title">编辑促销活动</span>
+      <span class="login-title">新建促销活动</span>
     </div>
-    <form @submit.prevent="handleEdit">
+    <form @submit.prevent="handleRegister">
       <div class="form-group">
         <label>活动名称：</label>
         <input v-model="promotionName" type="text" required placeholder="请输入活动名称" :disabled="submitStatus==='success'" />
@@ -29,13 +29,13 @@
         v-if="submitStatus==='normal'"
         type="submit"
         class="submit-btn"
-      >保存修改</button>
+      >新建活动</button>
       <button
         v-else
         type="button"
         class="submit-btn"
         @click="goBack"
-      >修改已提交，点击返回促销管理</button>
+      >已提交，点击返回促销管理</button>
     </form>
     <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
     <div class="login-support">
@@ -49,7 +49,7 @@ import { BASE_URL, fetchWithTimeout } from '@/config.js'
 import { mapState } from 'vuex'
 
 export default {
-  name: 'MerchantPromotionEdit',
+  name: 'MerchantPromotionRegister',
   computed: {
     ...mapState('merchantStore', {
       merchantId: state => state.merchantId
@@ -57,7 +57,6 @@ export default {
   },
   data() {
     return {
-      promotionId: '',
       promotionName: '',
       full: '',
       minus: '',
@@ -68,33 +67,13 @@ export default {
     }
   },
   methods: {
-    async fetchPromotionInfo() {
-      // 获取当前促销活动信息用于预填充
-      try {
-        const params = new URLSearchParams({ promotionId: this.promotionId }).toString()
-        const response = await fetchWithTimeout(`${BASE_URL}/merchant/promotion/detail?${params}`)
-        const result = await response.json()
-        if (result.success && result.data) {
-          this.promotionName = result.data.promotionName
-          this.full = result.data.full
-          this.minus = result.data.minus
-          this.startTime = result.data.startTime
-          this.endTime = result.data.endTime
-        } else {
-          this.errorMessage = '促销活动信息获取失败'
-        }
-      } catch (e) {
-        this.errorMessage = '网络错误或超时，促销活动信息获取失败'
-      }
-    },
-    async handleEdit() {
+    async handleRegister() {
       if (!this.promotionName || this.full === '' || this.minus === '' || !this.startTime || !this.endTime) {
         this.errorMessage = '请填写完整信息'
         return
       }
       this.errorMessage = ''
       const formData = new FormData()
-      formData.append('promotionId', this.promotionId)
       formData.append('promotionName', this.promotionName)
       formData.append('full', this.full)
       formData.append('minus', this.minus)
@@ -103,7 +82,7 @@ export default {
       formData.append('merchantId', this.merchantId)
 
       try {
-        const response = await fetchWithTimeout(`${BASE_URL}/merchant/promotion/edit`, {
+        const response = await fetchWithTimeout(`${BASE_URL}/merchant/promotion/register`, {
           method: 'POST',
           body: formData
         })
@@ -111,19 +90,25 @@ export default {
         if (result.status === 'success') {
           this.submitStatus = 'success'
         } else {
-          this.errorMessage = '未能成功修改，请重试'
+          this.errorMessage = '未能成功发送，请重试'
+          this.promotionName = ''
+          this.full = ''
+          this.minus = ''
+          this.startTime = ''
+          this.endTime = ''
         }
       } catch (e) {
-        this.errorMessage = '网络错误或超时，未能成功修改'
+        this.errorMessage = '网络错误或超时，未能成功发送'
+        this.promotionName = ''
+        this.full = ''
+        this.minus = ''
+        this.startTime = ''
+        this.endTime = ''
       }
     },
     goBack() {
       this.$router.push('/merchant/promotion')
     }
-  },
-  mounted() {
-    this.promotionId = this.$route.params.id
-    this.fetchPromotionInfo()
   }
 }
 </script>
