@@ -6,11 +6,11 @@
       <div class="detail-card">
         <div class="detail-item">
           <label>商家名称：</label>
-          <span>{{ orderDetail.merchantName }}</span>
+          <span>{{ orderDetail.sellerName }}</span>
         </div>
         <div class="detail-item">
           <label>商家地址：</label>
-          <span>{{ orderDetail.merchantAddress }}</span>
+          <span>{{ orderDetail.sellerAddress }}</span>
         </div>
         <div class="detail-item">
           <label>用户地址：</label>
@@ -92,10 +92,10 @@ export default {
     return {
       orderDetail: {
         id: null,
-        merchantName: '',
-        merchantAddress: '',
-        merchantLng: null,
-        merchantLat: null,
+        sellerName: '',
+        sellerAddress: '',
+        sellerLng: null,
+        sellerLat: null,
         userAddress: '',
         userLng: null,
         userLat: null,
@@ -144,8 +144,8 @@ export default {
           console.warn('使用测试数据进行地图功能检测')
           this.orderDetail = {
             id: this.orderId || 'test-001',
-            merchantName: '清华大学食堂',
-            merchantAddress: '清华大学',
+            sellerName: '清华大学食堂',
+            sellerAddress: '清华大学',
             userAddress: '北京大学',
             userPhone: '138-0000-0000',
             createTime: new Date().toLocaleString(),
@@ -157,8 +157,8 @@ export default {
         // 网络错误时也使用测试数据
         this.orderDetail = {
           id: this.orderId || 'test-001',
-          merchantName: '清华大学食堂',
-          merchantAddress: '清华大学',
+          sellerName: '清华大学食堂',
+          sellerAddress: '清华大学',
           userAddress: '北京大学',
           userPhone: '138-0000-0000',
           createTime: new Date().toLocaleString(),
@@ -272,8 +272,8 @@ export default {
       
       if (this.orderDetail.status === 'accepted') {
         // 去商家取餐 - 清华大学
-        targetAddress = this.orderDetail.merchantAddress  // "清华大学"
-        targetName = this.orderDetail.merchantName
+        targetAddress = this.orderDetail.sellerAddress  // "清华大学"
+        targetName = this.orderDetail.sellerName
       } else {
         // 送到用户 - 北京大学
         targetAddress = this.orderDetail.userAddress      // "北京大学"
@@ -402,7 +402,7 @@ export default {
     // 获取当前目标
     getCurrentTarget() {
       if (this.orderDetail.status === 'accepted') {
-        return `前往 ${this.orderDetail.merchantName} 取餐`
+        return `前往 ${this.orderDetail.sellerName} 取餐`
       } else if (this.orderDetail.status === 'picked') {
         return '前往用户地址送餐'
       }

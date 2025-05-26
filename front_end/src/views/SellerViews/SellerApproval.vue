@@ -1,5 +1,5 @@
 <template>
-  <div class="merchant-approval">
+  <div class="seller-approval">
     <!-- 店铺信息修改审批列表 -->
     <div class="approval-section">
       <div class="section-title">店铺信息修改</div>
@@ -49,19 +49,19 @@ import { BASE_URL } from '@/config.js'
 import { mapState } from 'vuex'
 
 export default {
-  name: 'MerchantApproval',
+  name: 'sellerApproval',
   components: { BottomNav },
   data() {
     return {
       shopApprovals: [],
       itemApprovals: [],
       navItems: [
-        { label: '返回店铺管理', action: () => { this.$router.push('/merchant/shop') } }
+        { label: '返回店铺管理', action: () => { this.$router.push('/seller/shop') } }
       ]
     }
   },
   computed: {
-    ...mapState('merchantStore', ['merchantId'])
+    ...mapState('sellerStore', ['sellerId'])
   },
   methods: {
     statusClass(status) {
@@ -80,7 +80,7 @@ export default {
     // 获取店铺审批数据
     async fetchShopApprovals() {
       try {
-        const params = new URLSearchParams({ merchantId: this.merchantId }).toString()
+        const params = new URLSearchParams({ sellerId: this.sellerId }).toString()
         const response = await fetch(`${BASE_URL}/approval/shop?${params}`)
         const result = await response.json()
         if (result.success && Array.isArray(result.data)) {
@@ -95,7 +95,7 @@ export default {
     // 获取商品审批数据
     async fetchItemApprovals() {
       try {
-        const params = new URLSearchParams({ merchantId: this.merchantId }).toString()
+        const params = new URLSearchParams({ sellerId: this.sellerId }).toString()
         const response = await fetch(`${BASE_URL}/approval/item?${params}`)
         const result = await response.json()
         if (result.success && Array.isArray(result.data)) {
@@ -116,7 +116,7 @@ export default {
 </script>
 
 <style scoped>
-.merchant-approval {
+.seller-approval {
   max-width: 400px;
   margin: 0 auto 70px auto;
   padding: 1em;

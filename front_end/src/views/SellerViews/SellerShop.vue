@@ -1,5 +1,5 @@
 <template>
-  <div class="merchant-shop">
+  <div class="seller-shop">
     <!-- 店铺信息栏 -->
     <div class="shop-info-bar">
       <img :src="shopInfo.image" alt="店铺图片" class="shop-img" />
@@ -59,7 +59,7 @@ import { BASE_URL, fetchWithTimeout } from '@/config.js'
 import BottomNav from '@/components/bottomNav.vue'
 
 export default {
-  name: 'MerchantShop',
+  name: 'sellerShop',
   components: { BottomNav },
   data() {
     return {
@@ -77,7 +77,7 @@ export default {
     }
   },
   computed: {
-    ...mapState('merchantStore', ['merchantId']),
+    ...mapState('sellerStore', ['sellerId']),
     sortedGoods() {
       let arr = [...this.goods]
       if (this.sortType === 'name') {
@@ -99,15 +99,15 @@ export default {
   },
   methods: {
     editShop() {
-      this.$router.push('/merchant/shop/edit')
+      this.$router.push('/seller/shop/edit')
     },
     editItem(id) {
-      this.$router.push(`/merchant/item/${id}`)
+      this.$router.push(`/seller/item/${id}`)
     },
     async deleteItem(id) {
       if (!confirm('确定要删除该商品吗？')) return
       try {
-        const response = await fetchWithTimeout(`${BASE_URL}/merchant/item`, {
+        const response = await fetchWithTimeout(`${BASE_URL}/seller/item`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id })
@@ -132,17 +132,17 @@ export default {
       this.jumpPage = p
     },
     goToAddItem() {
-      this.$router.push('/merchant/item/register')
+      this.$router.push('/seller/item/register')
     },
     goToPromotion() {
-      this.$router.push('/merchant/promotion')
+      this.$router.push('/seller/promotion')
     },
     goToApproval() {
-      this.$router.push('/merchant/approval')
+      this.$router.push('/seller/approval')
     },
     async fetchShopInfo() {
       try {
-        const params = new URLSearchParams({ merchantId: this.merchantId }).toString()
+        const params = new URLSearchParams({ sellerId: this.sellerId }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/shop?${params}`)
         const result = await response.json()
         if (result.success && result.code === 200) {
@@ -168,7 +168,7 @@ export default {
     },
     async fetchGoods() {
       try {
-        const params = new URLSearchParams({ merchantId: this.merchantId }).toString()
+        const params = new URLSearchParams({ sellerId: this.sellerId }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/item?${params}`)
         const result = await response.json()
         if (result.success && result.code === 200 && Array.isArray(result.data)) {
@@ -194,7 +194,7 @@ export default {
 </script>
 
 <style scoped>
-.merchant-shop {
+.seller-shop {
   max-width: 400px;
   margin: 0 auto 70px auto;
   padding: 1em;

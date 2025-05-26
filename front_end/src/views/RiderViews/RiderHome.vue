@@ -7,8 +7,8 @@
         <div class="order-item" v-for="order in acceptedOrders" :key="order.id" @click="goToOrderDetail(order.id)">
           <div class="order-info">
             <div class="order-detail">
-              <div class="merchant-name">{{ order.merchantName }}</div>
-              <div class="merchant-address">商家地址：{{ order.merchantAddress }}</div>
+              <div class="seller-name">{{ order.sellerName }}</div>
+              <div class="seller-address">商家地址：{{ order.sellerAddress }}</div>
               <div class="user-address">用户地址：{{ order.userAddress }}</div>
               <div class="create-time">创建时间：{{ order.createTime }}</div>
             </div>
@@ -35,8 +35,8 @@
         <div class="order-item" v-for="order in recommendedOrders" :key="order.id" @click="goToOrderDetail(order.id)">
           <div class="order-info">
             <div class="order-detail">
-              <div class="merchant-name">{{ order.merchantName }}</div>
-              <div class="merchant-address">商家地址：{{ order.merchantAddress }}</div>
+              <div class="seller-name">{{ order.sellerName }}</div>
+              <div class="seller-address">商家地址：{{ order.sellerAddress }}</div>
               <div class="user-address">用户地址：{{ order.userAddress }}</div>
               <div class="create-time">创建时间：{{ order.createTime }}</div>
             </div>
@@ -320,12 +320,12 @@ export default {
   flex-direction: column;
   gap: 0.3em;
 }
-.merchant-name {
+.seller-name {
   font-weight: bold;
   color: #333;
   font-size: 1.1em;
 }
-.merchant-address {
+.seller-address {
   color: #666;
   font-size: 0.95em;
 }

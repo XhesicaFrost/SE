@@ -4,7 +4,7 @@
     <div class="filter-section">
       <div class="filter-row">
         <label>商家名称：</label>
-        <input type="text" v-model="merchantNameFilter" placeholder="输入商家名称" />
+        <input type="text" v-model="sellerNameFilter" placeholder="输入商家名称" />
       </div>
       <div class="filter-row">
         <label>用户地址：</label>
@@ -21,8 +21,8 @@
       <div class="order-item" v-for="order in pagedOrders" :key="order.id" @click="goToOrderDetail(order.id)">
         <div class="order-info">
           <div class="order-detail">
-            <div class="merchant-name">{{ order.merchantName }}</div>
-            <div class="merchant-address">商家地址：{{ order.merchantAddress }}</div>
+            <div class="seller-name">{{ order.sellerName }}</div>
+            <div class="seller-address">商家地址：{{ order.sellerAddress }}</div>
             <div class="user-address">用户地址：{{ order.userAddress }}</div>
             <div class="create-time">创建时间：{{ order.createTime }}</div>
           </div>
@@ -62,7 +62,7 @@ export default {
   data() {
     return {
       allOrders: [],
-      merchantNameFilter: '',
+      sellerNameFilter: '',
       userAddressFilter: '',
       page: 1,
       pageSize: 10,
@@ -76,11 +76,11 @@ export default {
     ...mapState('userStore', ['userId']),
     filteredOrders() {
       return this.allOrders.filter(order => {
-        const matchMerchant = !this.merchantNameFilter || 
-          order.merchantName.toLowerCase().includes(this.merchantNameFilter.toLowerCase())
+        const matchseller = !this.sellerNameFilter || 
+          order.sellerName.toLowerCase().includes(this.sellerNameFilter.toLowerCase())
         const matchAddress = !this.userAddressFilter || 
           order.userAddress.toLowerCase().includes(this.userAddressFilter.toLowerCase())
-        return matchMerchant && matchAddress
+        return matchseller && matchAddress
       })
     },
     pagedOrders() {
@@ -105,7 +105,7 @@ export default {
     },
     
     clearFilter() {
-      this.merchantNameFilter = ''
+      this.sellerNameFilter = ''
       this.userAddressFilter = ''
       this.page = 1
       this.jumpPage = 1
@@ -147,7 +147,7 @@ export default {
       try {
         const params = new URLSearchParams({
           userId: this.userId,
-          merchantName: this.merchantNameFilter || '',
+          sellerName: this.sellerNameFilter || '',
           userAddress: this.userAddressFilter || ''
         }).toString()
         
@@ -276,13 +276,13 @@ export default {
   gap: 0.3em;
 }
 
-.merchant-name {
+.seller-name {
   font-weight: bold;
   color: #333;
   font-size: 1.1em;
 }
 
-.merchant-address {
+.seller-address {
   color: #666;
   font-size: 0.95em;
 }
