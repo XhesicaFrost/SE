@@ -7,7 +7,7 @@
       class="nav-item"
       @click="handleClick(item)"
     >
-      {{ item.label }}
+      <p>{{ item.label }}</p>
     </div>
   </div>
 </template>
@@ -40,10 +40,8 @@ export default {
 <style scoped>
 .bottom-nav {
   display: flex;
-  justify-content: space-around;
-  align-items: center;
+  place-items: center;
   background: #fff;
-  border-top: 1px solid #eee;
   height: 56px;
   position: fixed;
   left: 50%;
@@ -57,9 +55,12 @@ export default {
   flex: 1;
   text-align: center;
   color: #3498db;
-  font-size: 1.1em;
+  font-size: 17px;
   cursor: pointer;
-  padding: 0.7em 0;
+  height: 100%;
+  width: 100%;
+  padding-bottom: 1%;
+  margin-right: -0.1%;
   transition: background 0.2s;
 }
 .nav-item:hover {

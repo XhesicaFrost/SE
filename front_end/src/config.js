@@ -1,4 +1,4 @@
-export const BASE_URL = 'http://localhost:3000'
+export const BASE_URL = 'http://localhost:3000';
 
 export const FETCH_TIMEOUT = 8000; // 超时时间（毫秒）
 export const debug_seller = false; // 是否启用商家调试模式
