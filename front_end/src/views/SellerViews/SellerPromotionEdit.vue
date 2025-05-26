@@ -49,10 +49,10 @@ import { BASE_URL, fetchWithTimeout } from '@/config.js'
 import { mapState } from 'vuex'
 
 export default {
-  name: 'MerchantPromotionEdit',
+  name: 'sellerPromotionEdit',
   computed: {
-    ...mapState('merchantStore', {
-      merchantId: state => state.merchantId
+    ...mapState('sellerStore', {
+      sellerId: state => state.sellerId
     })
   },
   data() {
@@ -72,7 +72,7 @@ export default {
       // 获取当前促销活动信息用于预填充
       try {
         const params = new URLSearchParams({ promotionId: this.promotionId }).toString()
-        const response = await fetchWithTimeout(`${BASE_URL}/merchant/promotion/detail?${params}`)
+        const response = await fetchWithTimeout(`${BASE_URL}/seller/promotion/detail?${params}`)
         const result = await response.json()
         if (result.success && result.data) {
           this.promotionName = result.data.promotionName
@@ -100,10 +100,10 @@ export default {
       formData.append('minus', this.minus)
       formData.append('startTime', this.startTime)
       formData.append('endTime', this.endTime)
-      formData.append('merchantId', this.merchantId)
+      formData.append('sellerId', this.sellerId)
 
       try {
-        const response = await fetchWithTimeout(`${BASE_URL}/merchant/promotion/edit`, {
+        const response = await fetchWithTimeout(`${BASE_URL}/seller/promotion/edit`, {
           method: 'POST',
           body: formData
         })
@@ -118,7 +118,7 @@ export default {
       }
     },
     goBack() {
-      this.$router.push('/merchant/promotion')
+      this.$router.push('/seller/promotion')
     }
   },
   mounted() {

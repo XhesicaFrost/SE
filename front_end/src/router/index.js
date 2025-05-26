@@ -22,76 +22,76 @@ const routes = [
   },
   // 示例：只有商家能进入
   {
-    path: '/merchant',
-    name: 'MerchantHome',
-    component: () => import('@/views/MerchantViews/MerchantHome.vue'),
-    meta: { allow: ['merchant'] }
+    path: '/seller',
+    name: 'sellerHome',
+    component: () => import('@/views/SellerViews/SellerHome.vue'),
+    meta: { allow: ['seller'] }
   },
   {
-    path: '/merchant/register',
-    name: 'MerchantRegister',
-    component: () => import('@/views/MerchantViews/MerchantRegister.vue'),
-    meta: { allow: ['merchant'] }
+    path: '/seller/register',
+    name: 'sellerRegister',
+    component: () => import('@/views/SellerViews/SellerRegister.vue'),
+    meta: { allow: ['seller'] }
   },
   {
-    path: '/merchant/shop',
-    name: 'MerchantShop',
-    component: () => import('@/views/MerchantViews/MerchantShop.vue'),
-    meta: { allow: ['merchant'] }
+    path: '/seller/shop',
+    name: 'sellerShop',
+    component: () => import('@/views/SellerViews/SellerShop.vue'),
+    meta: { allow: ['seller'] }
   },
   {
-    path: '/merchant/shop/edit',
-    name: 'MerchantShopEdit',
-    component: () => import('@/views/MerchantViews/MerchantShopEdit.vue'),
-    meta: { allow: ['merchant'] }
+    path: '/seller/shop/edit',
+    name: 'sellerShopEdit',
+    component: () => import('@/views/SellerViews/SellerShopEdit.vue'),
+    meta: { allow: ['seller'] }
   },
   {
-    path: '/merchant/item/register',
-    name: 'MerchantItemRegister',
-    component: () => import('@/views/MerchantViews/MerchantItemRegister.vue'),
-    meta: { allow: ['merchant'] }
+    path: '/seller/item/register',
+    name: 'sellerItemRegister',
+    component: () => import('@/views/SellerViews/SellerItemRegister.vue'),
+    meta: { allow: ['seller'] }
   },
   {
-    path: '/merchant/item/:id',
-    name: 'MerchantItemEdit',
-    component: () => import('@/views/MerchantViews/MerchantItemEdit.vue'),
-    meta: { allow: ['merchant'] }
+    path: '/seller/item/:id',
+    name: 'sellerItemEdit',
+    component: () => import('@/views/SellerViews/SellerItemEdit.vue'),
+    meta: { allow: ['seller'] }
   },
   {
-    path: '/merchant/order',
-    name: 'MerchantOrder',
-    component: () => import('@/views/MerchantViews/MerchantOrder.vue'),
-    meta: { allow: ['merchant'] }
+    path: '/seller/order',
+    name: 'sellerOrder',
+    component: () => import('@/views/SellerViews/SellerOrder.vue'),
+    meta: { allow: ['seller'] }
   },
   {
-    path:'/merchant/Approval',
-    name:'MerchantApproval',
-    component: () => import('@/views/MerchantViews/MerchantApproval.vue'),
-    meta: { allow: ['merchant'] }
+    path:'/seller/Approval',
+    name:'sellerApproval',
+    component: () => import('@/views/SellerViews/SellerApproval.vue'),
+    meta: { allow: ['seller'] }
   },
   {
-    path:'/merchant/promotion',
-    name:'MerchantPromotion',
-    component: () => import('@/views/MerchantViews/MerchantPromotion.vue'),
-    meta: { allow: ['merchant'] }
+    path:'/seller/promotion',
+    name:'sellerPromotion',
+    component: () => import('@/views/SellerViews/SellerPromotion.vue'),
+    meta: { allow: ['seller'] }
   },
   {
-    path:'/merchant/promotion/:id',
-    name:'MerchantPromotionEdit',
-    component: () => import('@/views/MerchantViews/MerchantPromotionEdit.vue'),
-    meta: { allow: ['merchant'] }
+    path:'/seller/promotion/:id',
+    name:'sellerPromotionEdit',
+    component: () => import('@/views/SellerViews/SellerPromotionEdit.vue'),
+    meta: { allow: ['seller'] }
   },
   {
-    path:'/merchant/promotion/register',
-    name:'MerchantPromotionRegister',
-    component: () => import('@/views/MerchantViews/MerchantPromotionRegister.vue'),
-    meta: { allow: ['merchant'] }
+    path:'/seller/promotion/register',
+    name:'sellerPromotionRegister',
+    component: () => import('@/views/SellerViews/SellerPromotionRegister.vue'),
+    meta: { allow: ['seller'] }
   },
   {
-    path:'/merchant/data',
-    name:'MerchantData',
-    component: () => import('@/views/MerchantViews/MerchantData.vue'),
-    meta: { allow: ['merchant'] }
+    path:'/seller/data',
+    name:'sellerData',
+    component: () => import('@/views/SellerViews/SellerData.vue'),
+    meta: { allow: ['seller'] }
   },
   {
     path: '/rider',

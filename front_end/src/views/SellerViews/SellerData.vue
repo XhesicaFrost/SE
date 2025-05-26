@@ -1,5 +1,5 @@
 <template>
-  <div class="merchant-data-view">
+  <div class="seller-data-view">
     <!-- 时间选择 -->
     <div class="date-picker-section">
       <label>开始时间：</label>
@@ -46,7 +46,7 @@ import { mapState } from 'vuex'
 import Chart from 'chart.js/auto'
 
 export default {
-  name: 'MerchantData',
+  name: 'sellerData',
   components: { BottomNav },
   data() {
     return {
@@ -62,14 +62,14 @@ export default {
       commentLabels: [],
       downloadUrl: '',
       navItems: [
-        { label: '返回主页', action: () => { this.$router.push('/merchant') } }
+        { label: '返回主页', action: () => { this.$router.push('/seller') } }
       ],
       salesOrderChartInstance: null,
       commentChartInstance: null
     }
   },
   computed: {
-    ...mapState('merchantStore', ['merchantId'])
+    ...mapState('sellerStore', ['sellerId'])
   },
   methods: {
     async fetchData() {
@@ -80,11 +80,11 @@ export default {
       // 获取销售额和订单数数据
       try {
         const params = new URLSearchParams({
-          merchantId: this.merchantId,
+          sellerId: this.sellerId,
           startDate: this.startDate,
           endDate: this.endDate
         }).toString()
-        const response = await fetchWithTimeout(`${BASE_URL}/merchant/data/sales?${params}`)
+        const response = await fetchWithTimeout(`${BASE_URL}/seller/data/sales?${params}`)
         const result = await response.json()
         if (result.success) {
           this.totalSales = result.data.totalSales
@@ -103,11 +103,11 @@ export default {
       // 获取评价数据
       try {
         const params = new URLSearchParams({
-          merchantId: this.merchantId,
+          sellerId: this.sellerId,
           startDate: this.startDate,
           endDate: this.endDate
         }).toString()
-        const response = await fetchWithTimeout(`${BASE_URL}/merchant/data/comment?${params}`)
+        const response = await fetchWithTimeout(`${BASE_URL}/seller/data/comment?${params}`)
         const result = await response.json()
         if (result.success) {
           this.totalGood = result.data.totalGood
@@ -124,7 +124,7 @@ export default {
         this.renderCommentChart()
       }
       // 下载链接
-      this.downloadUrl = `${BASE_URL}/merchant/data/download?merchantId=${this.merchantId}&startDate=${this.startDate}&endDate=${this.endDate}`
+      this.downloadUrl = `${BASE_URL}/seller/data/download?sellerId=${this.sellerId}&startDate=${this.startDate}&endDate=${this.endDate}`
     },
     renderSalesOrderChart() {
       if (this.salesOrderChartInstance) {
@@ -199,7 +199,7 @@ export default {
 </script>
 
 <style scoped>
-.merchant-data-view {
+.seller-data-view {
   max-width: 600px;
   margin: 0 auto 70px auto;
   padding: 1em;

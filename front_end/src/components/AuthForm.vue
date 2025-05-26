@@ -29,7 +29,7 @@
       <select v-model="formData.userKind">
         <option value="user">用户</option>
         <option value="rider">骑手</option>
-        <option value="merchant">商家</option>
+        <option value="seller">商家</option>
       </select>
     </div>
     <button type="submit" class="submit-btn">

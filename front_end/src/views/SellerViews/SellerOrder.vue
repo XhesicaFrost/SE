@@ -1,5 +1,5 @@
 <template>
-  <div class="merchant-order-view">
+  <div class="seller-order-view">
     <div class="order-list">
       <div
         class="order-item"
@@ -56,7 +56,7 @@ import { BASE_URL, fetchWithTimeout } from '@/config.js'
 import { mapState } from 'vuex'
 
 export default {
-  name: 'MerchantOrder',
+  name: 'sellerOrder',
   components: { BottomNav },
   data() {
     return {
@@ -65,13 +65,13 @@ export default {
       pageSize: 10,
       jumpPage: 1,
       navItems: [
-        { label: '返回商家主页', action: () => { this.$router.push('/merchant') } }
+        { label: '返回商家主页', action: () => { this.$router.push('/seller') } }
       ],
       expandedOrderId: null
     }
   },
   computed: {
-    ...mapState('merchantStore', ['merchantId']),
+    ...mapState('sellerStore', ['sellerId']),
     sortedOrders() {
       // 未出餐的订单排前面，已出餐的排后面，同组内按订单编号降序
       return [...this.orders].sort((a, b) => {
@@ -92,8 +92,8 @@ export default {
   methods: {
     async fetchOrders() {
       try {
-        const params = new URLSearchParams({ merchantId: this.merchantId }).toString()
-        const response = await fetchWithTimeout(`${BASE_URL}/merchant/order?${params}`)
+        const params = new URLSearchParams({ sellerId: this.sellerId }).toString()
+        const response = await fetchWithTimeout(`${BASE_URL}/seller/order?${params}`)
         const result = await response.json()
         if (result.success && Array.isArray(result.data)) {
           this.orders = result.data
@@ -106,7 +106,7 @@ export default {
     },
     async serveOrder(orderId) {
       try {
-        const response = await fetchWithTimeout(`${BASE_URL}/merchant/order/serve`, {
+        const response = await fetchWithTimeout(`${BASE_URL}/seller/order/serve`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ orderId })
@@ -138,7 +138,7 @@ export default {
 </script>
 
 <style scoped>
-.merchant-order-view {
+.seller-order-view {
   max-width: 500px;
   margin: 0 auto 70px auto;
   padding: 1em;

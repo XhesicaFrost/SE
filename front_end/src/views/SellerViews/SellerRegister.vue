@@ -1,5 +1,5 @@
 <!--
-  MerchantRegister.vue 组件说明
+  sellerRegister.vue 组件说明
 
   本页面用于商家注册店铺，包含：
   - 顶部 logo 和标题
@@ -57,7 +57,7 @@ import { BASE_URL } from '@/config.js'
 import { mapState } from 'vuex'
 
 export default {
-  name: 'MerchantRegister',
+  name: 'sellerRegister',
   computed: {
     ...mapState('userStore', {
       userId: state => state.userInfo.userId
@@ -95,7 +95,7 @@ export default {
       formData.append('userId', this.userId) // 发送商家id
 
       try {
-        const response = await fetch(`${BASE_URL}/merchant/register`, {
+        const response = await fetch(`${BASE_URL}/seller/register`, {
           method: 'POST',
           body: formData
         })
@@ -120,7 +120,7 @@ export default {
       }
     },
     goBack() {
-      this.$router.push('/merchant')
+      this.$router.push('/seller')
     }
   }
 }
