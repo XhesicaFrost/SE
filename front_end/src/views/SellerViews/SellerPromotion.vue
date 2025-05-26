@@ -24,24 +24,24 @@ import { mapState } from 'vuex'
 import BottomNav from '@/components/bottomNav.vue'
 
 export default {
-  name: 'MerchantPromotion',
+  name: 'sellerPromotion',
   components: { BottomNav },
   data() {
     return {
       promotions: [],
       navItems: [
-        { label: '新建促销活动', action: () => { this.$router.push('/merchant/promotion/register') } }
+        { label: '新建促销活动', action: () => { this.$router.push('/seller/promotion/register') } }
       ]
     }
   },
   computed: {
-    ...mapState('merchantStore', ['merchantId'])
+    ...mapState('sellerStore', ['sellerId'])
   },
   methods: {
     async fetchPromotions() {
       try {
-        const params = new URLSearchParams({ merchantId: this.merchantId }).toString()
-        const response = await fetch(`${BASE_URL}/merchant/promotion?${params}`)
+        const params = new URLSearchParams({ sellerId: this.sellerId }).toString()
+        const response = await fetch(`${BASE_URL}/seller/promotion?${params}`)
         const result = await response.json()
         if (result.success && Array.isArray(result.data)) {
           this.promotions = result.data
@@ -54,7 +54,7 @@ export default {
     },
     async deletePromotion(promotionId) {
       try {
-        const response = await fetch(`${BASE_URL}/merchant/promotion`, {
+        const response = await fetch(`${BASE_URL}/seller/promotion`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ promotionId })
@@ -70,7 +70,7 @@ export default {
       }
     },
     editPromotion(promotionId) {
-      this.$router.push(`/merchant/edit/${promotionId}`)
+      this.$router.push(`/seller/edit/${promotionId}`)
     }
   },
   mounted() {

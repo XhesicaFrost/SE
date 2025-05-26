@@ -20,9 +20,9 @@
           </div>
           
           <div class="order-content">
-            <div class="merchant-info">
-              <div class="merchant-name">{{ order.merchantName }}</div>
-              <div class="merchant-address">商家：{{ order.merchantAddress }}</div>
+            <div class="seller-info">
+              <div class="seller-name">{{ order.sellerName }}</div>
+              <div class="seller-address">商家：{{ order.sellerAddress }}</div>
             </div>
             
             <div class="delivery-info">
@@ -251,17 +251,17 @@ export default {
   margin-bottom: 1em;
 }
 
-.merchant-info, .delivery-info {
+.seller-info, .delivery-info {
   margin-bottom: 0.8em;
 }
 
-.merchant-name {
+.seller-name {
   font-weight: bold;
   color: #333;
   margin-bottom: 0.3em;
 }
 
-.merchant-address, .user-address, .user-phone {
+.seller-address, .user-address, .user-phone {
   color: #666;
   font-size: 0.9em;
   margin-bottom: 0.2em;

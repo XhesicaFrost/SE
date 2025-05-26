@@ -1,5 +1,5 @@
 <template>
-  <div class="merchant-home">
+  <div class="seller-home">
     <!-- 顶部统计 -->
     <div class="top-stats">
       <div class="stat-item">
@@ -36,11 +36,11 @@
 
 <script>
 import { mapState, mapMutations } from 'vuex'
-import { BASE_URL, debug_merchant_created, fetchWithTimeout } from '@/config.js'
+import { BASE_URL, debug_seller_created, fetchWithTimeout } from '@/config.js'
 import BottomNav from '@/components/bottomNav.vue'
 
 export default {
-  name: 'MerchantHome',
+  name: 'sellerHome',
   components: { BottomNav },
   data() {
     return {
@@ -63,30 +63,30 @@ export default {
     }
   },
   methods: {
-    ...mapMutations('merchantStore', ['SET_MERCHANT_ID', 'SET_MERCHANT_NAME']),
+    ...mapMutations('sellerStore', ['SET_seller_ID', 'SET_seller_NAME']),
     goTo(type) {
         console.log('goTo', type)
       if (type === 'shop') {
-        this.$router.push('/merchant/shop')
+        this.$router.push('/seller/shop')
       } else if (type === 'order') {
-        this.$router.push('/merchant/order')
+        this.$router.push('/seller/order')
       } else if (type === 'data') {
-        this.$router.push('/merchant/data')
+        this.$router.push('/seller/data')
       } else if (type === 'register') {
-        this.$router.push('/merchant/register')
+        this.$router.push('/seller/register')
       }
     },
     /**
-     * fetchMerchantHomeData
-     * 根据商家ID（merchantId）获取商家首页数据，包括今日营销额、今日订单总数和最新评论。
-     * 调用 /merchantHome 接口，成功后更新页面数据。
-     * @param {string} merchantId - 商家ID
+     * fetchsellerHomeData
+     * 根据商家ID（sellerId）获取商家首页数据，包括今日营销额、今日订单总数和最新评论。
+     * 调用 /sellerHome 接口，成功后更新页面数据。
+     * @param {string} sellerId - 商家ID
      */
-    async fetchMerchantHomeData(merchantId) {
+    async fetchsellerHomeData(sellerId) {
       try {
-        console.log('fetchMerchantHomeData')
-        const params = new URLSearchParams({ merchantId: merchantId }).toString()
-        const response = await fetchWithTimeout(`${BASE_URL}/merchantHome?${params}`)
+        console.log('fetchsellerHomeData')
+        const params = new URLSearchParams({ sellerId: sellerId }).toString()
+        const response = await fetchWithTimeout(`${BASE_URL}/sellerHome?${params}`)
         const result = await response.json()
         if (result.success && result.code === 200) {
           this.todayRevenue = result.data.todayRevenue
@@ -100,21 +100,21 @@ export default {
       }
     },
     /**
-     * fetchMerchantInfo
-     * 进入页面时调用，通过当前用户ID请求 /userToMerchant 接口，获取商家ID、商家名称和商家状态，
-     * 并保存到 merchantStore，随后根据 merchantStatus 决定导航栏内容和是否获取首页数据。
-     * merchantStatus 可为“未注册/审批中/封禁中/正常”
+     * fetchsellerInfo
+     * 进入页面时调用，通过当前用户ID请求 /userToseller 接口，获取商家ID、商家名称和商家状态，
+     * 并保存到 sellerStore，随后根据 sellerStatus 决定导航栏内容和是否获取首页数据。
+     * sellerStatus 可为“未注册/审批中/封禁中/正常”
      */
-    async fetchMerchantInfo() {
+    async fetchsellerInfo() {
       try {
-        console.log('fetchMerchantInfo')
+        console.log('fetchsellerInfo')
         const params = new URLSearchParams({ userId: this.userInfo.userId }).toString()
-        const response = await fetchWithTimeout(`${BASE_URL}/userToMerchant?${params}`)
+        const response = await fetchWithTimeout(`${BASE_URL}/userToseller?${params}`)
         const result = await response.json()
         if (result.success && result.code === 200) {
-          this.SET_MERCHANT_ID(result.merchantId || '')
-          this.SET_MERCHANT_NAME(result.merchantName || '')
-          const status = result.merchantStatus
+          this.SET_seller_ID(result.sellerId || '')
+          this.SET_seller_NAME(result.sellerName || '')
+          const status = result.sellerStatus
           if (status === '未注册') {
             // 未注册店铺，仅显示“创建店铺”
             this.navItems = [
@@ -147,7 +147,7 @@ export default {
               { label: '查看数据', action: () => this.goTo('data') },
               { label: '个人中心', action: () => this.goTo('withdraw') }
             ]
-            this.fetchMerchantHomeData(result.merchantId)
+            this.fetchsellerHomeData(result.sellerId)
           }
         } else {
           this.$toast && this.$toast(result.message || '商家信息获取失败')
@@ -155,7 +155,7 @@ export default {
       } catch (error) {
         this.$toast && this.$toast('网络异常，商家信息获取失败')
       }
-      if (debug_merchant_created) {
+      if (debug_seller_created) {
         this.navItems = [
           { label: '管理店铺', action: () => this.goTo('shop') },
           { label: '管理订单', action: () => this.goTo('order') },
@@ -166,18 +166,18 @@ export default {
     }
   },
   mounted() {
-    console.log('MerchantHome mounted')
+    console.log('sellerHome mounted')
     // 检查是否已创建商家
     this.navItems = [
       { label: '创建店铺', action: () => this.goTo('register') }
     ]
-    this.fetchMerchantInfo()
+    this.fetchsellerInfo()
   }
 }
 </script>
 
 <style scoped>
-.merchant-home {
+.seller-home {
   display: flex;
   flex-direction: column;
   min-height: 100vh;

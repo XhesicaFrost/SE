@@ -33,7 +33,7 @@ export default {
      *   username: string,   // 用户名，必填
      *   phone: string,      // 用户手机号，必填
      *   password: string,   // 用户密码，必填
-     *   userKind: string    // 用户类型（user/rider/merchant），必填
+     *   userKind: string    // 用户类型（user/rider/seller），必填
      * }
      *
      * 返回值格式：
@@ -89,7 +89,7 @@ export default {
      *   username: string,   // 用户名，必填
      *   phone: string,      // 用户手机号，必填
      *   password: string,   // 用户密码，必填
-     *   userKind: string    // 用户类型（user/rider/merchant），必填
+     *   userKind: string    // 用户类型（user/rider/seller），必填
      * }
      *
      * 返回值格式：
