@@ -1,25 +1,69 @@
 ### 环境
-vue+vuex+router
+vue+vuex(就是那个Store,处理全局变量比javaScript原生舒服。)+router
+
+### 增加新页面可能要做的
+在/src/router/indej.js 进行注册
+在/src/views/* 写页面
+在/src/components 写一些可以复用的组件。
+在/config 写一些特殊的全局变量 (amap.js是我的高德地图api) 或者/config.js 写一些配置
+在/store/index.js注新的全局变量，然后在/store/modules写具体的  *Store.js
 
 ### 项目结构
 #### /front_end/src/assets
 用于存放图片等资源
+现在有一张奶龙
 #### /front_end/src/components
 用于存放各种vue组件
+现在有一个底部导航栏bottomNav和一个登录注册表单AuthForm
 #### /front_end/src/stores
-用于存放基于vuex的状态和数据管理
+用于存放基于vuex的状态和数据管理（更好用的全局变量）
+locationStore存放的是当前的地理位置。
+userStore存放的是用户信息，包括userId,userName,userKind,userPhone
+riderStore存放的是骑手的地理位置。
+merchantStore存放的是当前的商家信息，包括merchantId（因为创建账户！=创建店铺）,merchantName,merchantStatus(可能出现审批中，被封禁，正常)
 #### /front_end/src/views
 用于存放各个页面
+注册和登录单独放置，剩下四个文件夹分别存放对应的页面。
 #### /front_end/src/styles
 用于存放各种样式
 #### /front_end/src/router
 用于存放路由相关内容
+```javaScript
+ path: '/merchant/shop',//网页路径，例如localhost/merchant/shop就会跳转到这个
+    name: 'MerchantShop',//路由的名字
+    component: () => import('@/views/MerchantViews/MerchantShop.vue'),//跳转之后载入哪个页面
+    meta: { allow: ['merchant'] }//内部数据，用于和下面的函数接合阻止随意跳转。
+```
+本函数用于鉴权，如果用户类型不正确，不能跳转。例如，merchant不能打开/rider
+```javaScript
+router.beforeEach((to, from, next) => {
+    if(debug_AuthCheck==false){//不会进行权限检查。
+        next()
+        return
+    }
+  const allow = to.meta.allow
+  const userKind = store.state.userStore.userInfo.userKind
+  if (allow && !allow.includes(userKind)) {
+    // 没有权限，跳转到登录或其他页面
+    next('/login')
+  } else {
+    next()
+  }
+})
+```
+
 #### /front_end/config.js
 存放可能用到的全局变量和全局函数
 目前已经有:
-+ BASE_URL
-+ FETCH_TIMEOUT
-+ fetchWithTimeout
++ BASE_URL （总不能一个个复制网址）
++ FETCH_TIMEOUT （超时的阈值）
++ fetchWithTimeout （带有超时停止的发送请求）
++ export const debug_merchant = false; // 是否启用商家调试模式
++ export const debug_rider = false; // 是否启用骑手调试模式
++ export const debug_user = false; // 是否启用用户调试模式
++ export const debug_admin = false; // 是否启用管理员调试模式
++ export const debug_AuthCheck = false; // 是否启用权限检查
++ export const debug_merchant_created = true;//是否默认商家已经创立
 
 # 用到的api
 ## 用户注册接口
