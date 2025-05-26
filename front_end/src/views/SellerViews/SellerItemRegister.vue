@@ -2,40 +2,35 @@
   <div class="register-view">
     <div class="login-header">
       <img src="@/assets/logo.jpg" alt="logo" class="login-logo" />
-      <span class="login-title">新建促销活动</span>
+      <span class="login-title">新增商品</span>
     </div>
     <form @submit.prevent="handleRegister">
       <div class="form-group">
-        <label>活动名称：</label>
-        <input v-model="promotionName" type="text" required placeholder="请输入活动名称" :disabled="submitStatus==='success'" />
+        <label>商品名称：</label>
+        <input v-model="itemName" type="text" required placeholder="请输入商品名称" :disabled="submitStatus==='success'" />
       </div>
       <div class="form-group">
-        <label>满多少元：</label>
-        <input v-model.number="full" type="number" min="0" step="0.01" required placeholder="请输入满减门槛" :disabled="submitStatus==='success'" />
+        <label>商品图片：</label>
+        <input type="file" accept="image/*" @change="onImageChange" :disabled="submitStatus==='success'" />
+        <div v-if="itemImageUrl" class="preview-img">
+          <img :src="itemImageUrl" alt="商品图片预览" />
+        </div>
       </div>
       <div class="form-group">
-        <label>减多少元：</label>
-        <input v-model.number="minus" type="number" min="0" step="0.01" required placeholder="请输入减免金额" :disabled="submitStatus==='success'" />
-      </div>
-      <div class="form-group">
-        <label>开始时间：</label>
-        <input v-model="startTime" type="datetime-local" required :disabled="submitStatus==='success'" />
-      </div>
-      <div class="form-group">
-        <label>结束时间：</label>
-        <input v-model="endTime" type="datetime-local" required :disabled="submitStatus==='success'" />
+        <label>单价：</label>
+        <input v-model.number="itemPrice" type="number" min="0" step="0.01" required placeholder="请输入单价" :disabled="submitStatus==='success'" />
       </div>
       <button
         v-if="submitStatus==='normal'"
         type="submit"
         class="submit-btn"
-      >新建活动</button>
+      >新增商品</button>
       <button
         v-else
         type="button"
         class="submit-btn"
         @click="goBack"
-      >已提交，点击返回促销管理</button>
+      >已提交，点击返回商品管理</button>
     </form>
     <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
     <div class="login-support">
@@ -49,40 +44,45 @@ import { BASE_URL, fetchWithTimeout } from '@/config.js'
 import { mapState } from 'vuex'
 
 export default {
-  name: 'MerchantPromotionRegister',
+  name: 'sellerItemRegister',
   computed: {
-    ...mapState('merchantStore', {
-      merchantId: state => state.merchantId
+    ...mapState('sellerStore', {
+      sellerId: state => state.sellerId
     })
   },
   data() {
     return {
-      promotionName: '',
-      full: '',
-      minus: '',
-      startTime: '',
-      endTime: '',
+      itemName: '',
+      itemImage: null,
+      itemImageUrl: '',
+      itemPrice: '',
       errorMessage: '',
       submitStatus: 'normal' // normal | success
     }
   },
   methods: {
+    onImageChange(e) {
+      const file = e.target.files[0]
+      if (file) {
+        this.itemImage = file
+        this.itemImageUrl = URL.createObjectURL(file)
+      }
+    },
     async handleRegister() {
-      if (!this.promotionName || this.full === '' || this.minus === '' || !this.startTime || !this.endTime) {
-        this.errorMessage = '请填写完整信息'
+      if (!this.itemName || !this.itemImage || this.itemPrice === '' || this.itemPrice === null) {
+        this.errorMessage = '请填写完整信息并上传图片'
         return
       }
       this.errorMessage = ''
+      // 构造 FormData
       const formData = new FormData()
-      formData.append('promotionName', this.promotionName)
-      formData.append('full', this.full)
-      formData.append('minus', this.minus)
-      formData.append('startTime', this.startTime)
-      formData.append('endTime', this.endTime)
-      formData.append('merchantId', this.merchantId)
+      formData.append('itemName', this.itemName)
+      formData.append('itemImage', this.itemImage)
+      formData.append('itemPrice', this.itemPrice)
+      formData.append('sellerId', this.sellerId)
 
       try {
-        const response = await fetchWithTimeout(`${BASE_URL}/merchant/promotion/register`, {
+        const response = await fetchWithTimeout(`${BASE_URL}/seller/item/register`, {
           method: 'POST',
           body: formData
         })
@@ -91,23 +91,23 @@ export default {
           this.submitStatus = 'success'
         } else {
           this.errorMessage = '未能成功发送，请重试'
-          this.promotionName = ''
-          this.full = ''
-          this.minus = ''
-          this.startTime = ''
-          this.endTime = ''
+          // 清空所有已填信息
+          this.itemName = ''
+          this.itemImage = null
+          this.itemImageUrl = ''
+          this.itemPrice = ''
         }
       } catch (e) {
         this.errorMessage = '网络错误或超时，未能成功发送'
-        this.promotionName = ''
-        this.full = ''
-        this.minus = ''
-        this.startTime = ''
-        this.endTime = ''
+        // 清空所有已填信息
+        this.itemName = ''
+        this.itemImage = null
+        this.itemImageUrl = ''
+        this.itemPrice = ''
       }
     },
     goBack() {
-      this.$router.push('/merchant/promotion')
+      this.$router.push('/seller/shop')
     }
   }
 }
@@ -133,7 +133,7 @@ export default {
 .form-group {
   margin-bottom: 1.2em;
 }
-input[type="text"], input[type="number"], input[type="datetime-local"] {
+input[type="text"], input[type="file"], input[type="number"] {
   width: 100%;
   padding: 0.5em;
   border-radius: 4px;
@@ -153,6 +153,15 @@ input[type="text"], input[type="number"], input[type="datetime-local"] {
 }
 .submit-btn:hover {
   background-color: #43a047;
+}
+.preview-img {
+  margin-top: 0.5em;
+}
+.preview-img img {
+  max-width: 100%;
+  max-height: 120px;
+  border-radius: 6px;
+  border: 1px solid #eee;
 }
 .login-support {
   margin-top: 2em;
