@@ -145,6 +145,36 @@ GET http://localhost:3000/login?username=张三&phone=13812345678&userKind=user&
   "message": "用户名或密码错误"
 }
 ```
+### 获取用户类型接口
+
+#### 接口信息
+- **请求方式**：GET
+- **请求地址**：`${BASE_URL}/user/kind`
+- **发送数据格式**：Query String
+
+#### 请求参数
+| 参数名 | 类型   | 说明   | 是否必填 |
+| ------ | ------ | ------ | -------- |
+| userId | string | 用户ID | 是       |
+
+#### 请求示例
+GET /user/kind?userId=rider123
+#### 返回数据格式
+##### 成功响应
+```json
+{
+  "success": true,
+  "data": {
+    "userKind": "rider"
+  }
+}
+
+##### 失败响应
+{
+  "success": false,
+  "message": "用户不存在"
+}
+
 ## 商家相关接口
 
 ### 1. `/userToseller`  
