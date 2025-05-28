@@ -12,6 +12,7 @@
 -->
 
 <template>
+  <TopNav :navInfo="navInfo" />
   <div class="register-view">
     <div class="login-header">
       <img src="@/assets/logo.jpg" alt="logo" class="login-logo" />
@@ -50,14 +51,18 @@
       support by 藤田ことねファングールプ
     </div>
   </div>
+  <BottomNav :navItems="navItems" />
 </template>
 
 <script>
+import BottomNav from '@/components/bottomNav.vue'
+import TopNav from '@/components/topNav.vue'
 import { BASE_URL } from '@/config.js'
 import { mapState } from 'vuex'
 
 export default {
   name: 'sellerRegister',
+  components: { TopNav, BottomNav },
   computed: {
     ...mapState('userStore', {
       userId: state => state.userInfo.userId
@@ -70,7 +75,11 @@ export default {
       shopImage: null,
       shopImageUrl: '',
       errorMessage: '',
-      submitStatus: 'normal' // normal | success
+      submitStatus: 'normal', // normal | success
+      navItems: [
+        { label: '创建店铺', action: () => { this.$router.push('/seller/register') }, isActive: true }
+      ],
+      navInfo: { title: '创建店铺', pageReturn: () => { this.$router.push('/seller') } }
     }
   },
   methods: {

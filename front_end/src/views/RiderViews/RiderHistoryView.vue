@@ -1,4 +1,5 @@
 <template>
+  <TopNav :navInfo="navInfo" />
   <div class="rider-history">
     <!-- 页面标题 -->
     <div class="header-section">
@@ -82,12 +83,13 @@
 
 <script>
 import BottomNav from '@/components/bottomNav.vue'
+import TopNav from '@/components/topNav.vue'
 import { BASE_URL, fetchWithTimeout } from '@/config.js'
 import { mapState } from 'vuex'
 
 export default {
   name: 'RiderHistory',
-  components: { BottomNav },
+  components: { BottomNav, TopNav },
   data() {
     return {
       historyOrders: [],
@@ -97,8 +99,11 @@ export default {
       totalPages: 1,
       totalCount: 0,
       navItems: [
-        { label: '返回主页', action: () => { this.$router.push('/rider') } }
-      ]
+        { label: '订单搜索', action: () => { this.$router.push('/rider/orders') } },
+        { label: '历史订单', action: () => { this.$router.push('/rider/history') }, isActive: true },
+        { label: '个人中心', action: () => { /* 暂时不跳转 */ } }
+      ],
+      navInfo: { title: '历史订单', pageReturn: () => { this.$router.push('/rider') } }
     }
   },
   computed: {
@@ -183,7 +188,7 @@ export default {
 <style scoped>
 .rider-history {
   max-width: 500px;
-  margin: 0 auto 70px auto;
+  margin: 48px auto 70px auto;
   padding: 1em;
   background: #f8f8f8;
   min-height: 100vh;

@@ -1,14 +1,14 @@
 <!-- filepath: front_end/src/components/bottomNav.vue -->
 <template>
   <div class="bottom-nav">
-    <div
+    <button
       v-for="(item, idx) in navItems"
       :key="idx"
-      class="nav-item"
       @click="handleClick(item)"
+      :class="{ 'active': item.isActive }"
     >
-      <p>{{ item.label }}</p>
-    </div>
+      {{ item.label }}
+  </button>
   </div>
 </template>
 
@@ -24,7 +24,7 @@ export default {
   },
   methods: {
     handleClick(item) {
-      if (typeof item.action === 'function') {
+      if (typeof item.action === 'function' && !item.isActive) {
         item.action()
       }
     }
@@ -32,7 +32,7 @@ export default {
     mounted() {
         // 这里可以添加一些初始化逻辑
         console.log('BottomNav mounted', this.navItems)
-
+        
     }   
 }
 </script>
@@ -51,19 +51,27 @@ export default {
   max-width: 400px;
   box-sizing: border-box;
 }
-.nav-item {
-  flex: 1;
+button.active {
+  background: #3498db;
+  cursor: default;
+}
+button.active:hover {
+  background: #3498db !important;
+  cursor: default !important;
+}
+button {
   text-align: center;
-  color: #3498db;
-  font-size: 17px;
-  cursor: pointer;
   height: 100%;
   width: 100%;
-  padding-bottom: 1%;
+  border: none;
+  cursor: pointer;
+  font-size: 17px;
+  font-weight: bold;
   margin-right: -0.1%;
   transition: background 0.2s;
+  color: #0909ff;
 }
-.nav-item:hover {
-  background: #f0f8ff;
+button:hover {
+  background: #66ccff;
 }
 </style>

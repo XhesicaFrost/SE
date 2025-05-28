@@ -1,4 +1,5 @@
 <template>
+  <TopNav :navInfo="navInfo" />
   <div class="rider-orders-view">
     <!-- 订单过滤器 -->
     <div class="filter-section">
@@ -53,12 +54,13 @@
 
 <script>
 import BottomNav from '@/components/bottomNav.vue'
+import TopNav from '@/components/topNav.vue'
 import { BASE_URL, fetchWithTimeout } from '@/config.js'
 import { mapState, mapActions } from 'vuex'
 
 export default {
   name: 'RiderOrdersView',
-  components: { BottomNav },
+  components: { BottomNav, TopNav },
   data() {
     return {
       allOrders: [],
@@ -68,8 +70,11 @@ export default {
       pageSize: 10,
       jumpPage: 1,
       navItems: [
-        { label: '回到主页面', action: () => { this.$router.push('/rider') } }
-      ]
+        { label: '订单搜索', action: () => { this.$router.push('/rider/orders') }, isActive: true },
+        { label: '历史订单', action: () => { this.$router.push('/rider/history') } },
+        { label: '个人中心', action: () => { /* 暂时不跳转 */ } }
+      ],
+      navInfo: { title: '订单搜索', pageReturn: () => { this.$router.push('/rider') } }
     }
   },
   computed: {
@@ -174,7 +179,7 @@ export default {
 <style scoped>
 .rider-orders-view {
   max-width: 500px;
-  margin: 0 auto 70px auto;
+  margin: 48px auto 70px auto;
   padding: 1em;
   background: #f8f8f8;
   min-height: 100vh;

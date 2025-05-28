@@ -144,8 +144,7 @@ export default {
             this.navItems = [
               { label: '管理店铺', action: () => this.goTo('shop') },
               { label: '管理订单', action: () => this.goTo('order') },
-              { label: '查看数据', action: () => this.goTo('data') },
-              { label: '个人中心', action: () => this.goTo('withdraw') }
+              { label: '查看数据', action: () => this.goTo('data') }
             ]
             this.fetchsellerHomeData(result.sellerId)
           }
@@ -159,8 +158,7 @@ export default {
         this.navItems = [
           { label: '管理店铺', action: () => this.goTo('shop') },
           { label: '管理订单', action: () => this.goTo('order') },
-          { label: '查看数据', action: () => this.goTo('data') },
-          { label: '个人中心', action: () => this.goTo('withdraw') }
+          { label: '查看数据', action: () => this.goTo('data') }
         ]
       }
     }

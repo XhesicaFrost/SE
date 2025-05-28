@@ -1,4 +1,5 @@
 <template>
+  <TopNav :navInfo="navInfo" />
   <div class="seller-shop">
     <!-- 店铺信息栏 -->
     <div class="shop-info-bar">
@@ -57,10 +58,11 @@
 import { mapState } from 'vuex'
 import { BASE_URL, fetchWithTimeout } from '@/config.js'
 import BottomNav from '@/components/bottomNav.vue'
+import TopNav from '@/components/topNav.vue'
 
 export default {
   name: 'sellerShop',
-  components: { BottomNav },
+  components: { BottomNav, TopNav },
   data() {
     return {
       shopInfo: {
@@ -73,7 +75,9 @@ export default {
       page: 1,
       pageSize: 10,
       jumpPage: 1,
-      navItems: []
+      navItems: [],
+      navInfo: { title: '管理店铺', pageReturn: () => { this.$router.push('/seller') } }
+
     }
   },
   computed: {
@@ -196,7 +200,7 @@ export default {
 <style scoped>
 .seller-shop {
   max-width: 400px;
-  margin: 0 auto 70px auto;
+  margin: 48px auto 70px auto;
   padding: 1em;
   background: #fff;
   min-height: 100vh;
