@@ -82,7 +82,7 @@ export default {
 <style scoped>
 .promotion-view {
   max-width: 400px;
-  margin: 0 auto 70px auto;
+  margin: 0 auto 36px auto;
   padding: 1em;
   background: #fff;
   min-height: 100vh;

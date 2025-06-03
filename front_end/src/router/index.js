@@ -25,6 +25,12 @@ const routes = [
     meta: { allow: ['user'] }
   },
   {
+    path: '/user/shopping',
+    name: 'UserShopInfo',
+    component: () => import('@/views/UserViews/UserShopInfo.vue'),
+    meta: { allow: ['user'] }
+  },
+  {
     path: '/seller',
     name: 'sellerHome',
     component: () => import('@/views/SellerViews/SellerHome.vue'),
@@ -121,9 +127,21 @@ const routes = [
     meta: { allow: ['rider'] }
   },
   {
-    path: '/admin',
-    name: 'AdminHome',
-    component: () => import('@/views/AdminViews/AdminHome.vue'),
+    path: '/admin/shops',
+    name: 'AdminShopManage',
+    component: () => import('@/views/AdminViews/AdminShopManage.vue'),
+    meta: { allow: ['admin'] }
+  },
+  {
+    path: '/admin/items',
+    name: 'AdminItemManage',
+    component: () => import('@/views/AdminViews/AdminItemManage.vue'),
+    meta: { allow: ['admin'] }
+  },
+  {
+    path: '/admin/orders',
+    name: 'AdminOrderManage',
+    component: () => import('@/views/AdminViews/AdminOrderManage.vue'),
     meta: { allow: ['admin'] }
   },
   {

@@ -1,4 +1,5 @@
 <template>
+  <TopNav :navInfo="navInfo" />
   <div class="seller-order-view">
     <div class="order-list">
       <div
@@ -52,12 +53,13 @@
 
 <script>
 import BottomNav from '@/components/bottomNav.vue'
+import TopNav from '@/components/topNav.vue'
 import { BASE_URL, fetchWithTimeout } from '@/config.js'
 import { mapState } from 'vuex'
 
 export default {
   name: 'sellerOrder',
-  components: { BottomNav },
+  components: { BottomNav, TopNav },
   data() {
     return {
       orders: [],
@@ -65,8 +67,11 @@ export default {
       pageSize: 10,
       jumpPage: 1,
       navItems: [
-        { label: '返回商家主页', action: () => { this.$router.push('/seller') } }
+        { label: '管理店铺', action: () => { this.$router.push('/seller/shop') } },
+        { label: '管理订单', action: () => { this.$router.push('/seller/order') }, isActive: true },
+        { label: '查看数据', action: () => { this.$router.push('/seller/data') } }
       ],
+      navInfo: { title: '管理订单', pageReturn: () => { this.$router.push('/seller') } },
       expandedOrderId: null
     }
   },
@@ -140,7 +145,7 @@ export default {
 <style scoped>
 .seller-order-view {
   max-width: 500px;
-  margin: 0 auto 70px auto;
+  margin: 48px auto 36px auto;
   padding: 1em;
   background: #fff;
   min-height: 100vh;

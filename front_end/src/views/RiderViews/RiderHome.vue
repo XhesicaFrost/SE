@@ -258,7 +258,7 @@ export default {
 <style scoped>
 .rider-home {
   max-width: 500px;
-  margin: 0 auto 70px auto;
+  margin: 0 auto 36px auto;
   padding: 1em;
   background: #f8f8f8;
   min-height: 100vh;

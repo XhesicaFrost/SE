@@ -13,7 +13,7 @@
       
       <!-- 倒计时显示 -->
       <div class="countdown">
-        {{ countdown }}s 后回到登录页面
+        {{ countdown }}s 后回到上一页面
       </div>
     </div>
   </div>
@@ -43,7 +43,7 @@ export default {
         
         if (this.countdown <= 0) {
           clearInterval(this.timer)
-          this.$router.push('/login')
+          this.$router.back()
         }
       }, 1000)
     }

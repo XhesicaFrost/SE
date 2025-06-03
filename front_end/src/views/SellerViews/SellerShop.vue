@@ -200,7 +200,7 @@ export default {
 <style scoped>
 .seller-shop {
   max-width: 400px;
-  margin: 48px auto 70px auto;
+  margin: 48px auto 36px auto;
   padding: 1em;
   background: #fff;
   min-height: 100vh;
@@ -306,34 +306,6 @@ export default {
   border-radius: 4px;
   border: 1px solid #bfbfbf;
   margin: 0 0.3em;
-}
-.bottom-nav {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  background: #fff;
-  border-top: 1px solid #eee;
-  height: 56px;
-  position: fixed;
-  left: 50%;
-  bottom: 0;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 400px;
-  box-sizing: border-box;
-  z-index: 10;
-}
-.nav-item {
-  flex: 1;
-  text-align: center;
-  color: #3498db;
-  font-size: 1.1em;
-  cursor: pointer;
-  padding: 0.7em 0;
-  transition: background 0.2s;
-}
-.nav-item:hover {
-  background: #f0f8ff;
 }
 .goods-actions {
   display: flex;

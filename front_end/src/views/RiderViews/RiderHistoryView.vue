@@ -188,7 +188,7 @@ export default {
 <style scoped>
 .rider-history {
   max-width: 500px;
-  margin: 48px auto 70px auto;
+  margin: 48px auto 36px auto;
   padding: 1em;
   background: #f8f8f8;
   min-height: 100vh;

@@ -1,4 +1,7 @@
 <!-- filepath: front_end/src/components/topNav.vue -->
+ <!--
+  <TopNav :navInfo="navInfo" />
+ -->
 <template>
   <div class="top-bg"></div>
   <div class="top-nav">
