@@ -16,16 +16,12 @@ public class OrderItem {
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
-    @ManyToOne
-    @JoinColumn(name = "item_id", nullable = false)
-    private Item item;
+    @Column(name = "item_id", nullable = false)
+    private Integer itemId;
 
     @Column(nullable = false)
     private Integer quantity;
 
-    @Column(name = "unit_price", nullable = false)
-    private BigDecimal unitPrice;
-
-    @Column(name = "total_price", nullable = false)
-    private BigDecimal totalPrice;
+    @Column(nullable = false)
+    private BigDecimal price;
 } 

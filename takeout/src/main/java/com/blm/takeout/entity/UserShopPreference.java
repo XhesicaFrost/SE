@@ -2,6 +2,7 @@ package com.blm.takeout.entity;
 
 import lombok.Data;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -13,8 +14,9 @@ public class UserShopPreference {
     @Column(nullable = false, unique = true)
     private Integer id;
 
-    @Column(nullable = false)
-    private Integer userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(columnDefinition = "json")
     private List<String> preferredTypes;
@@ -28,8 +30,73 @@ public class UserShopPreference {
     private Integer maxDeliveryTime;
 
     @Column(nullable = false)
-    private java.time.LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 
     @Column(nullable = false)
-    private java.time.LocalDateTime updatedAt;
+    private LocalDateTime updatedAt;
+
+    // Getters and Setters
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public List<String> getPreferredTypes() {
+        return preferredTypes;
+    }
+
+    public void setPreferredTypes(List<String> preferredTypes) {
+        this.preferredTypes = preferredTypes;
+    }
+
+    public Double getMinPrice() {
+        return minPrice;
+    }
+
+    public void setMinPrice(Double minPrice) {
+        this.minPrice = minPrice;
+    }
+
+    public Double getMaxPrice() {
+        return maxPrice;
+    }
+
+    public void setMaxPrice(Double maxPrice) {
+        this.maxPrice = maxPrice;
+    }
+
+    public Integer getMaxDeliveryTime() {
+        return maxDeliveryTime;
+    }
+
+    public void setMaxDeliveryTime(Integer maxDeliveryTime) {
+        this.maxDeliveryTime = maxDeliveryTime;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 } 

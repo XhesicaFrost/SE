@@ -9,7 +9,7 @@ import java.util.List;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Integer> {
-    List<Order> findByUser_userid(Integer userId);
     Order findByOrderNumber(String orderNumber);
     Page<Order> findByUser_useridOrderByCreatedAtDesc(Integer userId, Pageable pageable);
+    List<Order> findByUser_useridOrderByCreatedAtDesc(Integer userId);
 } 

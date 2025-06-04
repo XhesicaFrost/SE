@@ -1,7 +1,8 @@
 package com.blm.takeout.entity;
 
-import lombok.Data;
 import jakarta.persistence.*;
+import lombok.Data;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -9,21 +10,22 @@ import jakarta.persistence.*;
 public class ShopRecommendation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(nullable = false, unique = true)
     private Integer id;
 
-    @Column(nullable = false)
-    private Integer userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @Column(nullable = false)
-    private Integer shopId;
+    @ManyToOne
+    @JoinColumn(name = "shop_id", nullable = false)
+    private Shop shop;
 
     @Column(nullable = false)
     private Double score;
 
-    @Column(length = 200)
+    @Column(name = "recommendation_reason")
     private String recommendationReason;
 
-    @Column(nullable = false)
-    private java.time.LocalDateTime createdAt;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 } 

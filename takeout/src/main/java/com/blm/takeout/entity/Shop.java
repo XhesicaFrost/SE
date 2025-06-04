@@ -37,6 +37,9 @@ public class Shop {
     private Double minPrice;
 
     @Column(nullable = false)
+    private Double maxPrice;
+
+    @Column(nullable = false)
     private Double deliveryFee;
 
     @Column(nullable = false)

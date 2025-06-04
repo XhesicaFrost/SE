@@ -83,12 +83,9 @@ public class OrderService {
     private OrderItemDTO convertToItemDTO(OrderItem item) {
         OrderItemDTO dto = new OrderItemDTO();
         dto.setId(item.getId());
-        dto.setItemId(item.getItem().getId());
-        dto.setItemName(item.getItem().getName());
-        dto.setItemImage(item.getItem().getImage());
+        dto.setItemId(item.getItemId());
         dto.setQuantity(item.getQuantity());
-        dto.setUnitPrice(item.getUnitPrice());
-        dto.setTotalPrice(item.getTotalPrice());
+        dto.setPrice(item.getPrice());
         return dto;
     }
 } 
