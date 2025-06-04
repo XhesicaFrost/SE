@@ -25,7 +25,7 @@ public class Item {
     @Column(nullable = false, length = 100)
     private String name;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(nullable = false)
     private Double price;
 
     @Column(length = 200)
@@ -37,7 +37,7 @@ public class Item {
     @Column(nullable = false)
     private Integer sales = 0;
 
-    @Column(nullable = false, precision = 3, scale = 1)
+    @Column(nullable = false)
     private Double rating = 0.0;
 
     @Column(nullable = false)

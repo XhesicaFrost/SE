@@ -19,10 +19,10 @@ public class UserShopPreference {
     @Column(columnDefinition = "json")
     private List<String> preferredTypes;
 
-    @Column(precision = 10, scale = 2)
+    @Column
     private Double minPrice;
 
-    @Column(precision = 10, scale = 2)
+    @Column
     private Double maxPrice;
 
     private Integer maxDeliveryTime;
