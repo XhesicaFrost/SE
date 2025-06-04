@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/items")
@@ -42,9 +43,20 @@ public class ItemController {
         return ResponseEntity.ok(items);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Item> getItemById(@PathVariable Integer id) {
-        Item item = itemService.getItemById(id);
-        return ResponseEntity.ok(item);
+    @GetMapping("/{itemId}")
+    public Map<String, Object> getItemDetails(@PathVariable Integer itemId) {
+        try {
+            return Map.of(
+                "code", 200,
+                "success", true,
+                "data", itemService.getItemDetails(itemId)
+            );
+        } catch (Exception e) {
+            return Map.of(
+                "code", 500,
+                "success", false,
+                "message", "获取商品详情失败：" + e.getMessage()
+            );
+        }
     }
 } 

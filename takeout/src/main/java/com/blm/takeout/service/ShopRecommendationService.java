@@ -60,20 +60,54 @@ public class ShopRecommendationService {
             }
             
             @SuppressWarnings("unchecked")
-            Map<String, Double> priceRange = (Map<String, Double>) userPrefs.get("priceRange");
+            Map<String, Object> priceRange = (Map<String, Object>) userPrefs.get("priceRange");
             if (priceRange != null) {
-                userPreference.setMinPrice(priceRange.get("min"));
-                userPreference.setMaxPrice(priceRange.get("max"));
+                Object minPrice = priceRange.get("min");
+                Object maxPrice = priceRange.get("max");
+                
+                if (minPrice != null) {
+                    userPreference.setMinPrice(minPrice instanceof Integer ? 
+                        ((Integer) minPrice).doubleValue() : (Double) minPrice);
+                }
+                
+                if (maxPrice != null) {
+                    userPreference.setMaxPrice(maxPrice instanceof Integer ? 
+                        ((Integer) maxPrice).doubleValue() : (Double) maxPrice);
+                }
             }
             
-            userPreference.setMaxDeliveryTime((Integer) userPrefs.get("maxDeliveryTime"));
+            Object maxDeliveryTime = userPrefs.get("maxDeliveryTime");
+            if (maxDeliveryTime != null) {
+                userPreference.setMaxDeliveryTime(maxDeliveryTime instanceof Integer ? 
+                    (Integer) maxDeliveryTime : ((Double) maxDeliveryTime).intValue());
+            }
+            
             userPreference.setUpdatedAt(LocalDateTime.now());
             userShopPreferenceRepository.save(userPreference);
         }
         
         // 获取位置信息
         @SuppressWarnings("unchecked")
-        Map<String, Double> location = (Map<String, Double>) preferences.get("location");
+        Map<String, Object> location = (Map<String, Object>) preferences.get("location");
+        final Map<String, Double> locationMap;
+        if (location != null) {
+            Map<String, Double> tempMap = new HashMap<>();
+            Object lat = location.get("latitude");
+            Object lon = location.get("longitude");
+            
+            if (lat != null) {
+                tempMap.put("latitude", lat instanceof Integer ? 
+                    ((Integer) lat).doubleValue() : (Double) lat);
+            }
+            
+            if (lon != null) {
+                tempMap.put("longitude", lon instanceof Integer ? 
+                    ((Integer) lon).doubleValue() : (Double) lon);
+            }
+            locationMap = tempMap;
+        } else {
+            locationMap = null;
+        }
         
         // 获取所有店铺
         List<Shop> shops = shopRepository.findAll();
@@ -81,7 +115,7 @@ public class ShopRecommendationService {
         // 计算推荐分数
         List<ShopRecommendation> recommendations = shops.stream()
             .map(shop -> {
-                double score = calculateShopScore(shop, userPreference, location);
+                double score = calculateShopScore(shop, userPreference, locationMap);
                 if (score > 0) {
                     ShopRecommendation rec = new ShopRecommendation();
                     User user = new User();
@@ -205,5 +239,73 @@ public class ShopRecommendationService {
                 );
             })
             .collect(Collectors.toList());
+    }
+
+    public Map<String, Object> getUserShopPreferences(Integer userId) {
+        UserShopPreference preference = userShopPreferenceRepository.findByUser_userid(userId)
+            .orElseGet(() -> {
+                UserShopPreference newPreference = new UserShopPreference();
+                User user = new User();
+                user.setUserid(userId);
+                newPreference.setUser(user);
+                newPreference.setCreatedAt(LocalDateTime.now());
+                newPreference.setUpdatedAt(LocalDateTime.now());
+                return userShopPreferenceRepository.save(newPreference);
+            });
+
+        return Map.of(
+            "preferredTypes", preference.getPreferredTypes() != null ? preference.getPreferredTypes() : List.of(),
+            "priceRange", Map.of(
+                "min", preference.getMinPrice() != null ? preference.getMinPrice() : 0.0,
+                "max", preference.getMaxPrice() != null ? preference.getMaxPrice() : 1000.0
+            ),
+            "maxDeliveryTime", preference.getMaxDeliveryTime() != null ? preference.getMaxDeliveryTime() : 60,
+            "lastUpdated", preference.getUpdatedAt()
+        );
+    }
+
+    @Transactional
+    public void updateUserShopPreferences(Integer userId, Map<String, Object> preferences) {
+        UserShopPreference userPreference = userShopPreferenceRepository.findByUser_userid(userId)
+            .orElseGet(() -> {
+                UserShopPreference newPreference = new UserShopPreference();
+                User user = new User();
+                user.setUserid(userId);
+                newPreference.setUser(user);
+                newPreference.setCreatedAt(LocalDateTime.now());
+                return newPreference;
+            });
+
+        @SuppressWarnings("unchecked")
+        List<String> preferredTypes = (List<String>) preferences.get("preferredTypes");
+        if (preferredTypes != null) {
+            userPreference.setPreferredTypes(preferredTypes);
+        }
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> priceRange = (Map<String, Object>) preferences.get("priceRange");
+        if (priceRange != null) {
+            Object minPrice = priceRange.get("min");
+            Object maxPrice = priceRange.get("max");
+            
+            if (minPrice != null) {
+                userPreference.setMinPrice(minPrice instanceof Integer ? 
+                    ((Integer) minPrice).doubleValue() : (Double) minPrice);
+            }
+            
+            if (maxPrice != null) {
+                userPreference.setMaxPrice(maxPrice instanceof Integer ? 
+                    ((Integer) maxPrice).doubleValue() : (Double) maxPrice);
+            }
+        }
+
+        Object maxDeliveryTime = preferences.get("maxDeliveryTime");
+        if (maxDeliveryTime != null) {
+            userPreference.setMaxDeliveryTime(maxDeliveryTime instanceof Integer ? 
+                (Integer) maxDeliveryTime : ((Double) maxDeliveryTime).intValue());
+        }
+        
+        userPreference.setUpdatedAt(LocalDateTime.now());
+        userShopPreferenceRepository.save(userPreference);
     }
 } 

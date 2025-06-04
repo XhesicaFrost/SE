@@ -1,18 +1,33 @@
 package com.blm.takeout.service;
 
 import com.blm.takeout.entity.Item;
+import com.blm.takeout.entity.Shop;
+import com.blm.takeout.entity.ItemReview;
 import com.blm.takeout.repository.ItemRepository;
+import com.blm.takeout.repository.ShopRepository;
+import com.blm.takeout.repository.ItemReviewRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ItemService {
 
     private final ItemRepository itemRepository;
+    private final ShopRepository shopRepository;
+    private final ItemReviewRepository itemReviewRepository;
 
-    public ItemService(ItemRepository itemRepository) {
+    @Autowired
+    public ItemService(
+            ItemRepository itemRepository,
+            ShopRepository shopRepository,
+            ItemReviewRepository itemReviewRepository) {
         this.itemRepository = itemRepository;
+        this.shopRepository = shopRepository;
+        this.itemReviewRepository = itemReviewRepository;
     }
 
     public Item getItemById(Integer id) {
@@ -29,5 +44,42 @@ public class ItemService {
 
     public Page<Item> getItemsByShopId(Integer shopId, Pageable pageable) {
         return itemRepository.findByShopId(shopId, pageable);
+    }
+
+    public Map<String, Object> getItemDetails(Integer itemId) {
+        Item item = itemRepository.findById(itemId)
+            .orElseThrow(() -> new RuntimeException("商品不存在"));
+
+        Shop shop = shopRepository.findById(item.getShopId())
+            .orElseThrow(() -> new RuntimeException("店铺不存在"));
+
+        List<ItemReview> reviews = itemReviewRepository.findByItemIdOrderByCreatedAtDesc(itemId);
+
+        Map<String, Object> itemDetails = new HashMap<>();
+        itemDetails.put("id", item.getId());
+        itemDetails.put("name", item.getName());
+        itemDetails.put("price", item.getPrice());
+        itemDetails.put("image", item.getImage());
+        itemDetails.put("description", item.getDescription());
+        itemDetails.put("sales", item.getSales());
+        itemDetails.put("rating", item.getRating());
+        itemDetails.put("shopId", item.getShopId());
+        itemDetails.put("shopName", shop.getName());
+        itemDetails.put("category", item.getCategoryId()); // 这里可以获取分类名称
+
+        // 添加评价
+        itemDetails.put("reviews", reviews.stream()
+            .map(review -> Map.of(
+                "id", review.getId(),
+                "userId", review.getUserId(),
+                "username", "用户" + review.getUserId(), // 这里可以获取用户名
+                "rating", review.getRating(),
+                "content", review.getContent(),
+                "createTime", review.getCreatedAt(),
+                "images", review.getImages()
+            ))
+            .collect(Collectors.toList()));
+
+        return itemDetails;
     }
 } 

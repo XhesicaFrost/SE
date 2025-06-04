@@ -19,6 +19,9 @@ public class Item {
     @Column(nullable = false)
     private Integer shopId;
 
+    @Column(nullable = false)
+    private Integer categoryId;
+
     @Column(nullable = false, length = 100)
     private String name;
 

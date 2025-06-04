@@ -16,4 +16,7 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
     
     Page<Item> findByNameContainingOrDescriptionContaining(String name, String description, Pageable pageable);
     Page<Item> findByShopId(Integer shopId, Pageable pageable);
+
+    List<Item> findTop5ByShopIdOrderBySalesDesc(Integer shopId);
+    List<Item> findByShopIdAndCategoryId(Integer shopId, Integer categoryId);
 } 

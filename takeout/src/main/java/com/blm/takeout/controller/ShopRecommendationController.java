@@ -52,4 +52,21 @@ public class ShopRecommendationController {
             );
         }
     }
+
+    @GetMapping("/preferences/{userId}")
+    public Map<String, Object> getUserShopPreferences(@PathVariable Integer userId) {
+        try {
+            return Map.of(
+                "code", 200,
+                "success", true,
+                "data", shopRecommendationService.getUserShopPreferences(userId)
+            );
+        } catch (Exception e) {
+            return Map.of(
+                "code", 500,
+                "success", false,
+                "message", "获取用户店铺偏好失败：" + e.getMessage()
+            );
+        }
+    }
 } 

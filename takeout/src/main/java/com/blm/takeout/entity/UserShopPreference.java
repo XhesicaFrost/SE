@@ -2,6 +2,7 @@ package com.blm.takeout.entity;
 
 import lombok.Data;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Type;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,6 +20,7 @@ public class UserShopPreference {
     private User user;
 
     @Column(columnDefinition = "json")
+    @Convert(converter = StringListConverter.class)
     private List<String> preferredTypes;
 
     @Column
@@ -98,5 +100,28 @@ public class UserShopPreference {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+}
+
+@Converter
+class StringListConverter implements AttributeConverter<List<String>, String> {
+    @Override
+    public String convertToDatabaseColumn(List<String> attribute) {
+        if (attribute == null) {
+            return "[]";
+        }
+        return "[\"" + String.join("\",\"", attribute) + "\"]";
+    }
+
+    @Override
+    public List<String> convertToEntityAttribute(String dbData) {
+        if (dbData == null || dbData.equals("[]")) {
+            return List.of();
+        }
+        String content = dbData.substring(1, dbData.length() - 1);
+        if (content.isEmpty()) {
+            return List.of();
+        }
+        return List.of(content.split("\",\""));
     }
 } 
