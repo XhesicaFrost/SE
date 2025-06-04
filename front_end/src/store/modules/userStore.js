@@ -48,7 +48,7 @@ export default {
         const params = new URLSearchParams(userData).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/register?${params}`)
         const result = await response.json()
-        if (result.success && result.code === 200) {
+        if (result.code === 200) {
           // 保存userId、userName、userKind、userPhone
           commit('SET_USER_INFO', {
             userId: result.id || '',
@@ -104,7 +104,7 @@ export default {
         const params = new URLSearchParams(loginData).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/login?${params}`)
         const result = await response.json()
-        if (result.success && result.code === 200) {
+        if ( result.code === 200) {
           // 保存userId、userName、userKind、userPhone
           commit('SET_USER_INFO', {
             userId: result.id || '',
