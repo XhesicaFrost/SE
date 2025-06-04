@@ -19,28 +19,28 @@ import java.time.LocalDateTime;
 @Service
 public class FavoriteService {
     private final FavoriteRepository favoriteRepository;
+    private final UserRepository userRepository;
     private final ShopRepository shopRepository;
     private final ItemRepository itemRepository;
-    private final UserRepository userRepository;
 
     public FavoriteService(FavoriteRepository favoriteRepository,
+                          UserRepository userRepository,
                           ShopRepository shopRepository,
-                          ItemRepository itemRepository,
-                          UserRepository userRepository) {
+                          ItemRepository itemRepository) {
         this.favoriteRepository = favoriteRepository;
+        this.userRepository = userRepository;
         this.shopRepository = shopRepository;
         this.itemRepository = itemRepository;
-        this.userRepository = userRepository;
     }
 
     @Transactional
     public void addFavorite(Integer userId, Favorite.TargetType targetType, Integer targetId) {
-        if (favoriteRepository.existsByUserIdAndTargetTypeAndTargetId(userId, targetType, targetId)) {
-            throw new RuntimeException("已经收藏过了");
-        }
-
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("用户不存在"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (favoriteRepository.existsByUser_IdAndTargetTypeAndTargetId(userId, targetType, targetId)) {
+            throw new RuntimeException("Already favorited");
+        }
 
         Favorite favorite = new Favorite();
         favorite.setUser(user);
@@ -51,7 +51,7 @@ public class FavoriteService {
     }
 
     public Page<FavoriteDTO> getUserFavorites(Integer userId, Pageable pageable) {
-        Page<Favorite> favorites = favoriteRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
+        Page<Favorite> favorites = favoriteRepository.findByUser_IdOrderByCreatedAtDesc(userId, pageable);
         return favorites.map(this::convertToDTO);
     }
 
@@ -64,13 +64,13 @@ public class FavoriteService {
 
     @Transactional
     public void removeFavorite(Integer userId, Favorite.TargetType targetType, Integer targetId) {
-        favoriteRepository.deleteByUserIdAndTargetTypeAndTargetId(userId, targetType, targetId);
+        favoriteRepository.deleteByUser_IdAndTargetTypeAndTargetId(userId, targetType, targetId);
     }
 
     private FavoriteDTO convertToDTO(Favorite favorite) {
         FavoriteDTO dto = new FavoriteDTO();
         dto.setId(favorite.getId());
-        dto.setUserId(favorite.getUser().getUserid());
+        dto.setUserId(favorite.getUser().getId());
         dto.setTargetType(favorite.getTargetType());
         dto.setTargetId(favorite.getTargetId());
         dto.setCreatedAt(favorite.getCreatedAt());

@@ -16,7 +16,7 @@ public class UserRegisterDto {
 
     @NotBlank(message = "手机号码不能为空")
     @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号码格式不正确")
-    private String phonenumber;
+    private String phone;
 
     @Email(message = "邮箱格式不正确")
     private String email;
@@ -24,5 +24,5 @@ public class UserRegisterDto {
     @NotNull(message = "身份不能为空")
     private Role role;
     
-    private String avatarurl;
+    private String avatar;
 }

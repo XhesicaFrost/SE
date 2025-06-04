@@ -21,7 +21,7 @@ public class OrderDTO {
     private Integer riderId;
     private String riderName;
     private String riderPhone;
-    private String riderLocation;
+    private String riderLocation;//For example:"116.4074,39.9042"
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<OrderItemDTO> orderItems;

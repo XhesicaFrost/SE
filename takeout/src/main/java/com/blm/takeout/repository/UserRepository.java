@@ -8,8 +8,8 @@ import com.blm.takeout.entity.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByUsername(String username);
-    Optional<User> findByPhonenumber(String phonenumber);
-    Optional<User> findByUsernameOrPhonenumber(String username, String phonenumber);
+    Optional<User> findByPhone(String phone);
+    Optional<User> findByUsernameOrPhone(String username, String phone);
     Boolean existsByUsername(String username);
-    Boolean existsByPhonenumber(String phonenumber);
+    Boolean existsByPhone(String phone);
 }

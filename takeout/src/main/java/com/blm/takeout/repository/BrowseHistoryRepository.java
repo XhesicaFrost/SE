@@ -6,9 +6,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface BrowseHistoryRepository extends JpaRepository<BrowseHistory, Integer> {
-    Page<BrowseHistory> findByUserIdOrderByBrowseTimeDesc(Integer userId, Pageable pageable);
+    Page<BrowseHistory> findByUser_IdOrderByBrowseTimeDesc(Integer userId, Pageable pageable);
     
     @Query("SELECT bh FROM BrowseHistory bh WHERE bh.user.id = :userId AND bh.targetType = :targetType ORDER BY bh.browseTime DESC")
     Page<BrowseHistory> findByUserIdAndTargetTypeOrderByBrowseTimeDesc(
@@ -16,5 +18,7 @@ public interface BrowseHistoryRepository extends JpaRepository<BrowseHistory, In
             @Param("targetType") BrowseHistory.TargetType targetType,
             Pageable pageable);
             
-    void deleteByUserIdAndTargetTypeAndTargetId(Integer userId, BrowseHistory.TargetType targetType, Integer targetId);
+    void deleteByUser_IdAndTargetTypeAndTargetId(Integer userId, BrowseHistory.TargetType targetType, Integer targetId);
+    
+    boolean existsByUser_IdAndTargetTypeAndTargetId(Integer userId, BrowseHistory.TargetType targetType, Integer targetId);
 } 

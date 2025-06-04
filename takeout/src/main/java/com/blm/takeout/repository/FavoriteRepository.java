@@ -6,9 +6,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface FavoriteRepository extends JpaRepository<Favorite, Integer> {
-    Page<Favorite> findByUserIdOrderByCreatedAtDesc(Integer userId, Pageable pageable);
+    Page<Favorite> findByUser_IdOrderByCreatedAtDesc(Integer userId, Pageable pageable);
     
     @Query("SELECT f FROM Favorite f WHERE f.user.id = :userId AND f.targetType = :targetType ORDER BY f.createdAt DESC")
     Page<Favorite> findByUserIdAndTargetTypeOrderByCreatedAtDesc(
@@ -16,7 +18,7 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Integer> {
             @Param("targetType") Favorite.TargetType targetType,
             Pageable pageable);
             
-    void deleteByUserIdAndTargetTypeAndTargetId(Integer userId, Favorite.TargetType targetType, Integer targetId);
+    void deleteByUser_IdAndTargetTypeAndTargetId(Integer userId, Favorite.TargetType targetType, Integer targetId);
     
-    boolean existsByUserIdAndTargetTypeAndTargetId(Integer userId, Favorite.TargetType targetType, Integer targetId);
+    boolean existsByUser_IdAndTargetTypeAndTargetId(Integer userId, Favorite.TargetType targetType, Integer targetId);
 } 

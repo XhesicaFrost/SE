@@ -4,9 +4,9 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
 
-@Data
 @Entity
-@Table(name = "favorites")
+@Table(name = "favorite")
+@Data
 public class Favorite {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,8 +16,8 @@ public class Favorite {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "target_type", nullable = false)
     @Enumerated(EnumType.STRING)
+    @Column(name = "target_type", nullable = false)
     private TargetType targetType;
 
     @Column(name = "target_id", nullable = false)

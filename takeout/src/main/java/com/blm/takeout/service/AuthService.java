@@ -31,17 +31,17 @@ public class AuthService {
         if (userRepository.existsByUsername(registerDto.getUsername())) {
             throw new BusinessException("用户名已存在");
         }
-        if (userRepository.existsByPhonenumber(registerDto.getPhonenumber())) {
+        if (userRepository.existsByPhone(registerDto.getPhone())) {
             throw new BusinessException("手机号码已注册");
         }
         
         User user = new User();
         user.setUsername(registerDto.getUsername());
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
-        user.setPhonenumber(registerDto.getPhonenumber());
+        user.setPhone(registerDto.getPhone());
         user.setEmail(registerDto.getEmail());
         user.setRole(registerDto.getRole());
-        user.setAvatarurl(registerDto.getAvatarurl());
+        user.setAvatar(registerDto.getAvatar());
         
         return userRepository.save(user);
     }
@@ -59,12 +59,12 @@ public class AuthService {
         String token = jwtUtils.generateToken(user);
         
         return new LoginResponseDto(
-            user.getUserid(), 
+            user.getId(), 
             user.getUsername(), 
-            user.getPhonenumber(), 
+            user.getPhone(), 
             user.getEmail(),
             user.getRole(), 
             token, 
-            user.getAvatarurl());
+            user.getAvatar());
     }
 }

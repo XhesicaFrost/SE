@@ -16,7 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer userid;
+    private Integer id;
 
     @Column(nullable = false, unique = true, length = 20)
     private String username;
@@ -25,20 +25,20 @@ public class User implements UserDetails {
     private String password;
 
     @Column(nullable = false, unique = true, length = 11)
-    private String phonenumber;
+    private String phone;
 
     @Column(length = 100)
     private String email;
 
-    @Column(updatable = false)
-    private LocalDateTime createtime = LocalDateTime.now();
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
 
-    @Column(length = 256)
-    private String avatarurl;
+    @Column(name = "avatar_url", length = 256)
+    private String avatar;
 
     public enum Role {
         USER,       // 顾客用户

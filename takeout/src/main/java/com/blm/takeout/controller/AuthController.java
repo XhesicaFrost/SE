@@ -24,7 +24,7 @@ public class AuthController {
             var user = authService.register(registerDto);
             return ApiResponse.success("注册成功", 
                 Map.of(
-                    "id", user.getUserid(),
+                    "id", user.getId(),
                     "role", user.getRole()
                 ));
         } catch (Exception e) {
@@ -38,11 +38,11 @@ public class AuthController {
             LoginResponseDto response = authService.login(loginDto);
             return ApiResponse.success("登录成功", 
                 Map.of(
-                    "id", response.getUserid(),
+                    "id", response.getId(),
                     "username", response.getUsername(),
                     "role", response.getRole(),
                     "token", response.getToken(),
-                    "avatar", response.getAvatarurl()
+                    "avatar", response.getAvatar()
                 ));
         } catch (Exception e) {
             return ApiResponse.error(HttpStatus.UNAUTHORIZED.value(), "用户名或密码错误");
