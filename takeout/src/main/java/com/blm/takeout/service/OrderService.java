@@ -4,7 +4,6 @@ import com.blm.takeout.dto.OrderDTO;
 import com.blm.takeout.dto.OrderItemDTO;
 import com.blm.takeout.entity.Order;
 import com.blm.takeout.entity.OrderItem;
-import com.blm.takeout.entity.User;
 import com.blm.takeout.repository.OrderRepository;
 import com.blm.takeout.repository.UserRepository;
 import org.springframework.data.domain.Page;
