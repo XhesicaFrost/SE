@@ -51,10 +51,34 @@ export default {
      */
     async handleLogin(userData) {
       console.log('LoginView:Login data:', userData)
+      
+      // 验证数据格式
+      
       const success = await this.loginUser(userData)
+      //success.success=true // 模拟登录成功，实际应用中应根据后端返回结果判断
       if (success.success) {
         console.log('LoginView:Login success:', success)
-        this.$router.push('/login')
+        //this.$router.push('/user') 
+        
+        // 根据用户类型跳转到对应的主页，而不是回到登录页面
+         const userKind = success.data?.userKind || userData.role
+         console.log('LoginView:User kind:', userKind)
+         switch (userKind) {
+          case 'user':
+            this.$router.push('/user')
+            break
+          case 'seller':
+            this.$router.push('/seller')
+            break
+          case 'rider':
+            this.$router.push('/rider')
+            break
+          case 'admin':
+            this.$router.push('/admin')
+            break
+          default:
+            this.$router.push('/error')
+        }
       } else {
         console.log('LoginView:Login failed:', success)
       }
