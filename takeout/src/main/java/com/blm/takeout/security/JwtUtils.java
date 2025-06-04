@@ -33,7 +33,7 @@ public class JwtUtils {
 
     public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("id", user.getId());
+        claims.put("userid", user.getUserid());
         claims.put("username", user.getUsername());
         claims.put("role", user.getRole());
         
@@ -41,7 +41,7 @@ public class JwtUtils {
                 .claims(claims)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
-                .signWith(key, Jwts.SIG.HS512)
+                .signWith(key, Jwts.SIG.HS256)
                 .compact();
     }
 

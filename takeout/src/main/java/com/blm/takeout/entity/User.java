@@ -16,38 +16,39 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
-    @Column(nullable = false, unique = true, length = 20)
-    private String username;
+    private Integer userid;
 
     @Column(nullable = false, length = 20)
+    private String username;
+
+    @Column(nullable = false, length = 100)
     private String password;
 
-    @Column(nullable = false, unique = true, length = 11)
-    private String phone;
+    @Column(nullable = false, length = 11)
+    private String phonenumber;
 
     @Column(length = 100)
     private String email;
 
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(updatable = false)
+    private LocalDateTime createtime = LocalDateTime.now();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
 
-    @Column(name = "avatar_url", length = 256)
-    private String avatar;
+    @Column(length = 256)
+    private String avatarurl;
+
+    @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"phonenumber", "role"}))
 
     public enum Role {
-        USER,       // 顾客用户
-        MERCHANT,   // 商家
-        RIDER,      // 骑手
-        ADMIN       // 管理员
+        user,       // 顾客用户
+        seller,   // 商家
+        rider,      // 骑手
+        admin       // 管理员
     }
 
-    // UserDetails 接口方法实现
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.name()));
