@@ -1,18 +1,15 @@
 <!-- filepath: front_end/src/components/topNav.vue -->
- <!--
-  <TopNav :navInfo="navInfo" />
- -->
 <template>
   <div class="top-bg"></div>
   <div class="top-nav">
-    <div class="nav-return">
+    <div class="nav-return" v-if="!navInfo.noReturn">
       <button
         class="return-bottom"
         @click="onClickReturn(navInfo)">
         ←
       </button>
     </div>
-    <div class="nav-title">
+    <div class="nav-title" :class="{ 'centered-title': navInfo.noReturn }">
       <p>{{ navInfo.title }}</p>
     </div>
   </div>
@@ -23,23 +20,21 @@ export default {
   name: 'TopNav',
   props: {
     navInfo: {
-      type: Element,
-      required: true
-      // 每项格式: { title: '显示内容', pageReturn: returnFunction }
+      type: Object,  // 修正为Object类型
+      required: true,
+      default: () => ({})
     }
   },
   methods: {
     onClickReturn(info) {
       if (typeof info.pageReturn === 'function') {
-       info.pageReturn();
+        info.pageReturn();
       }
     }
   },
-    mounted() {
-        // 这里可以添加一些初始化逻辑
-        console.log('TopNav mounted', this.navItems)
-        
-    }   
+  mounted() {
+    console.log('TopNav mounted', this.navInfo);
+  }   
 }
 </script>
 
@@ -75,7 +70,7 @@ export default {
   width: 48px;
 }
 .nav-return button {
-  background-color: none;
+  background-color: transparent;
   border-radius: 35%;
   height: 100%;
   width: 100%;
@@ -87,8 +82,7 @@ export default {
   color: #3498db;
 }
 .nav-return button:hover {
-  background: #c0c0d0;
-  background-color: rgba(192, 192, 208, 0.5);
+  background: rgba(192, 192, 208, 0.5);
 }
 .nav-title {
   position: absolute;
@@ -96,6 +90,10 @@ export default {
   bottom: 0;
   height: 48px;
   width: 200px;
+}
+.nav-title.centered-title {
+  left: 0;
+  width: 100%;
 }
 .nav-title p {
   position: absolute;
@@ -105,6 +103,12 @@ export default {
   margin: 0 auto;
   padding: 0;
   font-size: 20px;
+  text-align: center;
+}
+.nav-title.centered-title p {
+  width: 100%;
+  left: 0;
+  right: 0;
   text-align: center;
 }
 </style>
