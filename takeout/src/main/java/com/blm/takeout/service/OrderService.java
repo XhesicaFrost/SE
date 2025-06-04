@@ -27,7 +27,7 @@ public class OrderService {
     public Page<OrderDTO> getUserOrders(Integer userId, Pageable pageable) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("用户不存在"));
-        Page<Order> orders = orderRepository.findByUser_IdOrderByCreatedAtDesc(userId, pageable);
+        Page<Order> orders = orderRepository.findByUser_useridOrderByCreatedAtDesc(userId, pageable);
         return orders.map(this::convertToDTO);
     }
 
@@ -56,7 +56,7 @@ public class OrderService {
     private OrderDTO convertToDTO(Order order) {
         OrderDTO dto = new OrderDTO();
         dto.setId(order.getId());
-        dto.setUserId(order.getUser().getId());
+        dto.setUserId(order.getUser().getUserid());
         dto.setShopId(order.getShop().getId());
         dto.setShopName(order.getShop().getName());
         dto.setShopImage(order.getShop().getImage());

@@ -47,7 +47,7 @@ public class BrowseHistoryService {
     }
 
     public Page<BrowseHistoryDTO> getUserBrowseHistory(Integer userId, Pageable pageable) {
-        Page<BrowseHistory> histories = browseHistoryRepository.findByUser_IdOrderByBrowseTimeDesc(userId, pageable);
+        Page<BrowseHistory> histories = browseHistoryRepository.findByUser_useridOrderByBrowseTimeDesc(userId, pageable);
         return histories.map(this::convertToDTO);
     }
 
@@ -60,13 +60,13 @@ public class BrowseHistoryService {
 
     @Transactional
     public void deleteBrowseHistory(Integer userId, BrowseHistory.TargetType targetType, Integer targetId) {
-        browseHistoryRepository.deleteByUser_IdAndTargetTypeAndTargetId(userId, targetType, targetId);
+        browseHistoryRepository.deleteByUser_useridAndTargetTypeAndTargetId(userId, targetType, targetId);
     }
 
     private BrowseHistoryDTO convertToDTO(BrowseHistory history) {
         BrowseHistoryDTO dto = new BrowseHistoryDTO();
         dto.setId(history.getId());
-        dto.setUserId(history.getUser().getId());
+        dto.setUserId(history.getUser().getUserid());
         dto.setTargetType(history.getTargetType());
         dto.setTargetId(history.getTargetId());
         dto.setBrowseTime(history.getBrowseTime());

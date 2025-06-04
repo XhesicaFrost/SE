@@ -36,13 +36,13 @@ public class UserService {
 
         // 更新基本信息
         if (userDTO.getPhone() != null) {
-            user.setPhone(userDTO.getPhone());
+            user.setPhonenumber(userDTO.getPhone());
         }
         if (userDTO.getEmail() != null) {
             user.setEmail(userDTO.getEmail());
         }
         if (userDTO.getAvatar() != null) {
-            user.setAvatar(userDTO.getAvatar());
+            user.setAvatarurl(userDTO.getAvatar());
         }
 
         user = userRepository.save(user);
@@ -66,17 +66,17 @@ public class UserService {
     public void updateAvatar(Integer id, String avatarUrl) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        user.setAvatar(avatarUrl);
+        user.setAvatarurl(avatarUrl);
         userRepository.save(user);
     }
 
     private UserDTO convertToDTO(User user) {
         UserDTO dto = new UserDTO();
-        dto.setId(user.getId());
+        dto.setId(user.getUserid());
         dto.setUsername(user.getUsername());
-        dto.setPhone(user.getPhone());
+        dto.setPhone(user.getPhonenumber());
         dto.setEmail(user.getEmail());
-        dto.setAvatar(user.getAvatar());
+        dto.setAvatar(user.getAvatarurl());
         dto.setRole(user.getRole());
         return dto;
     }
