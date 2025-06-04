@@ -1,10 +1,8 @@
 package com.blm.takeout.service;
 
 import com.blm.takeout.entity.Item;
-import com.blm.takeout.entity.ItemCategory;
 import com.blm.takeout.entity.ItemReview;
 import com.blm.takeout.entity.Shop;
-import com.blm.takeout.repository.ItemCategoryRepository;
 import com.blm.takeout.repository.ItemRepository;
 import com.blm.takeout.repository.ItemReviewRepository;
 import com.blm.takeout.repository.ShopRepository;
@@ -32,9 +30,6 @@ public class ItemDetailService {
     private ShopRepository shopRepository;
 
     @Autowired
-    private ItemCategoryRepository categoryRepository;
-
-    @Autowired
     private ItemReviewRepository reviewRepository;
 
     @Autowired
@@ -47,9 +42,6 @@ public class ItemDetailService {
         Shop shop = shopRepository.findById(item.getShopId())
                 .orElseThrow(() -> new RuntimeException("店铺不存在"));
 
-        ItemCategory category = categoryRepository.findById(item.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("商品分类不存在"));
-
         Map<String, Object> result = new HashMap<>();
         result.put("id", item.getId());
         result.put("name", item.getName());
@@ -59,7 +51,6 @@ public class ItemDetailService {
         result.put("sales", item.getSales());
         result.put("rating", item.getRating());
         result.put("status", item.getStatus());
-        result.put("category", convertCategoryToMap(category));
         result.put("shop", convertShopToMap(shop));
 
         return result;
@@ -80,13 +71,6 @@ public class ItemDetailService {
         result.put("current", page);
 
         return result;
-    }
-
-    private Map<String, Object> convertCategoryToMap(ItemCategory category) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("id", category.getId());
-        map.put("name", category.getName());
-        return map;
     }
 
     private Map<String, Object> convertShopToMap(Shop shop) {
