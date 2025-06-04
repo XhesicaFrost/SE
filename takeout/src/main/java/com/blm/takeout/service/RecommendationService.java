@@ -115,6 +115,7 @@ public class RecommendationService {
                 
                 // 位置筛选（如果提供了位置信息）
                 if (location != null) {
+                    @SuppressWarnings("unchecked")
                     Map<String, Double> shopLocation = (Map<String, Double>) shop.get("location");
                     double distance = calculateDistance(
                         location.get("latitude"),

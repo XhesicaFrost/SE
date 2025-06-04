@@ -157,6 +157,7 @@ public class ShopRecommendationService {
         
         // 距离匹配度
         if (location != null) {
+            @SuppressWarnings("unchecked")
             Map<String, Double> shopLocation = (Map<String, Double>) shop.get("location");
             double distance = calculateDistance(
                 location.get("latitude"),
