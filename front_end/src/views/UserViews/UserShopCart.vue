@@ -1,6 +1,3 @@
-<!--
-self-imformation-apis
--->
 <template>
   <div class="seller-shop">
     <BottomNav :navItems="navItems" />
@@ -17,8 +14,8 @@ export default {
     return {
       navItems: [
       { label: '首页', action: () => { this.$router.push('/user') } },
-      { label: '搜索', action: () => { this.$router.push('/user/search') }, isActive: true },
-      { label: '购物车', action: () => { this.$router.push('/user/shopcart') } },
+      { label: '搜索', action: () => { this.$router.push('/user/search') } },
+      { label: '购物车', action: () => { this.$router.push('/user/shopcart') }, isActive: true },
       { label: '我的', action: () => { this.$router.push('/user/personal') } }
     ]
     }

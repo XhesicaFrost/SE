@@ -25,9 +25,27 @@ const routes = [
     meta: { allow: ['user'] }
   },
   {
+    path: '/user/search',
+    name: 'UserSearch',
+    component: () => import('@/views/UserViews/UserSearch.vue'),
+    meta: { allow: ['user'] }
+  },
+  {
     path: '/user/shopping',
     name: 'UserShopInfo',
     component: () => import('@/views/UserViews/UserShopInfo.vue'),
+    meta: { allow: ['user'] }
+  },
+  {
+    path: '/user/shopcart',
+    name: 'UserShopCart',
+    component: () => import('@/views/UserViews/UserShopCart.vue'),
+    meta: { allow: ['user'] }
+  },
+  {
+    path: '/user/personal',
+    name: 'UserPersonal',
+    component: () => import('@/views/UserViews/UserPersonal.vue'),
     meta: { allow: ['user'] }
   },
   {
