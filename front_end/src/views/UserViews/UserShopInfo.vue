@@ -1,6 +1,6 @@
 <template>
   <TopNav :navInfo="navInfo" />
-  <div class="seller-shop">
+  <div class="user-shopinfo">
     <!-- 店铺信息栏 -->
     <div class="shop-info-bar">
       <img :src="shopInfo.image" class="shop-img" />
@@ -98,7 +98,8 @@ import { BASE_URL, fetchWithTimeout } from '@/config.js'
 import TopNav from '@/components/topNav.vue'
 
 export default {
-  name: 'CustomerShop',
+  props: ['shopId'],
+  name: 'UserShopInfo',
   components: { TopNav },
   data() {
     return {
@@ -113,7 +114,6 @@ export default {
       currentProduct: null,
       cart: {},
       products: [
-        { name : '123', id : 1, image : 'https://www.baidu.com/img/flexible/logo/pc/result.png', description: '123123', price : 12}
       ],
       navInfo: { 
         title: '店铺详情', 
@@ -151,7 +151,7 @@ export default {
     },
     async fetchShopInfo() {
       try {
-        const shopId = this.$route.params.shopId;
+        const shopId = this.shopId;
         const response = await fetchWithTimeout(`${BASE_URL}/shop/${shopId}`)
         const result = await response.json()
         if (result.success && result.code === 200) {
@@ -189,7 +189,7 @@ export default {
 </script>
 
 <style scoped>
-.seller-shop {
+.user-shopinfo {
   max-width: 400px;
   margin: 48px auto 36px auto;
   padding: 1em;

@@ -31,10 +31,11 @@ const routes = [
     meta: { allow: ['user'] }
   },
   {
-    path: '/user/shopping',
+    path: '/user/shopping/:shopId',
     name: 'UserShopInfo',
     component: () => import('@/views/UserViews/UserShopInfo.vue'),
-    meta: { allow: ['user'] }
+    meta: { allow: ['user'] },
+    props: true
   },
   {
     path: '/user/shopcart',

@@ -9,8 +9,17 @@
         ←
       </button>
     </div>
-    <div class="nav-title" :class="{ 'centered-title': navInfo.noReturn }">
+    <div class="nav-title" v-if="!navInfo.search">
       <p>{{ navInfo.title }}</p>
+    </div>
+    <div class="nav-search" v-if="navInfo.search">
+      <input
+        type="search"
+        :value="value" 
+        @input="$emit('input', $event.target.value)"
+        @keyup.enter="handleEnter"
+      />
+      <button @click="handleEnter">🔍</button>
     </div>
   </div>
 </template>
@@ -20,9 +29,13 @@ export default {
   name: 'TopNav',
   props: {
     navInfo: {
-      type: Object,  // 修正为Object类型
+      type: Object,
       required: true,
       default: () => ({})
+    },
+    value: {
+      type: String,
+      default: ''
     }
   },
   methods: {
@@ -30,6 +43,9 @@ export default {
       if (typeof info.pageReturn === 'function') {
         info.pageReturn();
       }
+    },
+    handleEnter() {
+      this.$emit('search',this.value);
     }
   },
   mounted() {
@@ -105,10 +121,30 @@ export default {
   font-size: 20px;
   text-align: center;
 }
-.nav-title.centered-title p {
-  width: 100%;
+.nav-search {
+  position: absolute;
+  left: 70px;
+  bottom: 0;
+  height: 48px;
+  width: 260px;
+  place-items: center;
+}
+.nav-search input {
+  position: absolute;
+  height: 26px;
+  top: 14px;
   left: 0;
+  width: 232px;
+  border: none;
+}
+.nav-search button {
+  background-color: #fff;
+  position: absolute;
+  height: 26px;
+  width: 28px;
+  top: 14px;
   right: 0;
-  text-align: center;
+  padding: 0;
+  border: none;
 }
 </style>
