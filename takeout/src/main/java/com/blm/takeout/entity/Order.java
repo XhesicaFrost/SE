@@ -12,52 +12,49 @@ import java.util.List;
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(nullable = false)
+    private Integer userId;
 
-    @ManyToOne
-    @JoinColumn(name = "shop_id", nullable = false)
-    private Shop shop;
+    @Column(nullable = false)
+    private Integer shopId;
+
+    @Column(nullable = false)
+    private String shopName;
+
+    @Column(nullable = false)
+    private String shopImage;
 
     @Column(nullable = false)
     private BigDecimal totalAmount;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private OrderStatus status;
 
-    @Column(name = "delivery_address", nullable = false)
+    @Column(nullable = false)
     private String deliveryAddress;
 
-    @Column(name = "delivery_phone", nullable = false)
+    @Column(nullable = false)
     private String deliveryPhone;
 
-    @Column(name = "delivery_name", nullable = false)
+    @Column(nullable = false)
     private String deliveryName;
 
-    @Column(name = "rider_id")
     private Integer riderId;
-
-    @Column(name = "rider_name")
     private String riderName;
-
-    @Column(name = "rider_phone")
     private String riderPhone;
-
-    @Column(name = "rider_location")
     private String riderLocation;
 
-    @Column(name = "order_number", nullable = false, unique = true)
-    private String orderNumber;
-
-    @Column(name = "created_at", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    @Column(nullable = false, unique = true)
+    private String orderNumber;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;

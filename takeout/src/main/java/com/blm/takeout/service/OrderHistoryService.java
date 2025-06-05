@@ -1,7 +1,6 @@
 package com.blm.takeout.service;
 
 import com.blm.takeout.entity.Order;
-import com.blm.takeout.entity.OrderItem;
 import com.blm.takeout.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,7 +18,7 @@ public class OrderHistoryService {
     }
 
     public List<Map<String, Object>> getUserOrderHistory(Integer userId, Integer limit) {
-        List<Order> orders = orderRepository.findByUser_useridOrderByCreatedAtDesc(userId);
+        List<Order> orders = orderRepository.findByUserIdOrderByCreatedAtDesc(userId);
         
         if (limit != null && limit > 0) {
             orders = orders.stream()
@@ -31,12 +30,13 @@ public class OrderHistoryService {
             .map(order -> {
                 Map<String, Object> orderData = Map.of(
                     "orderId", order.getId(),
-                    "shopId", order.getShop().getId(),
+                    "shopId", order.getShopId(),
                     "items", order.getOrderItems().stream()
                         .map(item -> Map.of(
                             "itemId", item.getItemId(),
                             "quantity", item.getQuantity(),
-                            "price", item.getPrice()
+                            "unitPrice", item.getUnitPrice(),
+                            "totalPrice", item.getTotalPrice()
                         ))
                         .collect(Collectors.toList()),
                     "totalAmount", order.getTotalAmount(),

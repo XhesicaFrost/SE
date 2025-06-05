@@ -60,6 +60,11 @@ public class UserLocationController {
             response.put("code", 200);
             response.put("success", true);
             response.put("message", "位置更新成功");
+            response.put("data", Map.of(
+                "latitude", location.getLatitude(),
+                "longitude", location.getLongitude(),
+                "address", location.getAddress()
+            ));
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, Object> response = new HashMap<>();

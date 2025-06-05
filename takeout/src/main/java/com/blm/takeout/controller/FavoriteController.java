@@ -3,8 +3,9 @@ package com.blm.takeout.controller;
 import com.blm.takeout.dto.FavoriteDTO;
 import com.blm.takeout.entity.Favorite.TargetType;
 import com.blm.takeout.service.FavoriteService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,83 +15,60 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/favorites")
 public class FavoriteController {
-    private final FavoriteService favoriteService;
 
-    public FavoriteController(FavoriteService favoriteService) {
-        this.favoriteService = favoriteService;
-    }
+    @Autowired
+    private FavoriteService favoriteService;
 
-    @PostMapping("/{targetType}/{targetId}")
+    @PostMapping("/user/{userId}/{targetType}/{targetId}")
     public ResponseEntity<Map<String, Object>> addFavorite(
+            @PathVariable Integer userId,
             @PathVariable TargetType targetType,
             @PathVariable Integer targetId,
-            @RequestParam Integer userId) {
-        try {
-            favoriteService.addFavorite(userId, targetType, targetId);
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 200);
-            response.put("success", true);
-            response.put("message", "收藏成功");
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 500);
-            response.put("success", false);
-            response.put("message", e.getMessage());
-            return ResponseEntity.ok(response);
-        }
+            @RequestBody FavoriteDTO favoriteDTO) {
+        favoriteService.addFavorite(userId, targetType, targetId, favoriteDTO);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("code", 200);
+        response.put("success", true);
+        response.put("message", "收藏成功");
+        
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<Map<String, Object>> getUserFavorites(
             @PathVariable Integer userId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        try {
-            Page<FavoriteDTO> favorites = favoriteService.getUserFavorites(
-                    userId, PageRequest.of(page, size));
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 200);
-            response.put("success", true);
-            response.put("data", favorites);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 500);
-            response.put("success", false);
-            response.put("message", e.getMessage());
-            return ResponseEntity.ok(response);
-        }
+            Pageable pageable) {
+        Page<FavoriteDTO> page = favoriteService.getUserFavorites(userId, pageable);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("code", 200);
+        response.put("success", true);
+        response.put("data", page);
+        
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/user/{userId}/{targetType}")
     public ResponseEntity<Map<String, Object>> getUserFavoritesByType(
             @PathVariable Integer userId,
             @PathVariable TargetType targetType,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        try {
-            Page<FavoriteDTO> favorites = favoriteService.getUserFavoritesByType(
-                    userId, targetType, PageRequest.of(page, size));
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 200);
-            response.put("success", true);
-            response.put("data", favorites);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 500);
-            response.put("success", false);
-            response.put("message", e.getMessage());
-            return ResponseEntity.ok(response);
-        }
+            Pageable pageable) {
+        Page<FavoriteDTO> page = favoriteService.getUserFavoritesByType(userId, targetType, pageable);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("code", 200);
+        response.put("success", true);
+        response.put("data", page);
+        
+        return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{targetType}/{targetId}")
+    @DeleteMapping("/user/{userId}/{targetType}/{targetId}")
     public ResponseEntity<Map<String, Object>> removeFavorite(
+            @PathVariable Integer userId,
             @PathVariable TargetType targetType,
-            @PathVariable Integer targetId,
-            @RequestParam Integer userId) {
+            @PathVariable Integer targetId) {
         try {
             favoriteService.removeFavorite(userId, targetType, targetId);
             Map<String, Object> response = new HashMap<>();

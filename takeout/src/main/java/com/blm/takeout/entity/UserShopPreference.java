@@ -2,7 +2,6 @@ package com.blm.takeout.entity;
 
 import lombok.Data;
 import jakarta.persistence.*;
-import org.hibernate.annotations.Type;
 import java.time.LocalDateTime;
 import java.util.List;
 
