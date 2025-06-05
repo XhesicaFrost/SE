@@ -106,6 +106,7 @@
 </template>
 
 <script>
+import { BASE_URL, fetchWithTimeout } from '@/config.js'
 import BottomNav from '@/components/bottomNav.vue'
 import TopNav from '@/components/topNav.vue'
 
@@ -119,60 +120,14 @@ export default {
       activeFilter: 'rating',
       isLoading: false,
       searchResults: [],
-      navInfo: { search: true, noReturn: true },
+      navInfo: { search: true, noReturn: true, function: true, functionText: '切换地址', functionButton: () => this.$router.push('/user/address') },
       navItems: [
         { label: '首页', action: () => this.$router.push('/user') },
         { label: '搜索', action: () => this.$router.push('/user/search'), isActive: true },
         { label: '购物车', action: () => this.$router.push('/user/shopcart') },
         { label: '我的', action: () => this.$router.push('/user/personal') }
       ],
-      // 模拟店铺数据
       allShops: [
-        {
-          id: 1,
-          name: '1',
-          image: '',
-          rating: 4.8,
-          avgPrice: 25,
-          distance: 1.2,
-          deliveryTime: 25,
-          tags: ['网红奶茶', '新品上市', '满30减5'],
-          products: [
-            { image: '' },
-            { image: '' },
-            { image: '' }
-          ]
-        },
-        {
-          id: 2,
-          name: '2',
-          image: '',
-          rating: 4.6,
-          avgPrice: 18,
-          distance: 0.8,
-          deliveryTime: 20,
-          tags: ['经典奶茶', '买一送一'],
-          products: [
-            { image: '' },
-            { image: '' },
-            { image: '' }
-          ]
-        },
-        {
-          id: 3,
-          name: '3',
-          image: '',
-          rating: 4.9,
-          avgPrice: 35,
-          distance: 2.1,
-          deliveryTime: 35,
-          tags: ['欧包奶茶', '高端品质', '新店开业'],
-          products: [
-            { image: '' },
-            { image: '' },
-            { image: '' }
-          ]
-        }
       ]
     }
   },
@@ -199,11 +154,21 @@ export default {
     setFilter(filterType) {
       this.activeFilter = filterType;
     },
-    selectAddress() {
-      // 这里可以添加地址选择逻辑
-      alert('地址选择功能待实现');
+    async fetchShops() {
+      try {
+        const response = await fetchWithTimeout(`${BASE_URL}/shops`)
+        const result = await response.json()
+        if (result.code === 200 && Array.isArray(result.data)) {
+          this.allShops = result.data
+        } else {
+          this.allShops = []
+        }
+      } catch (e) {
+        this.allShops = []
+      }
     },
-    performSearch() {
+    performSearch(value) {
+      this.searchKeyword = value;
       if (!this.searchKeyword.trim()) return;
       
       this.isLoading = true;
@@ -226,9 +191,7 @@ export default {
     }
   },
   mounted() {
-    // 页面加载时执行一次搜索
-    // this.searchKeyword = '奶茶';
-    // this.performSearch();
+    this.fetchShops()
   }
 }
 </script>
@@ -251,30 +214,6 @@ export default {
   color: #333;
   font-size: 18px;
   cursor: pointer;
-}
-
-.address-selector {
-  flex: 1;
-  margin: 0 10px;
-  background: white;
-  border-radius: 15px;
-  padding: 5px 12px;
-  display: flex;
-  align-items: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  cursor: pointer;
-}
-
-.address-selector i {
-  margin-right: 5px;
-  color: #666;
-}
-
-.address-text {
-  font-size: 14px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .search-container {

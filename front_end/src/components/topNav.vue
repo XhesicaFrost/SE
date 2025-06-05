@@ -4,8 +4,8 @@
   <div class="top-nav">
     <div class="nav-return" v-if="!navInfo.noReturn">
       <button
-        class="return-bottom"
-        @click="onClickReturn(navInfo)">
+        @click="runFunction(navInfo.pageReturn)"
+      >
         ←
       </button>
     </div>
@@ -16,10 +16,19 @@
       <input
         type="search"
         :value="value" 
-        @input="$emit('input', $event.target.value)"
+        @input="handleInput($event)"
         @keyup.enter="handleEnter"
+        ref="searchInput"
       />
       <button @click="handleEnter">🔍</button>
+    </div>
+    <div class="nav-function" v-if="navInfo.function">
+      <button
+        @click="runFunction(navInfo.functionButton)"
+      >
+        <img :src="navInfo.functionImage" v-if="navInfo.functionImage != NULL"/>
+        <p v-if="navInfo.functionText != NULL">{{ navInfo.functionText }}</p>
+      </button>
     </div>
   </div>
 </template>
@@ -39,13 +48,16 @@ export default {
     }
   },
   methods: {
-    onClickReturn(info) {
-      if (typeof info.pageReturn === 'function') {
-        info.pageReturn();
+    runFunction(func) {
+      if (typeof func === 'function') {
+        func();
       }
     },
+    handleInput(event) {
+      this.$emit('input', event.target.value);
+    },
     handleEnter() {
-      this.$emit('search',this.value);
+      this.$emit('search', this.$refs.searchInput.value);
     }
   },
   mounted() {
@@ -136,6 +148,8 @@ export default {
   left: 0;
   width: 232px;
   border: none;
+  outline: none;
+  padding: 7px;
 }
 .nav-search button {
   background-color: #fff;
@@ -146,5 +160,43 @@ export default {
   right: 0;
   padding: 0;
   border: none;
+}
+.nav-function {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 48px;
+  height: 48px;
+}
+.nav-function button {
+  background-color: transparent;
+  border-radius: 35%;
+  height: 100%;
+  width: 100%;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+  overflow: hidden;
+}
+.nav-function button:hover {
+  background: rgba(192, 192, 208, 0.5);
+}
+.nav-function button img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.nav-function button p {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  top: 10%;
+  left: 15%;
+  width: 70%;
+  height: 80%;
+  font-size: 13px;
+  font-weight: bold;
 }
 </style>
