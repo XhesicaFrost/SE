@@ -164,7 +164,7 @@ export default {
 .nav-function {
   position: absolute;
   bottom: 0;
-  right: 0;
+  right: 0px;
   width: 48px;
   height: 48px;
 }
@@ -183,20 +183,23 @@ export default {
 }
 .nav-function button img {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  margin: 0;
+  padding: 0;
+  top: 13%;
+  left: 13%;
+  width: 74%;
+  height: 74%;
 }
 .nav-function button p {
   position: absolute;
   margin: 0;
   padding: 0;
-  top: 10%;
-  left: 15%;
-  width: 70%;
-  height: 80%;
-  font-size: 13px;
+  top: 10px;
+  left: 10px;
+  width: 28px;
+  height: 28px;
+  font-size: 14px;
+  line-height: 14px;
   font-weight: bold;
 }
 </style>

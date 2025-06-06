@@ -120,7 +120,13 @@ export default {
       activeFilter: 'rating',
       isLoading: false,
       searchResults: [],
-      navInfo: { search: true, noReturn: true, function: true, functionText: '切换地址', functionButton: () => this.$router.push('/user/address') },
+      navInfo: {
+        search: true,
+        noReturn: true,
+        function: true,
+        functionText: '切换地址',
+        functionButton: () => this.$router.push('/user/address')
+      },
       navItems: [
         { label: '首页', action: () => this.$router.push('/user') },
         { label: '搜索', action: () => this.$router.push('/user/search'), isActive: true },
