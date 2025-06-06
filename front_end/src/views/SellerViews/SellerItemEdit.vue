@@ -17,6 +17,10 @@
         </div>
       </div>
       <div class="form-group">
+        <label>商品描述：</label>
+        <input v-model="itemDescription" type="text" required placeholder="请输入商品描述" :disabled="submitStatus==='success'" />
+      </div>
+      <div class="form-group">
         <label>单价：</label>
         <input v-model.number="itemPrice" type="number" min="0" step="0.01" required placeholder="请输入单价" :disabled="submitStatus==='success'" />
       </div>
@@ -51,6 +55,7 @@ export default {
       itemImage: null,
       itemImageUrl: '',
       itemPrice: '',
+      itemDescription: '',
       errorMessage: '',
       submitStatus: 'normal' // normal | success
     }
@@ -76,6 +81,7 @@ export default {
           this.itemImageUrl = result.data.itemImage
             ? `data:image/png;base64,${result.data.itemImage}`
             : ''
+          this.itemDescription = result.data.itemDescription || ''
         } else {
           this.errorMessage = '商品信息获取失败'
         }
@@ -94,10 +100,10 @@ export default {
       formData.append('itemId', this.itemId)
       formData.append('itemName', this.itemName)
       formData.append('itemPrice', this.itemPrice)
+      formData.append('itemDescription', this.itemDescription)
       if (this.itemImage) {
         formData.append('itemImage', this.itemImage)
       }
-
       try {
         const response = await fetch(`${BASE_URL}/seller/item/register`, {
           method: 'POST',

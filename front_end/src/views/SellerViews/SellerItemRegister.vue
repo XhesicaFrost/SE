@@ -10,6 +10,10 @@
         <input v-model="itemName" type="text" required placeholder="请输入商品名称" :disabled="submitStatus==='success'" />
       </div>
       <div class="form-group">
+        <label>商品描述：</label>
+        <input v-model="itemDescription" type="text" required placeholder="请输入商品描述" :disabled="submitStatus==='success'" />
+      </div>
+      <div class="form-group">
         <label>商品图片：</label>
         <input type="file" accept="image/*" @change="onImageChange" :disabled="submitStatus==='success'" />
         <div v-if="itemImageUrl" class="preview-img">
@@ -56,6 +60,7 @@ export default {
       itemImage: null,
       itemImageUrl: '',
       itemPrice: '',
+      SellerItemEdit:'',
       errorMessage: '',
       submitStatus: 'normal' // normal | success
     }
@@ -80,7 +85,7 @@ export default {
       formData.append('itemImage', this.itemImage)
       formData.append('itemPrice', this.itemPrice)
       formData.append('sellerId', this.sellerId)
-
+      formData.append('itemDescription', this.itemDescription || '')
       try {
         const response = await fetchWithTimeout(`${BASE_URL}/seller/item/register`, {
           method: 'POST',
