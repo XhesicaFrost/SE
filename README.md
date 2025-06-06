@@ -354,6 +354,7 @@ GET /seller/item?id=123
 | itemName  | string | 商品名称     | 是       |
 | itemPrice | number | 商品单价     | 是       |
 | itemImage | file   | 商品图片     | 否（如未更改可不传） |
+| itemDescription | string | 商品描述 | 是（不填为空） |
 
 - **请求示例**：
 ```
@@ -364,6 +365,7 @@ itemId=123
 itemName=商品A
 itemPrice=10.5
 itemImage=文件（可选）
+itemDescription=奶龙喜欢吃
 ```
 
 - **返回数据格式**（JSON）：
@@ -393,7 +395,7 @@ itemImage=文件（可选）
 | itemImage   | file   | 商品图片     | 是       |
 | itemPrice   | number | 商品单价     | 是       |
 | sellerId  | string | 商家ID       | 是       |
-
+| itemDescription | string | 商品描述 | 是（不填为空） |
 - **请求示例**：
 ```
 POST /seller/item/register
@@ -403,6 +405,7 @@ itemName=商品A
 itemImage=文件
 itemPrice=10.5
 sellerId=xxx
+itemDescription=奶龙喜欢吃
 ```
 
 - **返回数据格式**（JSON）：

@@ -1,76 +1,123 @@
 <template>
   <div class="rider-order-detail">
-    <!-- 订单详情 -->
-    <div class="order-detail-section">
-      <h3 class="section-title">订单详情</h3>
-      <div class="detail-card">
-        <div class="detail-item">
-          <label>商家名称：</label>
-          <span>{{ orderDetail.sellerName }}</span>
-        </div>
-        <div class="detail-item">
-          <label>商家地址：</label>
-          <span>{{ orderDetail.sellerAddress }}</span>
-        </div>
-        <div class="detail-item">
-          <label>用户地址：</label>
-          <span>{{ orderDetail.userAddress }}</span>
-        </div>
-        <div class="detail-item">
-          <label>用户手机：</label>
-          <span>{{ orderDetail.userPhone }}</span>
-        </div>
-        <div class="detail-item">
-          <label>订单时间：</label>
-          <span>{{ orderDetail.createTime }}</span>
-        </div>
-        <div class="detail-item">
-          <label>订单状态：</label>
-          <span class="status-badge" :class="getStatusClass(orderDetail.status)">
-            {{ getStatusText(orderDetail.status) }}
-          </span>
+    <!-- 错误状态显示 -->
+    <div v-if="hasError" class="error-section">
+      <div class="error-card">
+        <div class="error-icon">⚠️</div>
+        <h3 class="error-title">订单信息加载失败</h3>
+        <p class="error-message">{{ errorMessage }}</p>
+        <div class="error-actions">
+          <button @click="retryFetchOrder" class="retry-btn">重新加载</button>
+          <button @click="goBack" class="back-btn">返回主页</button>
         </div>
       </div>
     </div>
 
-    <!-- 导航地图 -->
-    <div class="navigation-section">
-      <h3 class="section-title">配送导航</h3>
-      <div class="nav-controls">
-        <button @click="startNavigation" class="nav-btn" :disabled="!orderDetail.id">
-          {{ isNavigating ? '导航中' : '开始导航' }}
-        </button>
-        <button @click="refreshRoute" class="refresh-btn" :disabled="!isNavigating">
-          刷新路线
-        </button>
-      </div>
-      <div id="nav-map" class="nav-map"></div>
-      <div class="route-info" v-if="routeInfo.distance">
-        <div class="info-item">
-          <span class="label">预计时间：</span>
-          <span class="value">{{ routeInfo.time }}</span>
-        </div>
-        <div class="info-item">
-          <span class="label">距离：</span>
-          <span class="value">{{ routeInfo.distance }}</span>
-        </div>
-        <div class="info-item">
-          <span class="label">当前目标：</span>
-          <span class="value">{{ getCurrentTarget() }}</span>
-        </div>
+    <!-- 加载状态 -->
+    <div v-else-if="isLoading" class="loading-section">
+      <div class="loading-card">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">正在加载订单信息...</p>
       </div>
     </div>
 
-    <!-- 状态更新按钮 -->
-    <div class="action-section">
-      <button 
-        class="status-update-btn"
-        :class="{ 'pickup-btn': orderDetail.status === 'accepted', 'complete-btn': orderDetail.status === 'picked' }"
-        @click="updateOrderStatus"
-        :disabled="!orderDetail.id"
-      >
-        {{ orderDetail.status === 'accepted' ? '确认接餐' : '确认送达' }}
-      </button>
+    <!-- 正常订单内容 -->
+    <div v-else>
+      <!-- 订单详情 -->
+      <div class="order-detail-section">
+        <h3 class="section-title">订单详情</h3>
+        <div class="detail-card">
+          <div class="detail-item">
+            <label>订单号：</label>
+            <span>{{ orderDetail.id || '未知' }}</span>
+          </div>
+          <div class="detail-item">
+            <label>商家名称：</label>
+            <span>{{ orderDetail.sellerName || '信息缺失' }}</span>
+          </div>
+          <div class="detail-item">
+            <label>商家地址：</label>
+            <span>{{ orderDetail.sellerAddress || '地址信息缺失' }}</span>
+          </div>
+          <div class="detail-item">
+            <label>用户地址：</label>
+            <span>{{ orderDetail.userAddress || '地址信息缺失' }}</span>
+          </div>
+          <div class="detail-item">
+            <label>用户手机：</label>
+            <span>{{ orderDetail.userPhone || '联系方式缺失' }}</span>
+          </div>
+          <div class="detail-item">
+            <label>订单时间：</label>
+            <span>{{ orderDetail.createTime || '时间信息缺失' }}</span>
+          </div>
+          <div class="detail-item">
+            <label>订单状态：</label>
+            <span class="status-badge" :class="getStatusClass(orderDetail.status)">
+              {{ getStatusText(orderDetail.status) }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 导航地图 -->
+      <div class="navigation-section">
+        <h3 class="section-title">配送导航</h3>
+        
+        <!-- 地址信息不完整提示 -->
+        <div v-if="!canNavigate" class="nav-error">
+          <div class="nav-error-icon">📍</div>
+          <p class="nav-error-text">地址信息不完整，无法进行导航</p>
+          <small class="nav-error-detail">
+            缺失信息：{{ getMissingAddressInfo() }}
+          </small>
+        </div>
+        
+        <!-- 正常导航控件 -->
+        <div v-else>
+          <div class="nav-controls">
+            <button @click="startNavigation" class="nav-btn" :disabled="!orderDetail.id || !mapInitialized">
+              {{ isNavigating ? '导航中' : '开始导航' }}
+            </button>
+            <button @click="refreshRoute" class="refresh-btn" :disabled="!isNavigating">
+              刷新路线
+            </button>
+          </div>
+          
+          <div id="nav-map" class="nav-map"></div>
+          
+          <div class="route-info" v-if="routeInfo.distance">
+            <div class="info-item">
+              <span class="label">预计时间：</span>
+              <span class="value">{{ routeInfo.time }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">距离：</span>
+              <span class="value">{{ routeInfo.distance }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">当前目标：</span>
+              <span class="value">{{ getCurrentTarget() }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 状态更新按钮 -->
+      <div class="action-section">
+        <button 
+          class="status-update-btn"
+          :class="{ 
+            'pickup-btn': orderDetail.status === 'accepted', 
+            'complete-btn': orderDetail.status === 'picked',
+            'disabled': !orderDetail.id
+          }"
+          @click="updateOrderStatus"
+          :disabled="!orderDetail.id || isUpdatingStatus"
+        >
+          {{ getUpdateButtonText() }}
+        </button>
+      </div>
     </div>
 
     <!-- 底部导航栏 -->
@@ -90,6 +137,14 @@ export default {
   components: { BottomNav },
   data() {
     return {
+      // 状态管理
+      isLoading: true,
+      hasError: false,
+      errorMessage: '',
+      isUpdatingStatus: false,
+      mapInitialized: false,
+      
+      // 订单数据
       orderDetail: {
         id: null,
         sellerName: '',
@@ -103,6 +158,8 @@ export default {
         createTime: '',
         status: 'accepted'
       },
+      
+      // 地图相关
       navMap: null,
       AMap: null,
       driving: null,
@@ -113,63 +170,126 @@ export default {
         distance: '',
         currentPosition: null
       },
+      locationUpdateTimer: null,
+      
+      // 导航
       navItems: [
         { label: '返回主页', action: () => { this.$router.push('/rider') } }
-      ],
-      locationUpdateTimer: null,
+      ]
     }
   },
+  
   computed: {
     ...mapState('userStore', ['userId']),
+    
     orderId() {
       return this.$route.params.id
+    },
+    
+    // 是否可以导航（地址信息是否完整）
+    canNavigate() {
+      return this.orderDetail.sellerAddress && 
+             this.orderDetail.userAddress && 
+             this.orderDetail.sellerAddress.trim() !== '' &&
+             this.orderDetail.userAddress.trim() !== ''
     }
   },
+  
   methods: {
     ...mapActions('locationStore', ['startLocationTracking', 'stopLocationTracking']),
 
-    // 获取订单详情 - 添加测试数据
+    // 获取订单详情 - 移除测试数据
     async fetchOrderDetail() {
+      if (!this.orderId) {
+        this.hasError = true
+        this.errorMessage = '订单ID缺失，无法加载订单信息'
+        this.isLoading = false
+        return
+      }
+
       try {
+        this.isLoading = true
+        this.hasError = false
+        
         const params = new URLSearchParams({ 
           riderId: this.userId, 
           orderId: this.orderId 
         }).toString()
+        
         const response = await fetchWithTimeout(`${BASE_URL}/rider/orderdetail?${params}`)
         const result = await response.json()
-        if (result.success && result.data) {
-          this.orderDetail = result.data
-        } else {
-          // 如果获取失败，使用测试数据
-          console.warn('使用测试数据进行地图功能检测')
+        
+        if (result.code === 200 && result.data) {
           this.orderDetail = {
-            id: this.orderId || 'test-001',
-            sellerName: '清华大学食堂',
-            sellerAddress: '清华大学',
-            userAddress: '北京大学',
-            userPhone: '138-0000-0000',
-            createTime: new Date().toLocaleString(),
-            status: 'accepted'
+            ...this.orderDetail,
+            ...result.data
           }
+          console.log('订单详情加载成功:', this.orderDetail)
+        } else {
+          this.hasError = true
+          this.errorMessage = result.message || '服务器返回错误信息，请稍后重试'
         }
-      } catch (e) {
-        console.error('获取订单详情失败，使用测试数据', e)
-        // 网络错误时也使用测试数据
-        this.orderDetail = {
-          id: this.orderId || 'test-001',
-          sellerName: '清华大学食堂',
-          sellerAddress: '清华大学',
-          userAddress: '北京大学',
-          userPhone: '138-0000-0000',
-          createTime: new Date().toLocaleString(),
-          status: 'accepted'
+      } catch (error) {
+        console.error('获取订单详情失败:', error)
+        this.hasError = true
+        
+        if (error.name === 'AbortError') {
+          this.errorMessage = '请求超时，请检查网络连接后重试'
+        } else if (error.message.includes('请求被阻止')) {
+          this.errorMessage = '请求参数错误，请返回重新进入'
+        } else {
+          this.errorMessage = '网络连接失败，请检查网络状态后重试'
         }
-        alert('网络错误，已加载测试数据进行地图功能检测')
+      } finally {
+        this.isLoading = false
       }
+    },
+
+    // 重新获取订单信息
+    async retryFetchOrder() {
+      await this.fetchOrderDetail()
+      
+      // 如果成功加载且可以导航，初始化地图
+      if (!this.hasError && this.canNavigate && !this.mapInitialized) {
+        await this.initAMap()
+      }
+    },
+
+    // 返回主页
+    goBack() {
+      this.$router.push('/rider')
+    },
+
+    // 获取缺失的地址信息
+    getMissingAddressInfo() {
+      const missing = []
+      if (!this.orderDetail.sellerAddress || this.orderDetail.sellerAddress.trim() === '') {
+        missing.push('商家地址')
+      }
+      if (!this.orderDetail.userAddress || this.orderDetail.userAddress.trim() === '') {
+        missing.push('用户地址')
+      }
+      return missing.join('、')
+    },
+
+    // 获取更新按钮文本
+    getUpdateButtonText() {
+      if (this.isUpdatingStatus) {
+        return '更新中...'
+      }
+      if (!this.orderDetail.id) {
+        return '订单信息缺失'
+      }
+      return this.orderDetail.status === 'accepted' ? '确认接餐' : '确认送达'
     },
 
     // 初始化高德地图
     async initAMap() {
+      if (!this.canNavigate) {
+        console.warn('地址信息不完整，跳过地图初始化')
+        return
+      }
+
       try {
         console.log('开始初始化高德地图...')
         
@@ -185,20 +305,16 @@ export default {
             'AMap.Driving',
             'AMap.Marker',
             'AMap.InfoWindow',
-            'AMap.Geocoder'  // 地理编码插件
+            'AMap.Geocoder'
           ]
         })
 
-        console.log('高德地图SDK加载成功')
-
-        // 创建地图实例 - 设置北京中心点
+        // 创建地图实例
         this.navMap = new this.AMap.Map('nav-map', {
           zoom: 11,
           center: [116.3974, 39.9093], // 北京市中心
           mapStyle: 'amap://styles/normal'
         })
-
-        console.log('地图实例创建成功')
 
         // 初始化驾车路径规划
         this.driving = new this.AMap.Driving({
@@ -208,107 +324,130 @@ export default {
           autoFitView: true
         })
 
-        console.log('路径规划初始化成功')
-
         // 初始化定位
         this.AMap.plugin('AMap.Geolocation', () => {
           this.geolocation = new this.AMap.Geolocation({
             enableHighAccuracy: true,
-            timeout: 10000, // 增加超时时间
+            timeout: 10000,
             convert: true,
             showButton: false,
             showMarker: true,
             showCircle: true,
             panToLocation: true
           })
-          console.log('定位服务初始化成功')
         })
 
-      } catch (e) {
-        console.error('高德地图加载失败', e)
-        alert('地图加载失败: ' + e.message + '\n请检查网络连接和API Key配置')
+        this.mapInitialized = true
+        console.log('地图初始化成功')
+
+      } catch (error) {
+        console.error('地图初始化失败:', error)
+        // 地图加载失败不设置为整体错误，仅禁用导航功能
+        this.mapInitialized = false
+      }
+    },
+
+    // 更新订单状态
+    async updateOrderStatus() {
+      if (!this.orderDetail.id || this.isUpdatingStatus) return
+
+      const nextStatus = this.orderDetail.status === 'accepted' ? 'picked' : 'completed'
+      
+      try {
+        this.isUpdatingStatus = true
+        
+        const response = await fetchWithTimeout(`${BASE_URL}/rider/updateorder`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            riderId: this.userId,
+            orderId: this.orderDetail.id,
+            status: nextStatus
+          })
+        })
+        
+        const result = await response.json()
+        
+        if (result.code === 200) {
+          this.orderDetail.status = nextStatus
+          
+          if (nextStatus === 'completed') {
+            this.isNavigating = false
+            alert('订单完成！3秒后返回主页')
+            setTimeout(() => {
+              this.$router.push('/rider')
+            }, 3000)
+          } else {
+            alert('状态更新成功！')
+            if (this.isNavigating && this.routeInfo.currentPosition) {
+              this.planRoute(this.routeInfo.currentPosition)
+            }
+          }
+        } else {
+          alert('状态更新失败：' + (result.message || '未知错误'))
+        }
+      } catch (error) {
+        console.error('状态更新失败:', error)
+        if (error.name === 'AbortError') {
+          alert('请求超时，请重试')
+        } else {
+          alert('网络错误，状态更新失败')
+        }
+      } finally {
+        this.isUpdatingStatus = false
       }
     },
 
     // 开始导航
     async startNavigation() {
-      if (!this.AMap || !this.orderDetail.id) {
-        console.warn('地图未初始化或订单ID为空')
+      if (!this.AMap || !this.orderDetail.id || !this.canNavigate) {
         return
       }
 
-      console.log('开始导航...')
       this.isNavigating = true
       
       try {
-        // 获取当前位置
         this.geolocation.getCurrentPosition((status, result) => {
-          console.log('定位结果:', status, result)
-          
           if (status === 'complete') {
             this.routeInfo.currentPosition = result.position
-            console.log('当前位置获取成功:', result.position)
             this.planRoute(result.position)
-            
-            // 修复后的实时追踪
             this.startRealTimeTracking()
           } else {
-            console.error('定位失败', result)
-            alert('无法获取当前位置: ' + (result.message || '请检查定位权限'))
+            alert('无法获取当前位置，请检查定位权限')
             this.isNavigating = false
           }
         })
-      } catch (e) {
-        console.error('导航启动失败', e)
-        alert('导航启动失败: ' + e.message)
+      } catch (error) {
+        alert('导航启动失败')
         this.isNavigating = false
       }
     },
 
-    // 规划路线 - 使用文字地址
+    // 规划路线
     planRoute(currentPosition) {
-      // 根据订单状态决定目标地点
-      let targetAddress, targetName
+      const targetAddress = this.orderDetail.status === 'accepted' 
+        ? this.orderDetail.sellerAddress 
+        : this.orderDetail.userAddress
       
-      if (this.orderDetail.status === 'accepted') {
-        // 去商家取餐 - 清华大学
-        targetAddress = this.orderDetail.sellerAddress  // "清华大学"
-        targetName = this.orderDetail.sellerName
-      } else {
-        // 送到用户 - 北京大学
-        targetAddress = this.orderDetail.userAddress      // "北京大学"
-        targetName = '用户地址'
-      }
+      const targetName = this.orderDetail.status === 'accepted' 
+        ? this.orderDetail.sellerName 
+        : '用户地址'
 
-      console.log('开始路线规划:')
-      console.log('当前位置:', currentPosition)
-      console.log('目标地址:', targetAddress)
-      console.log('目标名称:', targetName)
-
-      // 使用高德地图地理编码将地址转换为坐标
       this.AMap.plugin('AMap.Geocoder', () => {
         const geocoder = new this.AMap.Geocoder({
-          city: '北京', // 设置为北京市，提高地址解析准确度
-          radius: 1000 // 搜索半径
+          city: '北京',
+          radius: 1000
         })
         
         geocoder.getLocation(targetAddress, (status, result) => {
-          console.log('地址解析结果:', status, result)
-          
           if (status === 'complete' && result.geocodes.length > 0) {
             const targetCoords = result.geocodes[0].location
-            console.log('目标坐标:', targetCoords)
-            
-            // 清除之前的标记
             this.navMap.clearMap()
             
-            // 使用转换后的坐标进行路径规划
             this.driving.search(
-              [currentPosition.lng, currentPosition.lat], // 起点坐标
-              [targetCoords.lng, targetCoords.lat],       // 终点坐标
+              [currentPosition.lng, currentPosition.lat],
+              [targetCoords.lng, targetCoords.lat],
               (status, result) => {
-                console.log('路径规划结果:', status, result)
-                
                 if (status === 'complete') {
                   const route = result.routes[0]
                   this.routeInfo = {
@@ -316,20 +455,14 @@ export default {
                     distance: (route.distance / 1000).toFixed(1) + ' 公里',
                     currentPosition: currentPosition
                   }
-
-                  console.log('路线信息:', this.routeInfo)
-
-                  // 添加自定义标记
                   this.addCustomMarkers(currentPosition, targetCoords.lng, targetCoords.lat, targetName)
                 } else {
-                  console.error('路线规划失败', result)
-                  alert('路线规划失败: ' + (result.info || '未知错误'))
+                  alert('路线规划失败')
                 }
               }
             )
           } else {
-            console.error('地址解析失败', targetAddress, result)
-            alert(`无法解析地址：${targetAddress}，解析结果：${result.info || '未知错误'}`)
+            alert(`无法解析地址：${targetAddress}`)
           }
         })
       })
@@ -337,7 +470,6 @@ export default {
 
     // 添加自定义标记
     addCustomMarkers(currentPosition, targetLng, targetLat, targetName) {
-      // 当前位置标记
       new this.AMap.Marker({
         position: [currentPosition.lng, currentPosition.lat],
         title: '我的位置',
@@ -347,7 +479,6 @@ export default {
         })
       }).setMap(this.navMap)
 
-      // 目标位置标记
       new this.AMap.Marker({
         position: [targetLng, targetLat],
         title: targetName,
@@ -360,35 +491,26 @@ export default {
 
     // 实时位置追踪
     startRealTimeTracking() {
-      console.log('开始实时位置追踪')
-      
       try {
-        // 启用连续定位
         this.geolocation.watchPosition()
         
-        // 使用正确的事件监听方式
         this.geolocation.on('complete', (data) => {
-          console.log('位置更新:', data.position)
           this.routeInfo.currentPosition = data.position
         })
         
         this.geolocation.on('error', (error) => {
           console.error('定位错误:', error)
         })
-      } catch (e) {
-        console.error('实时追踪启动失败:', e)
-        
-        // 备选方案：定时获取位置
+      } catch (error) {
         this.locationUpdateTimer = setInterval(() => {
           if (this.isNavigating && this.geolocation) {
             this.geolocation.getCurrentPosition((status, result) => {
               if (status === 'complete') {
-                console.log('定时位置更新:', result.position)
                 this.routeInfo.currentPosition = result.position
               }
             })
           }
-        }, 30000) // 每30秒更新一次
+        }, 30000)
       }
     },
 
@@ -402,7 +524,7 @@ export default {
     // 获取当前目标
     getCurrentTarget() {
       if (this.orderDetail.status === 'accepted') {
-        return `前往 ${this.orderDetail.sellerName} 取餐`
+        return `前往 ${this.orderDetail.sellerName || '商家'} 取餐`
       } else if (this.orderDetail.status === 'picked') {
         return '前往用户地址送餐'
       }
@@ -416,7 +538,7 @@ export default {
         picked: '已取餐',
         completed: '已完成'
       }
-      return statusMap[status] || status
+      return statusMap[status] || '状态未知'
     },
 
     // 获取状态样式类
@@ -426,73 +548,23 @@ export default {
         'status-picked': status === 'picked',
         'status-completed': status === 'completed'
       }
-    },
-
-    // 更新订单状态
-    async updateOrderStatus() {
-      if (!this.orderDetail.id) return
-
-      const nextStatus = this.orderDetail.status === 'accepted' ? 'picked' : 'completed'
-      console.log('更新订单状态:', this.orderDetail.status, '->', nextStatus)
-      
-      try {
-        const response = await fetchWithTimeout(`${BASE_URL}/rider/updateorder`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            riderId: this.userId,
-            orderId: this.orderDetail.id,
-            status: nextStatus
-          })
-        })
-        const result = await response.json()
-        if (result.success) {
-          this.orderDetail.status = nextStatus
-          console.log('状态更新成功:', nextStatus)
-          
-          if (nextStatus === 'completed') {
-            // 订单完成，停止导航
-            this.isNavigating = false
-            alert('订单完成！3秒后返回主页')
-            setTimeout(() => {
-              this.$router.push('/rider')
-            }, 3000)
-          } else {
-            alert('状态更新成功！现在请送餐到北京大学')
-            // 重新规划路线到用户地址（北京大学）
-            if (this.isNavigating && this.routeInfo.currentPosition) {
-              console.log('重新规划路线到用户地址')
-              this.planRoute(this.routeInfo.currentPosition)
-            }
-          }
-        } else {
-          console.error('状态更新失败:', result)
-          alert('状态更新失败：' + (result.message || '未知错误'))
-        }
-      } catch (e) {
-        console.error('网络错误:', e)
-        alert('网络错误，状态更新失败')
-      }
     }
-
-    // ...其他方法保持不变
   },
 
   async mounted() {
     console.log('组件挂载，订单ID:', this.orderId)
-    if (this.orderId) {
-      await this.fetchOrderDetail()
+    await this.fetchOrderDetail()
+    
+    // 只有在订单加载成功且地址信息完整时才初始化地图
+    if (!this.hasError && this.canNavigate) {
       await this.initAMap()
     }
   },
 
   beforeUnmount() {
-    // 清理地图资源
     if (this.navMap) {
       this.navMap.destroy()
     }
-    
-    // 清理定时器
     if (this.locationUpdateTimer) {
       clearInterval(this.locationUpdateTimer)
     }
@@ -507,6 +579,137 @@ export default {
   min-height: 100vh;
 }
 
+/* 错误状态样式 */
+.error-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+}
+
+.error-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 32px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+}
+
+.error-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.error-title {
+  color: #d32f2f;
+  margin-bottom: 12px;
+  font-size: 20px;
+}
+
+.error-message {
+  color: #666;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.error-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.retry-btn, .back-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.retry-btn {
+  background-color: #1976d2;
+  color: white;
+}
+
+.retry-btn:hover {
+  background-color: #1565c0;
+}
+
+.back-btn {
+  background-color: #757575;
+  color: white;
+}
+
+.back-btn:hover {
+  background-color: #616161;
+}
+
+/* 加载状态样式 */
+.loading-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+}
+
+.loading-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 32px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #1976d2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  color: #666;
+  margin: 0;
+}
+
+/* 导航错误样式 */
+.nav-error {
+  text-align: center;
+  padding: 24px;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.nav-error-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.nav-error-text {
+  color: #856404;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.nav-error-detail {
+  color: #6c757d;
+  font-size: 14px;
+}
+
+/* 其他样式保持不变 */
 .order-detail-section, .navigation-section, .action-section {
   background: #fff;
   border-radius: 8px;
@@ -523,8 +726,7 @@ export default {
 
 .detail-card {
   display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 16px;
+  gap: 12px;
 }
 
 .detail-item {
@@ -538,12 +740,12 @@ export default {
   border-bottom: none;
 }
 
-.label {
+.detail-item label {
   font-weight: 500;
   color: #333;
 }
 
-.value {
+.detail-item span {
   color: #666;
 }
 
@@ -570,20 +772,15 @@ export default {
   color: #6a1b9a;
 }
 
-.navigation-section {
-  position: relative;
-}
-
 .nav-controls {
   display: flex;
-  justify-content: space-between;
+  gap: 12px;
   margin-bottom: 12px;
 }
 
 .nav-btn, .refresh-btn {
   flex: 1;
   padding: 10px;
-  margin-right: 8px;
   border: none;
   border-radius: 4px;
   font-size: 16px;
@@ -641,7 +838,6 @@ export default {
 .action-section {
   display: flex;
   justify-content: center;
-  margin-top: 16px;
 }
 
 .status-update-btn {
@@ -655,6 +851,11 @@ export default {
   transition: background 0.3s;
 }
 
+.status-update-btn:disabled {
+  background: #ddd;
+  cursor: not-allowed;
+}
+
 .pickup-btn {
   background-color: #007bff;
   color: #fff;
@@ -663,5 +864,10 @@ export default {
 .complete-btn {
   background-color: #28a745;
   color: #fff;
+}
+
+.disabled {
+  background-color: #6c757d !important;
+  color: #fff !important;
 }
 </style>
