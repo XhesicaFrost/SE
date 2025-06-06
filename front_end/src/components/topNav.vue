@@ -194,12 +194,13 @@ export default {
   position: absolute;
   margin: 0;
   padding: 0;
-  top: 10px;
+  top: 11px;
   left: 10px;
   width: 28px;
   height: 28px;
   font-size: 14px;
   line-height: 14px;
   font-weight: bold;
+  color: #1246a0;
 }
 </style>

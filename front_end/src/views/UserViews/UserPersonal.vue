@@ -75,7 +75,8 @@ export default {
       this.$router.push('/user/service');
     },
     goToPayment() {
-      this.$router.push('/user/payment');
+      alert("奶龙已经设置过了！");
+      //this.$router.push('/user/payment');
     }
   }
 }

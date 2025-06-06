@@ -117,7 +117,7 @@ export default {
       ],
       navInfo: { 
         title: '店铺详情', 
-        pageReturn: () => { this.$router.push("/user/search") } 
+        pageReturn: () => { this.$router.go(-1) } 
       }
     }
   },
