@@ -112,7 +112,7 @@ export default {
         deliveryTime: ''
       },
       currentProduct: null,
-      cart: {},
+      cart: [],
       products: [
       ],
       navInfo: { 
@@ -151,10 +151,10 @@ export default {
     },
     async fetchShopInfo() {
       try {
-        const shopId = this.shopId;
-        const response = await fetchWithTimeout(`${BASE_URL}/shop/${shopId}`)
+        const params = new URLSearchParams({ shopId: this.$route.params.shopId }).toString()
+        const response = await fetchWithTimeout(`${BASE_URL}/shop?${params}`)
         const result = await response.json()
-        if (result.success && result.code === 200) {
+        if (result.code === 200) {
           this.shopInfo = {
             name: result.data.shopName,
             image: result.data.shopImg,
@@ -170,20 +170,41 @@ export default {
     },
     async fetchproducts() {
       try {
-        const shopId = this.$route.params.shopId;
-        const response = await fetchWithTimeout(`${BASE_URL}/${shopId}/item`)
+        const params = new URLSearchParams({ shopId: this.$route.params.shopId }).toString()
+        const response = await fetchWithTimeout(`${BASE_URL}/items?${params}`)
         const result = await response.json()
-        if (result.success && result.code === 200 && Array.isArray(result.data)) {
+        if (result.code === 200 && Array.isArray(result.data)) {
           this.products = result.data
         }
       } catch (e) {
         console.error('获取分类信息失败', e)
+      }
+    },
+    async fetchCartItems() {
+      try {
+        const params = new URLSearchParams({ userId: this.$store.state.userStore.userId }).toString()
+        const response = await fetchWithTimeout(`${BASE_URL}/shopcart?${params}`)
+        const result = await response.json()
+        if (result.code === 200 && Array.isArray(result.data)) {
+          for (let index = 0; index < result.data.length; index++) {
+            const element = result.data[index];
+            if(this.$route.params.shopId === element.shop.id) {
+              this.cart = element.items;
+            }
+          }
+        } else {
+          this.cart = [];
+        }
+      } catch (error) {
+          this.cart = [];
+        console.error('获取购物车数据失败:', error)
       }
     }
   },
   mounted() {
     this.fetchShopInfo()
     this.fetchproducts()
+    this.fetchCartItems()
   }
 }
 </script>

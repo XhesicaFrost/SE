@@ -181,9 +181,7 @@ export default {
       console.log(this.searchKeyword);
       this.searchResults = [];
       
-      // 模拟API请求延迟
       setTimeout(() => {
-        // 实际项目中这里应该是API调用
         this.searchResults = this.allShops.filter(shop => 
           shop.name.toLowerCase().includes(this.searchKeyword.toLowerCase()) ||
           shop.tags.some(tag => tag.toLowerCase().includes(this.searchKeyword.toLowerCase()))

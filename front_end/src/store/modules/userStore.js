@@ -9,7 +9,8 @@ export default {
       userId: '',      // 用户ID
       userName: '',    // 用户名
       userKind: '',    // 用户类型
-      userPhone: ''    // 用户手机号
+      userPhone: '',    // 用户手机号
+      userImage: ''
     },
     errorMessage: ''
   }),
@@ -54,7 +55,8 @@ export default {
             userId: result.id || '',
             userName: userData.username || '',
             userKind: userData.userKind || '',
-            userPhone: userData.phone || ''
+            userPhone: userData.phone || '',
+            userImage: userData.userImage || ''
           })
           commit('SET_ERROR', '')
           return { code: result.code, success: true, id: result.id }
@@ -110,7 +112,8 @@ export default {
             userId: result.id || '',
             userName: loginData.username || '',
             userKind: loginData.userKind || '',
-            userPhone: loginData.phone || ''
+            userPhone: loginData.phone || '',
+            userImage: loginData.userImage || ''
           })
           commit('SET_ERROR', '')
           return { code: result.code, success: true, id: result.id }

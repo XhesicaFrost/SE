@@ -42,17 +42,18 @@
 
 <script>
 import BottomNav from '@/components/bottomNav.vue'
+import { mapState } from 'vuex'
 
 export default {
   name: 'userPersonal',
+  computed: {
+    ...mapState('userStore', {
+      userInfo: state => state.userInfo
+    })
+  },
   components: { BottomNav },
   data() {
     return {
-      userInfo: {
-        name: '123',
-        phone: '123****1234',
-        image: 'https://www.baidu.com/img/flexible/logo/pc/result.png'
-      },
       navItems: [
         { label: '首页', action: () => { this.$router.push('/user') } },
         { label: '搜索', action: () => { this.$router.push('/user/search') } },
@@ -63,16 +64,17 @@ export default {
   },
   methods: {
     goToEdit() {
-      this.$router.push('/user/editProfile');
+      this.$router.push('/user/personal/edit');
     },
     goToAddress() {
       this.$router.push('/user/address');
     },
     goToOrders() {
-      this.$router.push('/user/orders');
+      this.$router.push('/user/history');
     },
     goToService() {
-      this.$router.push('/user/service');
+      alert("暂未开放");
+      //this.$router.push('/user/service');
     },
     goToPayment() {
       alert("奶龙已经设置过了！");

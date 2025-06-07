@@ -76,36 +76,6 @@ export default {
         { label: '我的', action: () => { this.$router.push('/user/personal') } }
       ],
       groupedCartItems: [
-        /*{
-          shop: {
-            id: '1',
-            name: '美味鲜果店',
-            image: 'https://via.placeholder.com/60',
-            address: '朝阳区建国路88号'
-          },
-          items: [
-            {
-              product: {
-                id: '101',
-                name: '进口红心火龙果',
-                description: '越南进口，果肉鲜甜',
-                price: 25.8,
-                image: 'https://via.placeholder.com/80?text=火龙果'
-              },
-              quantity: 2
-            },
-            {
-              product: {
-                id: '102',
-                name: '泰国金枕头榴莲',
-                description: '新鲜采摘，香甜软糯',
-                price: 98.0,
-                image: 'https://via.placeholder.com/80?text=榴莲'
-              },
-              quantity: 1
-            }
-          ]
-        }*/
       ]
     }
   },

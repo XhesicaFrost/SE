@@ -4,38 +4,30 @@
     
     <!-- 地址列表容器 -->
     <div class="address-container">
-      <div class="section-title">
-        <i class="fas fa-map-marker-alt"></i>
-        <span>我的收货地址</span>
-      </div>
-      
       <transition-group name="fade" tag="div" class="address-list">
         <!-- 地址项 -->
         <div v-for="address in addresses" :key="address.id" 
-             class="address-item" :class="{selected: address.isDefault}">
-          <div class="selected-badge" v-if="address.isDefault">当前使用</div>
-          <div class="address-header">
-            <div class="address-name">{{ address.name }}</div>
-            <div class="address-phone">{{ address.phone }}</div>
-          </div>
-          <div class="address-detail">
-            <span class="default-tag" v-if="address.isDefault">默认</span>
-            {{ address.fullAddress }}
-          </div>
-          <div class="address-actions">
-            <button class="action-btn set-default-btn" 
-                    :disabled="address.isDefault"
-                    @click="setDefaultAddress(address.id)">
-              <i class="fas fa-check-circle"></i>
-              {{ address.isDefault ? '默认地址' : '设为默认' }}
-            </button>
-            <button class="action-btn edit-btn" @click="editAddress(address)">
-              <i class="fas fa-edit"></i>编辑
-            </button>
-            <button class="action-btn delete-btn" @click="deleteAddress(address.id)">
-              <i class="fas fa-trash-alt"></i>删除
-            </button>
-          </div>
+             class="address-item" :class="{selected: address.current}">
+          <button class="set-default-btn" 
+                  :disabled="address.current"
+                  @click="setCurrentAddress(address.id)">
+            <div class="selected-badge" v-if="address.current">当前使用</div>
+            <div class="address-header">
+              <div class="address-name">{{ address.name }}</div>
+              <div class="address-phone">{{ address.phone }}</div>
+            </div>
+            <div class="address-detail">
+              {{ address.fullAddress }}
+            </div>
+            <div class="address-actions">
+              <button class="action-btn edit-btn" @click="handleEdit(address)">
+                <i class="fas fa-edit"></i>编辑
+              </button>
+              <button class="action-btn delete-btn" @click="deleteAddress(address.id)">
+                <i class="fas fa-trash-alt"></i>删除
+              </button>
+            </div>
+          </button>
         </div>
         
         <!-- 空状态提示 -->
@@ -52,74 +44,86 @@
 
 <script>
 import TopNav from '@/components/topNav.vue'
+import { BASE_URL, fetchWithTimeout } from '@/config.js'
+import { mapState } from 'vuex'
 
 export default {
   name: 'userAddress',
   components: { TopNav },
+  computed: {
+    ...mapState('userStore', {
+      userId: state => state.userId
+    })
+  },
   data() {
     return {
       addresses: [
-        {
-          id: 1,
-          name: '张小明',
-          phone: '138****5678',
-          fullAddress: '北京市海淀区中关村大街27号科技大厦A座1208室',
-          isDefault: true
-        },
-        {
-          id: 2,
-          name: '李思思',
-          phone: '159****1234',
-          fullAddress: '上海市浦东新区张江高科技园区亮秀路112号Y1座',
-          isDefault: false
-        },
-        {
-          id: 3,
-          name: '张小明 (父母家)',
-          phone: '138****5678',
-          fullAddress: '天津市河西区友谊路32号银丰花园B区5栋302室',
-          isDefault: false
-        },
-        {
-          id: 4,
-          name: '张小明 (公司)',
-          phone: '138****5678',
-          fullAddress: '广州市天河区珠江新城华夏路10号富力中心2206室',
-          isDefault: false
-        }
       ],
       navInfo: { 
         title: '收货地址', 
-        pageReturn: () => { this.$router.go(-1) } 
+        pageReturn: () => { this.$router.go(-1) },
+        function: true,
+        functionText: '新增地址',
+        functionButton: () => this.$router.push('/user/address/add')
       }
     }
   },
   methods: {
-    goBack() {
-      // 实际项目中这里会返回上一页
-      alert('返回上一页');
-    },
-    setDefaultAddress(id) {
-      this.addresses.forEach(address => {
-        address.isDefault = address.id === id;
-      });
-    },
-    editAddress(address) {
-      // 实际项目中这里会打开编辑表单
-      alert(`编辑地址: ${address.name}\n电话: ${address.phone}\n地址: ${address.fullAddress}`);
-    },
-    deleteAddress(id) {
-      if (confirm('确定要删除这个地址吗？')) {
-        const index = this.addresses.findIndex(addr => addr.id === id);
-        if (index !== -1) {
-          this.addresses.splice(index, 1);
+    async fetchAddress() {
+      try {
+        const params = new URLSearchParams({ userId: this.userId }).toString()
+        const response = await fetchWithTimeout(`${BASE_URL}/address?${params}`)
+        const result = await response.json()
+        if (result.success && result.code === 200 && result.data) {
+          this.addresses = result.data
+        } else {
+          this.errorMessage = '店铺信息获取失败'
         }
+      } catch (e) {
+        this.errorMessage = '网络错误，店铺信息获取失败'
       }
     },
-    addNewAddress() {
-      // 实际项目中这里会打开添加地址表单
-      alert('打开添加新地址表单');
+    async deleteAddress(id) {
+      if (!confirm('确定要删除该地址吗？')) return
+      try {
+        const response = await fetchWithTimeout(`${BASE_URL}/address/delete`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        })
+        const result = await response.json()
+        if (result.success) {
+          this.fetchAddress()
+        } else {
+          alert('删除失败')
+        }
+      } catch (e) {
+        alert('网络错误，删除失败')
+      }
+    },
+    async setCurrentAddress(id) {
+      try {
+        const response = await fetchWithTimeout(`${BASE_URL}/address/current`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        })
+        const result = await response.json()
+        if (result.success) {
+          this.fetchAddress()
+        } else {
+          alert('更改失败')
+        }
+      } catch (e) {
+        alert('网络错误，更改失败')
+      }
+    },
+    handleEdit(id) {
+      this.$router.push(`/user/address/edit/${id}`)
     }
+  },
+  mounted() {
+    this.fetchAddress()
   }
 }
 </script>
@@ -136,20 +140,6 @@ export default {
 /* 地址列表容器 */
 .address-container {
   padding: 20px;
-}
-
-.section-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 15px;
-  color: #444;
-  display: flex;
-  align-items: center;
-}
-
-.section-title i {
-  margin-right: 8px;
-  color: #4a6cf7;
 }
 
 /* 地址列表 */
@@ -169,6 +159,12 @@ export default {
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+}
+
+.set-default-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
 .address-item.selected {
@@ -196,6 +192,7 @@ export default {
 }
 
 .address-name {
+  color: #000;
   font-weight: 600;
   font-size: 1.1rem;
 }
@@ -210,16 +207,6 @@ export default {
   margin-bottom: 10px;
   font-size: 0.95rem;
   line-height: 1.5;
-}
-
-.default-tag {
-  display: inline-block;
-  background: #e6f7ff;
-  color: #1890ff;
-  font-size: 0.8rem;
-  padding: 3px 8px;
-  border-radius: 4px;
-  margin-right: 8px;
 }
 
 .address-actions {
@@ -242,24 +229,12 @@ export default {
   transition: color 0.2s;
 }
 
-.action-btn i {
-  margin-right: 5px;
-}
-
 .edit-btn:hover {
   color: #4a6cf7;
 }
 
 .delete-btn:hover {
   color: #f5222d;
-}
-
-.set-default-btn {
-  color: #52c41a;
-}
-
-.set-default-btn:hover {
-  color: #389e0d;
 }
 
 /* 空状态提示 */

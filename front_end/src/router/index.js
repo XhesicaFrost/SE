@@ -50,9 +50,34 @@ const routes = [
     meta: { allow: ['user'] }
   },
   {
+    path: '/user/personal/edit',
+    name: 'UserPersonalEdit',
+    component: () => import('@/views/UserViews/UserPersonalEdit.vue'),
+    meta: { allow: ['user'] }
+  },
+  {
     path: '/user/address',
     name: 'UserAddress',
     component: () => import('@/views/UserViews/UserAddress.vue'),
+    meta: { allow: ['user'] }
+  },
+  {
+    path: '/user/address/edit/:addressId',
+    name: 'UserAddressEdit',
+    component: () => import('@/views/UserViews/UserAddressEdit.vue'),
+    meta: { allow: ['user'] },
+    props: true
+  },
+  {
+    path: '/user/address/add',
+    name: 'UserAddressAdd',
+    component: () => import('@/views/UserViews/UserAddressAdd.vue'),
+    meta: { allow: ['user'] }
+  },
+  {
+    path: '/user/history',
+    name: 'UserHistory',
+    component: () => import('@/views/UserViews/UserHistory.vue'),
     meta: { allow: ['user'] }
   },
   {

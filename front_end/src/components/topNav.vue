@@ -68,6 +68,7 @@ export default {
 
 <style scoped>
 .top-bg {
+  z-index: 1000;
   display: flex;
   background: #eff6f0;
   height: 20px;
@@ -80,6 +81,7 @@ export default {
   box-sizing: border-box;
 }
 .top-nav {
+  z-index: 1001;
   display: flex;
   background: rgba(240,240,240,1);
   height: 48px;
