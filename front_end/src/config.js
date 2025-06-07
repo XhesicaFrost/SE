@@ -1,4 +1,5 @@
-export const BASE_URL = 'http://localhost:12345'
+// 应用配置（移除了代理配置）
+export const BASE_URL = '/api'  // 使用代理路径
 
 export const FETCH_TIMEOUT = 8000; // 超时时间（毫秒）
 export const debug_seller = false; // 是否启用商家调试模式
@@ -127,6 +128,7 @@ export async function fetchWithTimeout(resource, options = {}) {
 
   // 获取用户 token 并添加到 Authorization Header
   const token = getUserToken();
+  console.log('🔑 获取到用户 token:', token ? `${token.substring(0, 10)}...` : '无 token')
   
   // 初始化 headers
   if (!options.headers) {
@@ -139,13 +141,27 @@ export async function fetchWithTimeout(resource, options = {}) {
     console.log('🔐 已添加 Authorization header');
   }
 
-  // 验证URL参数（对所有请求类型）
+  // 修正：针对代理路径的 URL 验证
   try {
-    const fullUrlString = resource.startsWith('http') ? resource : `${BASE_URL}${resource.startsWith('/') ? resource : '/' + resource}`;
-    const url = new URL(fullUrlString);
+    let urlForValidation;
+    
+    // 如果是代理路径（以 /api 开头）
+    if (resource.startsWith('/api')) {
+      // 构造临时的完整 URL 用于参数验证
+      urlForValidation = new URL(resource, 'http://localhost:8080');
+    } 
+    // 如果是完整的 HTTP URL
+    else if (resource.startsWith('http')) {
+      urlForValidation = new URL(resource);
+    }
+    // 如果是相对路径
+    else {
+      const fullUrlString = `${BASE_URL}${resource.startsWith('/') ? resource : '/' + resource}`;
+      urlForValidation = new URL(fullUrlString, 'http://localhost:8080');
+    }
     
     // 验证URL参数
-    if (!validateUrlParams(url.searchParams)) {
+    if (!validateUrlParams(urlForValidation.searchParams)) {
       clearTimeout(timeoutId);
       throw new Error('请求被阻止：URL包含无效参数');
     }
@@ -160,14 +176,18 @@ export async function fetchWithTimeout(resource, options = {}) {
 
   try {
     console.log('发起请求:', {
-      url: resource,
+      originalResource: resource,  // 显示原始传入的资源路径
       method: currentMethod,
       headers: options.headers,
       body: options.body,
-      hasToken: !!token // 显示是否携带 token
+      hasToken: !!token
     });
     
-    const response = await fetch(resource, { ...options, method: currentMethod, signal: controller.signal });
+    const response = await fetch(resource, { 
+      ...options, 
+      method: currentMethod, 
+      signal: controller.signal 
+    });
     
     // 检查 401 未授权错误
     if (response.status === 401) {
