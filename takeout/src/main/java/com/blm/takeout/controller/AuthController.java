@@ -44,6 +44,7 @@ public class AuthController {
                 case "user": userrole = User.Role.user; break;
                 case "rider": userrole = User.Role.rider; break;
                 case "seller": userrole = User.Role.seller; break;
+                case "admin": userrole = User.Role.admin; break;
                 default: throw new BusinessException("无效的用户类型");
             }
             UserLoginDto loginDto = new UserLoginDto();
