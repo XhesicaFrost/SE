@@ -50,6 +50,12 @@ const routes = [
     meta: { allow: ['user'] }
   },
   {
+    path: '/user/address',
+    name: 'UserAddress',
+    component: () => import('@/views/UserViews/UserAddress.vue'),
+    meta: { allow: ['user'] }
+  },
+  {
     path: '/seller',
     name: 'sellerHome',
     component: () => import('@/views/SellerViews/SellerHome.vue'),
