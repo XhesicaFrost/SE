@@ -1,13 +1,13 @@
-// 应用配置（移除了代理配置）
-export const BASE_URL = '/api'  // 使用代理路径
+// 应用配置（直接请求后端，不使用代理）
+export const BASE_URL = 'http://localhost:12345'  // 修正：添加了缺失的 //
 
 export const FETCH_TIMEOUT = 8000; // 超时时间（毫秒）
 export const debug_seller = false; // 是否启用商家调试模式
 export const debug_rider = false; // 是否启用骑手调试模式
 export const debug_user = false; // 是否启用用户调试模式
 export const debug_admin = false; // 是否启用管理员调试模式
-export const debug_AuthCheck = false; // 是否启用权限检查
-export const debug_seller_created = true;//是否默认商家已经创立
+export const debug_AuthCheck = true; // 是否启用权限检查
+export const debug_seller_created = false;//是否默认商家已经创立
 
 let storeInstance = null;
 
@@ -141,24 +141,22 @@ export async function fetchWithTimeout(resource, options = {}) {
     console.log('🔐 已添加 Authorization header');
   }
 
-  // 修正：针对代理路径的 URL 验证
+  // 修正：直接拼接 BASE_URL，不使用代理
+  let finalUrl = resource;
+  
+  // 如果 resource 不是完整的 URL（不以 http 开头）
+  if (!resource.startsWith('http')) {
+    // 直接拼接 BASE_URL
+    if (resource.startsWith('/')) {
+      finalUrl = BASE_URL + resource;  // http://localhost:12345 + /login
+    } else {
+      finalUrl = BASE_URL + '/' + resource;  // http://localhost:12345 + / + login
+    }
+  }
+
+  // 验证URL参数
   try {
-    let urlForValidation;
-    
-    // 如果是代理路径（以 /api 开头）
-    if (resource.startsWith('/api')) {
-      // 构造临时的完整 URL 用于参数验证
-      urlForValidation = new URL(resource, 'http://localhost:8080');
-    } 
-    // 如果是完整的 HTTP URL
-    else if (resource.startsWith('http')) {
-      urlForValidation = new URL(resource);
-    }
-    // 如果是相对路径
-    else {
-      const fullUrlString = `${BASE_URL}${resource.startsWith('/') ? resource : '/' + resource}`;
-      urlForValidation = new URL(fullUrlString, 'http://localhost:8080');
-    }
+    const urlForValidation = new URL(finalUrl);
     
     // 验证URL参数
     if (!validateUrlParams(urlForValidation.searchParams)) {
@@ -166,7 +164,7 @@ export async function fetchWithTimeout(resource, options = {}) {
       throw new Error('请求被阻止：URL包含无效参数');
     }
   } catch (e) {
-    console.warn('解析URL参数失败:', resource, e);
+    console.warn('解析URL参数失败:', finalUrl, e);
     clearTimeout(timeoutId);
     // 如果是我们的验证错误，重新抛出
     if (e.message.includes('请求被阻止')) {
@@ -176,14 +174,16 @@ export async function fetchWithTimeout(resource, options = {}) {
 
   try {
     console.log('发起请求:', {
-      originalResource: resource,  // 显示原始传入的资源路径
+      originalResource: resource,    // 原始传入的 resource
+      finalUrl: finalUrl,           // 最终请求的 URL
       method: currentMethod,
       headers: options.headers,
       body: options.body,
       hasToken: !!token
     });
     
-    const response = await fetch(resource, { 
+    // 使用修正后的 finalUrl 发送请求
+    const response = await fetch(finalUrl, { 
       ...options, 
       method: currentMethod, 
       signal: controller.signal 
@@ -194,7 +194,7 @@ export async function fetchWithTimeout(resource, options = {}) {
       clearTimeout(timeoutId);
       
       console.error('🚫 身份验证失败 (401):', {
-        url: resource,
+        url: finalUrl,
         method: currentMethod,
         hasToken: !!token,
         token: token ? `${token.substring(0, 10)}...` : 'null',

@@ -111,6 +111,7 @@ export default {
         const params = new URLSearchParams({ userId: this.userInfo.userId }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/userToseller?${params}`)
         const result = await response.json()
+        console.log('fetchsellerInfo result:', result)
         if (result.success && result.code === 200) {
           this.SET_seller_ID(result.sellerId || '')
           this.SET_seller_NAME(result.sellerName || '')

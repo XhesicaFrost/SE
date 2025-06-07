@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import store from '@/store'
-import { debug_AuthCheck, BASE_URL, fetchWithTimeout } from '@/config'
+import { debug_AuthCheck } from '@/config'
 
 const routes = [
   {
@@ -144,27 +144,27 @@ const router = createRouter({
 })
 
 // 从后端获取用户类型的函数
-async function getUserKindFromBackend(userId) {
-  try {
-    if (!userId) {
-      return null
-    }
+// async function getUserKindFromBackend(userId) {
+//   try {
+//     if (!userId) {
+//       return null
+//     }
     
-    const params = new URLSearchParams({ userId }).toString()
-    const response = await fetchWithTimeout(`${BASE_URL}/user/kind?${params}`)
-    const result = await response.json()
+//     const params = new URLSearchParams({ userId }).toString()
+//     const response = await fetchWithTimeout(`${BASE_URL}/user/kind?${params}`)
+//     const result = await response.json()
     
-    if (result.success && result.data) {
-      return result.data.userKind
-    } else {
-      console.error('获取用户类型失败:', result.message)
-      return null
-    }
-  } catch (error) {
-    console.error('请求用户类型失败:', error)
-    return null
-  }
-}
+//     if (result.success && result.data) {
+//       return result.data.userKind
+//     } else {
+//       console.error('获取用户类型失败:', result.message)
+//       return null
+//     }
+//   } catch (error) {
+//     console.error('请求用户类型失败:', error)
+//     return null
+//   }
+// }
 
 // 全局前置守卫
 // 进行跳转的权限检查
@@ -173,51 +173,52 @@ router.beforeEach(async (to, from, next) => {
     next()
     return
   }
+  next();
+  return 
+//   const allow = to.meta.allow
   
-  const allow = to.meta.allow
+//   // 如果路由不需要权限检查，直接通过
+//   if (!allow || allow.length === 0) {
+//     next()
+//     return
+//   }
   
-  // 如果路由不需要权限检查，直接通过
-  if (!allow || allow.length === 0) {
-    next()
-    return
-  }
-  
-  try {
-    // 从store获取userId
-    const userId = store.state.userStore.userInfo.userId
+//   try {
+//     // 从store获取userId
+//     const userId = store.state.userStore.userInfo.userId
     
-    if (!userId) {
-      console.warn('用户未登录，跳转到错误页面')
-      next('/error')
-      return
-    }
+//     if (!userId) {
+//       console.warn('用户未登录，跳转到错误页面')
+//       next('/error')
+//       return
+//     }
     
-    // 从后端获取用户类型
-    const userKind = await getUserKindFromBackend(userId)
+//     // 从后端获取用户类型
+//     const userKind = await getUserKindFromBackend(userId)
     
-    if (userKind) {
-      // 更新store中的userKind（保持同步）
-      store.commit('userStore/SET_USER_INFO', {
-        ...store.state.userStore.userInfo,
-        userKind: userKind
-      })
+//     if (userKind) {
+//       // 更新store中的userKind（保持同步）
+//       store.commit('userStore/SET_USER_INFO', {
+//         ...store.state.userStore.userInfo,
+//         userKind: userKind
+//       })
       
-      // 检查权限
-      if (allow.includes(userKind)) {
-        next() // 有权限，继续访问
-      } else {
-        console.warn(`用户类型 ${userKind} 无权限访问 ${to.path}`)
-        next('/error') // 无权限，跳转到错误页面
-      }
-    } else {
-      // 获取用户类型失败
-      console.warn('无法获取用户类型，跳转到错误页面')
-      next('/error')
-    }
-  } catch (error) {
-    console.error('权限验证失败:', error)
-    next('/error') // 验证失败，跳转到错误页面
-  }
+//       // 检查权限
+//       if (allow.includes(userKind)) {
+//         next() // 有权限，继续访问
+//       } else {
+//         console.warn(`用户类型 ${userKind} 无权限访问 ${to.path}`)
+//         next('/error') // 无权限，跳转到错误页面
+//       }
+//     } else {
+//       // 获取用户类型失败
+//       console.warn('无法获取用户类型，跳转到错误页面')
+//       next('/error')
+//     }
+//   } catch (error) {
+//     console.error('权限验证失败:', error)
+//     next('/error') // 验证失败，跳转到错误页面
+//   }
 })
 
 // 当用户离开骑手相关页面时停止位置追踪

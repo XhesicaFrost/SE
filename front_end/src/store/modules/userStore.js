@@ -109,7 +109,7 @@ export default {
         const response = await fetchWithTimeout(`${BASE_URL}/login?${params}`)
         const result = await response.json()
         console.log('Login result:', result)
-        
+
         if (result.code === 200) {
           // 保存用户信息和 token
           commit('SET_USER_INFO', {
@@ -119,6 +119,16 @@ export default {
             userPhone: loginData.phonenumber || result.data?.phonenumber || '',
             token: result.data?.token || result.token || '' // 保存后端返回的 token
           })
+          // 检查获得的token是否有效
+          console.log('🚀 登录成功，保存用户信息:', 
+            {
+              userId: result.id || result.data?.id || '',
+              userName: loginData.username || result.data?.username || '',
+              userKind: loginData.role || result.data?.role || '',
+              userPhone: loginData.phonenumber || result.data?.phonenumber || '',
+              token: result.data?.token || result.token || ''
+            }
+          )
           commit('SET_ERROR', '')
           return { 
             code: result.code, 
