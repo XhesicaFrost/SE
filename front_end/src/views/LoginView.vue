@@ -51,19 +51,30 @@ export default {
      */
     async handleLogin(userData) {
       console.log('LoginView:Login data:', userData)
-      
+      if (!userData || 
+          typeof userData !== 'object' || 
+          userData.isTrusted !== undefined ||  // 事件对象特有属性
+          userData.type !== undefined ||       // 事件对象特有属性
+          userData.target !== undefined) {     // 事件对象特有属性
+          console.error('LoginView:接收到错误的数据格式:', userData)
+        return
+      }
       // 验证数据格式
+      if (!userData || typeof userData !== 'object' || userData.isTrusted) {
+        console.error('LoginView:接收到错误的数据格式:', userData)
+        return
+      }
       
       const success = await this.loginUser(userData)
-      //success.success=true // 模拟登录成功，实际应用中应根据后端返回结果判断
+      
       if (success.success) {
         console.log('LoginView:Login success:', success)
-        //this.$router.push('/user') 
         
-        // 根据用户类型跳转到对应的主页，而不是回到登录页面
-         const userKind = success.data?.userKind || userData.role
-         console.log('LoginView:User kind:', userKind)
-         switch (userKind) {
+        // 修复：使用正确的用户类型判断
+        const userKind = success.data?.userKind || userData.role || this.$store.state.userStore.userInfo.userKind
+        console.log('LoginView:User kind:', userKind)
+        
+        switch (userKind) {
           case 'user':
             this.$router.push('/user')
             break
@@ -77,10 +88,12 @@ export default {
             this.$router.push('/admin')
             break
           default:
-            this.$router.push('/error')
+            console.warn('未知的用户类型:', userKind)
+            this.$router.push('/user') // 默认跳转到用户页面
         }
       } else {
         console.log('LoginView:Login failed:', success)
+        // 错误信息已经通过 commit('SET_ERROR') 设置到 store 中了
       }
     }
   },

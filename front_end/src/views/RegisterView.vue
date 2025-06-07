@@ -49,6 +49,19 @@ export default {
      */
     async handleRegister(userData) {
       console.log('RegisterView:Register data:', userData)
+      if (!userData || 
+          typeof userData !== 'object' || 
+          userData.isTrusted !== undefined ||  // 事件对象特有属性
+          userData.type !== undefined ||       // 事件对象特有属性
+          userData.target !== undefined) {     // 事件对象特有属性
+          console.error('RegisterView:接收到错误的数据格式:', userData)
+        return
+      }
+      // 验证数据格式
+      if (!userData || typeof userData !== 'object' || userData.isTrusted) {
+        console.error('接收到错误的数据格式:', userData)
+        return
+      }
       const success = await this.registerUser(userData)
       if (success.success) {
         console.log('RegisterView:Register success:', success)

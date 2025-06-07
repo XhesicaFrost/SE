@@ -8,6 +8,33 @@ export const debug_admin = false; // 是否启用管理员调试模式
 export const debug_AuthCheck = false; // 是否启用权限检查
 export const debug_seller_created = true;//是否默认商家已经创立
 
+let storeInstance = null;
+
+/**
+ * 设置 store 实例引用
+ * 在 main.js 中调用此方法来设置 store 引用
+ * @param {Object} store - Vuex store 实例
+ */
+export function setStoreInstance(store) {
+  storeInstance = store;
+}
+
+/**
+ * 获取当前用户的 token
+ * @returns {string} - 用户 token 或空字符串
+ */
+function getUserToken() {
+  try {
+    if (storeInstance && storeInstance.state.userStore) {
+      return storeInstance.state.userStore.userInfo.token || '';
+    }
+    return '';
+  } catch (error) {
+    console.warn('获取用户token失败:', error);
+    return '';
+  }
+}
+
 /**
  * 验证请求参数是否为有效数据
  * @param {any} data - 要验证的数据
@@ -98,6 +125,20 @@ export async function fetchWithTimeout(resource, options = {}) {
     delete options.body;
   }
 
+  // 获取用户 token 并添加到 Authorization Header
+  const token = getUserToken();
+  
+  // 初始化 headers
+  if (!options.headers) {
+    options.headers = {};
+  }
+  
+  // 如果有 token，添加到 Authorization header
+  if (token && token.trim() !== '') {
+    options.headers['Authorization'] = `Bearer ${token}`;
+    console.log('🔐 已添加 Authorization header');
+  }
+
   // 验证URL参数（对所有请求类型）
   try {
     const fullUrlString = resource.startsWith('http') ? resource : `${BASE_URL}${resource.startsWith('/') ? resource : '/' + resource}`;
@@ -122,14 +163,55 @@ export async function fetchWithTimeout(resource, options = {}) {
       url: resource,
       method: currentMethod,
       headers: options.headers,
-      body: options.body // GET请求这里应该是 undefined
+      body: options.body,
+      hasToken: !!token // 显示是否携带 token
     });
     
     const response = await fetch(resource, { ...options, method: currentMethod, signal: controller.signal });
+    
+    // 检查 401 未授权错误
+    if (response.status === 401) {
+      clearTimeout(timeoutId);
+      
+      console.error('🚫 身份验证失败 (401):', {
+        url: resource,
+        method: currentMethod,
+        hasToken: !!token,
+        token: token ? `${token.substring(0, 10)}...` : 'null',
+        response: {
+          status: response.status,
+          statusText: response.statusText
+        }
+      });
+      
+      // 尝试解析响应体获取详细错误信息
+      let errorDetail = '';
+      try {
+        const errorData = await response.json();
+        errorDetail = errorData.message || errorData.error || '未知错误';
+      } catch (e) {
+        errorDetail = response.statusText || '身份验证失败';
+      }
+      
+      // 抛出特定的 401 错误
+      const authError = new Error(`身份验证失败: ${errorDetail}`);
+      authError.name = 'AuthenticationError';
+      authError.status = 401;
+      authError.response = response;
+      throw authError;
+    }
+    
     clearTimeout(timeoutId);
     return response;
   } catch (error) {
     clearTimeout(timeoutId);
+    
+    // 如果是我们的 401 错误，直接重新抛出
+    if (error.name === 'AuthenticationError') {
+      throw error;
+    }
+    
+    // 其他错误正常抛出
     throw error;
   }
 }

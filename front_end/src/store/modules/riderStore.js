@@ -1,3 +1,6 @@
+// Before 2025/6/7 It is not used, but it is reserved for future use.
+// riderStore.js
+
 import { BASE_URL, fetchWithTimeout } from '@/config.js'
 
 const state = {

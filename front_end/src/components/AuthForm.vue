@@ -59,7 +59,9 @@ export default {
     }
   },
   methods: {
-    handleSubmit() {
+    handleSubmit(event) {
+      event.preventDefault()
+      event.stopPropagation()
       this.$emit('submit', { ...this.formData })
     }
   }
