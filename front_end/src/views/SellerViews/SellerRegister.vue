@@ -97,10 +97,13 @@ export default {
       try {
         const response = await fetch(`${BASE_URL}/seller/register`, {
           method: 'POST',
-          body: formData
+          body: formData,
+          headers: {
+            'Authorization': `Bearer ${this.$store.state.userStore.userInfo.token}` // 添加 Authorization 头
+          }
         })
         const result = await response.json()
-        if (result.status === 'success') {
+        if (result.data.status === 'success') {
           this.submitStatus = 'success'
         } else {
           this.errorMessage = '未能成功发送，请重试'
