@@ -178,7 +178,6 @@ export default {
         return { code: error.status || 500, success: false, message: msg }
       }
     },
-
     /**
      * 退出登录
      */

@@ -71,15 +71,47 @@ export default {
       navItems: [
         { label: '订单搜索', action: () => { this.$router.push('/rider/orders') } },
         { label: '历史订单', action: () => { this.$router.push('/rider/history') } },
-        { label: '个人中心', action: () => { /* 暂时不跳转 */ } }
+        { label: '退出登录', action: () => { this.goTo('logout') } }  // 🎯 修改：将个人中心改为退出登录
       ]
     }
   },
   computed: {
-    ...mapState('userStore', ['userId'])
+    ...mapState('userStore', ['userInfo'])  // 🎯 修改：改为 userInfo 以保持一致性
   },
   methods: {
     ...mapActions('locationStore', ['startLocationTracking', 'stopLocationTracking']),
+    ...mapActions('userStore', ['logout']),  // 🎯 添加：导入 logout action
+    
+    // 🎯 添加：退出登录处理方法
+    async goTo(type) {
+      console.log('goTo', type)
+      
+      if (type === 'logout') {
+        try {
+          // 确认对话框
+          if (confirm('确定要退出登录吗？这将停止位置追踪。')) {
+            console.log('🚪 执行退出登录流程')
+            
+            // 停止位置追踪
+            this.stopLocationTracking()
+            
+            // 调用 userStore 的 logout action
+            await this.logout()
+            
+            // 显示提示信息
+            alert('已成功退出登录')
+            
+            // 导航到登录页
+            this.$router.push('/login')
+            
+            console.log('✅ 退出登录流程完成')
+          }
+        } catch (error) {
+          console.error('❌ 退出登录失败:', error)
+          alert('退出登录失败，请重试')
+        }
+      }
+    },
     
     goToOrderDetail(orderId) {
       this.$router.push(`/rider/order/${orderId}`)
@@ -126,7 +158,8 @@ export default {
     // 获取已接订单
     async fetchAcceptedOrders() {
       try {
-        const params = new URLSearchParams({ riderId: this.userId }).toString()
+        // 🎯 修改：使用 userInfo.userId 而不是 userId
+        const params = new URLSearchParams({ riderId: this.userInfo.userId }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/rider/acceptedorders?${params}`)
         const result = await response.json()
         if (result.success && Array.isArray(result.data)) {
@@ -151,7 +184,7 @@ export default {
         }
         
         const params = new URLSearchParams({
-          riderId: this.userId,
+          riderId: this.userInfo.userId,  // 🎯 修改：使用 userInfo.userId
           latitude: this.userLocation.latitude,
           longitude: this.userLocation.longitude
         }).toString()
@@ -190,7 +223,7 @@ export default {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
-            riderId: this.userId,
+            riderId: this.userInfo.userId,  // 🎯 修改：使用 userInfo.userId
             orderId,
             status: nextStatus
           })
@@ -224,7 +257,7 @@ export default {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
-            riderId: this.userId,
+            riderId: this.userInfo.userId,  // 🎯 修改：使用 userInfo.userId
             orderId 
           })
         })
@@ -248,10 +281,12 @@ export default {
     await this.fetchRecommendedOrders()
   },
   
-//   onBeforeUnmount() {
-//     // 组件销毁时不停止位置追踪，因为用户可能去到其他骑手页面
-//     // 如果需要在退出骑手相关页面时停止追踪，应该在App.vue或路由守卫中处理
-//   }
+  // 🎯 添加：组件销毁时的处理
+  beforeUnmount() {
+    // 如果用户离开页面但不是退出登录，保持位置追踪
+    // 只有在明确退出登录时才停止追踪
+    console.log('RiderHome 组件即将销毁')
+  }
 }
 </script>
 
