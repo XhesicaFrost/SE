@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex'
+import { mapState, mapMutations, mapActions } from 'vuex'  // 添加 mapActions
 import { BASE_URL, debug_seller_created, fetchWithTimeout } from '@/config.js'
 import BottomNav from '@/components/bottomNav.vue'
 
@@ -64,9 +64,37 @@ export default {
   },
   methods: {
     ...mapMutations('sellerStore', ['SET_seller_ID', 'SET_seller_NAME']),
-    goTo(type) {
-        console.log('goTo', type)
-      if (type === 'shop') {
+    ...mapActions('userStore', ['logout']),  // 添加 logout action
+    
+    async goTo(type) {
+      console.log('goTo', type)
+      
+      if (type === 'logout') {
+        try {
+          // 确认对话框
+          if (confirm('确定要退出登录吗？')) {
+            console.log('🚪 执行退出登录流程')
+            
+            // 调用 userStore 的 logout action
+            await this.logout()
+            
+            // 可选：清除商家相关信息
+            this.SET_seller_ID('')
+            this.SET_seller_NAME('')
+            
+            // 显示提示信息
+            alert('已成功退出登录')
+            
+            // 导航到登录页
+            this.$router.push('/login')
+            
+            console.log('✅ 退出登录流程完成')
+          }
+        } catch (error) {
+          console.error('❌ 退出登录失败:', error)
+          alert('退出登录失败，请重试')
+        }
+      } else if (type === 'shop') {
         this.$router.push('/seller/shop')
       } else if (type === 'order') {
         this.$router.push('/seller/order')
@@ -74,8 +102,11 @@ export default {
         this.$router.push('/seller/data')
       } else if (type === 'register') {
         this.$router.push('/seller/register')
+      } else if (type === 'withdraw') {
+        this.$router.push('/seller/withdraw')
       }
     },
+
     /**
      * fetchsellerHomeData
      * 根据商家ID（sellerId）获取商家首页数据，包括今日营销额、今日订单总数和最新评论。
@@ -99,11 +130,12 @@ export default {
         this.$toast && this.$toast('网络异常，数据获取失败')
       }
     },
+
     /**
      * fetchsellerInfo
      * 进入页面时调用，通过当前用户ID请求 /userToseller 接口，获取商家ID、商家名称和商家状态，
      * 并保存到 sellerStore，随后根据 sellerStatus 决定导航栏内容和是否获取首页数据。
-     * sellerStatus 可为“未注册/审批中/封禁中/正常”
+     * sellerStatus 可为"未注册/审批中/封禁中/正常"
      */
     async fetchsellerInfo() {
       try {
@@ -117,9 +149,10 @@ export default {
           this.SET_seller_NAME(result.sellerName || '')
           const status = result.sellerStatus
           if (status === '未注册') {
-            // 未注册店铺，仅显示“创建店铺”
+            // 未注册店铺，仅显示"创建店铺"
             this.navItems = [
-              { label: '创建店铺', action: () => this.goTo('register') }
+              { label: '创建店铺', action: () => this.goTo('register') },
+              { label: '退出登录', action: () => this.goTo('logout') }
             ]
             this.todayRevenue = 0
             this.todayOrderCount = 0
@@ -127,7 +160,8 @@ export default {
           } else if (status === '审批中') {
             // 审批中，仅显示提示
             this.navItems = [
-              { label: '正在审批', action: () => {} }
+              { label: '正在审批', action: () => {} },
+              { label: '退出登录', action: () => this.goTo('logout') }  // 添加退出登录
             ]
             this.todayRevenue = 0
             this.todayOrderCount = 0
@@ -135,7 +169,8 @@ export default {
           } else if (status === '封禁中') {
             // 封禁中，仅显示提示
             this.navItems = [
-              { label: '封禁，请联系管理员', action: () => {} }
+              { label: '封禁，请联系管理员', action: () => {} },
+              { label: '退出登录', action: () => this.goTo('logout') }
             ]
             this.todayRevenue = 0
             this.todayOrderCount = 0
@@ -146,7 +181,7 @@ export default {
               { label: '管理店铺', action: () => this.goTo('shop') },
               { label: '管理订单', action: () => this.goTo('order') },
               { label: '查看数据', action: () => this.goTo('data') },
-              { label: '个人中心', action: () => this.goTo('withdraw') }
+              { label: '退出登录', action: () => this.goTo('logout') }
             ]
             this.fetchsellerHomeData(result.sellerId)
           }
@@ -161,7 +196,7 @@ export default {
           { label: '管理店铺', action: () => this.goTo('shop') },
           { label: '管理订单', action: () => this.goTo('order') },
           { label: '查看数据', action: () => this.goTo('data') },
-          { label: '个人中心', action: () => this.goTo('withdraw') }
+          { label: '退出登录', action: () => this.goTo('logout') }  // 修改：使用 logout 而不是 withdraw
         ]
       }
     }
@@ -170,7 +205,8 @@ export default {
     console.log('sellerHome mounted')
     // 检查是否已创建商家
     this.navItems = [
-      { label: '创建店铺', action: () => this.goTo('register') }
+      { label: '创建店铺', action: () => this.goTo('register') },
+      { label: '退出登录', action: () => this.goTo('logout') }
     ]
     this.fetchsellerInfo()
   }
