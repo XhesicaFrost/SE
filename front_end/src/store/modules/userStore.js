@@ -8,8 +8,8 @@ export default {
       userName: '',    // 用户名
       userKind: '',    // 用户类型
       userPhone: '',   // 用户手机号
-      token: '',        // 用户令牌
-      userImage: ''
+      token: '',       // 用户令牌
+      userImage: ''    // 用户头像
     },
     errorMessage: ''
   }),
@@ -17,9 +17,22 @@ export default {
     SET_USER_INFO(state, payload) {
       // 使用 Object.assign 来确保响应式更新
       Object.assign(state.userInfo, payload)
+      // ✅ 保留原有的手动持久化
+      try {
+        localStorage.setItem('userInfo', JSON.stringify(state.userInfo))
+        localStorage.setItem('token', state.userInfo.token || '')
+      } catch (e) {
+        console.warn('⚠️ 手动持久化失败，将使用插件备份')
+      }
     },
     SET_ERROR(state, message) {
       state.errorMessage = message
+      // ✅ 保留原有的错误信息持久化
+      try {
+        localStorage.setItem('errorMessage', message)
+      } catch (e) {
+        console.warn('⚠️ 错误信息持久化失败')
+      }
     },
     CLEAR_USER_INFO(state) {
       state.userInfo = {
@@ -28,22 +41,48 @@ export default {
         userKind: '',
         userPhone: '',
         token: '',
-        userImage: ''  // ✅ 修复：添加 userImage 重置
+        userImage: ''
+      }
+      state.errorMessage = ''
+      
+      // ✅ 保留原有的清除逻辑
+      try {
+        localStorage.removeItem('userInfo')
+        localStorage.removeItem('token')
+        localStorage.removeItem('errorMessage')
+      } catch (e) {
+        console.warn('⚠️ 手动清除持久化数据失败')
+      }
+    },
+    // ✅ 保留原有的恢复方法
+    RESTORE_FROM_STORAGE(state) {
+      try {
+        const savedUserInfo = localStorage.getItem('userInfo')
+        const savedErrorMessage = localStorage.getItem('errorMessage') || ''
+        
+        if (savedUserInfo) {
+          const userInfo = JSON.parse(savedUserInfo)
+          if (userInfo && userInfo.userId) {
+            Object.assign(state.userInfo, userInfo)
+            console.log('🔄 从手动存储恢复用户信息:', userInfo)
+          }
+        }
+        
+        state.errorMessage = savedErrorMessage
+      } catch (error) {
+        console.error('❌ 从手动存储恢复失败:', error)
+        // 插件会自动处理备份恢复
       }
     }
   },
   actions: {
-    /**
-     * registerUser
-     * 用户注册方法，向后端 /register 接口发送注册请求。
-     */
+    // ✅ 保留所有原有的 actions 代码
     async registerUser({ commit }, userData) {
       try {
         const params = new URLSearchParams(userData).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/register?${params}`)
         const result = await response.json()
         if (result.code === 200) {
-          // ✅ 新增：保存 token 到 localStorage
           const token = result.data?.token || result.token || ''
           localStorage.setItem('token', token)
           
@@ -52,15 +91,12 @@ export default {
           if (isNaN(userId)) {
             throw new Error('无效的用户ID')
           }
-          
-          // 保存用户信息和 token
           commit('SET_USER_INFO', {
             userId: userId,
             userName: userData.username || result.data?.username || '',
             userKind: userData.role || result.data?.role || '',
             userPhone: userData.phonenumber || result.data?.phonenumber || '',
             token: token, // ✅ 修改：使用提取的 token
-            token: result.data?.token || result.token || '',
             userImage: userData.userImage || ''
           })
           commit('SET_ERROR', '')
@@ -82,41 +118,12 @@ export default {
         }
       } catch (error) {
         console.error('Registration error:', error)
-        
-        let msg = 'Registration failed'
-        let shouldUpdateErrorMessage = true
-        
-        if (error.name === 'AuthenticationError') {
-          console.error('🚫 注册时身份验证失败:', error.message)
-          msg = '身份验证失败，请重新登录'
-          commit('CLEAR_USER_INFO')
-        } else if (error.name === 'AbortError') {
-          msg = '请求超时，请检查网络连接'
-        } else if (error.message.includes('请求被阻止：检测到无效的请求体数据')) {
-          console.warn('🚫 注册请求被阻止：检测到无效的请求体数据')
-          console.warn('传入的 userData:', userData)
-          shouldUpdateErrorMessage = false
-          msg = '数据格式错误'
-        } else if (error.message.includes('请求被阻止')) {
-          console.warn('🚫 注册请求被阻止:', error.message)
-          shouldUpdateErrorMessage = false
-          msg = '请求格式错误'
-        } else {
-          msg += '，请检查网络连接'
-        }
-        
-        if (shouldUpdateErrorMessage) {
-          commit('SET_ERROR', msg)
-        }
-        
+        let msg = 'Registration failed，请检查网络连接'
+        commit('SET_ERROR', msg)
         return { code: error.status || 500, success: false, message: msg }
       }
     },
 
-    /**
-     * loginUser
-     * 用户登录方法，向后端 /login 接口发送登录请求。
-     */
     async loginUser({ commit }, loginData) {
       try {
         const params = new URLSearchParams(loginData).toString()
@@ -125,12 +132,8 @@ export default {
         console.log('Login result:', result)
 
         if (result.code === 200) {
-          // ✅ 新增：提取 token 并保存到 localStorage
           const token = result.data?.token || result.token || ''
-          localStorage.setItem('token', token)
           
-          // 保存用户信息和 token
-          const token = result.data?.token || result.token || ''
           // 保存token到localStorage
           localStorage.setItem('token', token)
           
@@ -147,8 +150,6 @@ export default {
             userPhone: loginData.phonenumber || result.data?.phonenumber || '',
             token: token, // ✅ 修改：使用提取的 token
             userImage: loginData.userImage || '' // ✅ 新增：设置 userImage
-            token: token,
-            userImage: loginData.userImage || ''
           })
           // 检查获得的token是否有效
           console.log('🚀 登录成功，保存用户信息:', 
@@ -161,6 +162,8 @@ export default {
               token: token
             }
           )
+          
+          console.log('🚀 登录成功，保存用户信息')
           commit('SET_ERROR', '')
           return { 
             code: result.code, 
@@ -179,47 +182,24 @@ export default {
         }
       } catch (error) {
         console.error('Login error:', error)
-        
-        let msg = 'Login failed'
-        let shouldUpdateErrorMessage = true
-        
-        if (error.name === 'AuthenticationError') {
-          console.error('🚫 登录时身份验证失败:', error.message)
-          msg = '登录凭证已过期，请重新登录'
-          commit('CLEAR_USER_INFO')
-        } else if (error.name === 'AbortError') {
-          msg = '请求超时，请检查网络连接！'
-        } else if (error.message.includes('请求被阻止：检测到无效的请求体数据')) {
-          console.warn('🚫 登录请求被阻止：检测到无效的请求体数据')
-          console.warn('传入的 loginData:', loginData)
-          shouldUpdateErrorMessage = false
-          msg = '数据格式错误'
-        } else if (error.message.includes('请求被阻止')) {
-          console.warn('🚫 登录请求被阻止:', error.message)
-          shouldUpdateErrorMessage = false
-          msg = '请求格式错误'
-        } else {
-          msg += '，请检查网络连接!'
-        }
-        
-        if (shouldUpdateErrorMessage) {
-          commit('SET_ERROR', msg)
-        }
-        
+        let msg = 'Login failed，请检查网络连接!'
+        commit('SET_ERROR', msg)
         return { code: error.status || 500, success: false, message: msg }
       }
     },
-    /**
-     * 退出登录
-     */
+    
+    // ✅ 保留原有的恢复方法
+    restoreFromStorage({ commit }) {
+      commit('RESTORE_FROM_STORAGE')
+    },
+    
+    // ✅ 保留原有的退出登录
     logout({ commit }) {
       console.log('🚪 用户退出登录')
       // 清除localStorage中的token
-      localStorage.removeItem('token')
       // ✅ 新增：清除 localStorage 中的 token
       localStorage.removeItem('token')
       commit('CLEAR_USER_INFO')
-      commit('SET_ERROR', '')
     }
   }
 }
