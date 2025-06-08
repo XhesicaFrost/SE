@@ -58,6 +58,7 @@ public class ShopServiceImpl implements ShopService {
         dto.setAddress(shop.getAddress());
         dto.setSales(shop.getSales());
         dto.setStatus(shop.getStatus().toString());
+        dto.setUserId(shop.getUserId());
         
         // 转换标签
         if (shop.getTags() != null) {
@@ -174,5 +175,10 @@ public class ShopServiceImpl implements ShopService {
         } catch (IOException e) {
             throw new RuntimeException("更新店铺图片失败", e);
         }
+    }
+
+    @Override
+    public void updateShop(Shop shop) {
+        shopRepository.save(shop);
     }
 } 

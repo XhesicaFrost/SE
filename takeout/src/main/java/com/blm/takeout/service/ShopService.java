@@ -19,4 +19,5 @@ public interface ShopService {
     Shop getShopByUserId(Integer userId);
     void updateShopImage(Integer shopId, MultipartFile image) throws Exception;
     List<Shop> getShopsByUserOrders(Integer userId);
+    void updateShop(Shop shop);
 } 

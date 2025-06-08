@@ -17,4 +17,5 @@ public class ShopDTO {
     private String address;
     private Integer sales;
     private String status;
+    private Integer userId;
 }

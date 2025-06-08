@@ -18,4 +18,8 @@ public interface OrderService {
     Order updateOrderStatus(Integer orderId, String status);
     Order updateRiderLocation(Integer orderId, String location);
     List<Map<String, Object>> getOrderHistory(Integer userId);
+    List<Order> getOrdersByUserId(Integer userId);
+    List<Order> getOrdersByShopId(Integer shopId);
+    void updateOrderStatus(Integer orderId, Order.OrderStatus status);
+    List<Order> getAllOrders();
 } 

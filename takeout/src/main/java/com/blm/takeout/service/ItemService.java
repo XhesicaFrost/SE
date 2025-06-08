@@ -22,4 +22,5 @@ public interface ItemService {
     void offlineItem(Integer itemId, Integer shopId) throws Exception;
     void onlineItem(Integer itemId, Integer shopId) throws Exception;
     List<Item> getNormalAndOffShelfItemsByShop(Integer shopId);
+    List<Item> getAllItems();
 } 

@@ -94,7 +94,7 @@ export default {
       try {
         const response = await fetchWithTimeout(`${BASE_URL}/admin/items`)
         const result = await response.json()
-        if (result.success && Array.isArray(result.data)) {
+        if (result.code === 200 && Array.isArray(result.data)) {
           this.items = result.data
         } else {
           this.items = []
@@ -108,7 +108,7 @@ export default {
       try {
         const response = await fetchWithTimeout(`${BASE_URL}/admin/shops`)
         const result = await response.json()
-        if (result.success && Array.isArray(result.data)) {
+        if (result.code === 200 && Array.isArray(result.data)) {
           this.shops = result.data
         } else {
           this.shops = []
@@ -127,17 +127,17 @@ export default {
     },
     async toggleItemStatus(itemId, currentStatus) {
       try {
+        const formData = new FormData()
+        formData.append('itemId', itemId)
+        formData.append('status', currentStatus ? 'disable' : 'enable')
+        
         const response = await fetchWithTimeout(`${BASE_URL}/admin/item/status`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            itemId, 
-            status: currentStatus ? 'disable' : 'enable' 
-          })
+          body: formData
         })
         
         const result = await response.json()
-        if (result.success) {
+        if (result.code === 200) {
           this.fetchItems()
         } else {
           alert('操作失败: ' + (result.message || '未知错误'))

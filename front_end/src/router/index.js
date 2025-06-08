@@ -184,10 +184,24 @@ const routes = [
     meta: { allow: ['admin'] }
   },
   {
+    path: '/admin/shop/edit/:id',
+    name: 'AdminShopEdit',
+    component: () => import('@/views/AdminViews/AdminShopEdit.vue'),
+    meta: { allow: ['admin'] },
+    props: true
+  },
+  {
     path: '/admin/items',
     name: 'AdminItemManage',
     component: () => import('@/views/AdminViews/AdminItemManage.vue'),
     meta: { allow: ['admin'] }
+  },
+  {
+    path: '/admin/item/edit/:id',
+    name: 'AdminItemEdit',
+    component: () => import('@/views/AdminViews/AdminItemEdit.vue'),
+    meta: { allow: ['admin'] },
+    props: true
   },
   {
     path: '/admin/orders',

@@ -151,10 +151,10 @@ export default {
       this.errorMessage = ''
       // 构造 FormData
       const formData = new FormData()
-      formData.append('shopName', this.shopName)
-      formData.append('shopAddress', this.shopAddress)
+      formData.append('name', this.shopName)
+      formData.append('address', this.shopAddress)
       if (this.shopImage) {
-        formData.append('shopImage', this.shopImage)
+        formData.append('image', this.shopImage)
       }
       formData.append('sellerId', this.sellerId)
       // ✅ 新增：添加标签数据到表单
@@ -166,7 +166,7 @@ export default {
           body: formData
         })
         const result = await response.json()
-        if (result.data.status === 'success') {
+        if (result.code === 200) {
           this.submitStatus = 'success'
         } else {
           this.errorMessage = '未能成功修改，请重试'

@@ -161,4 +161,27 @@ public class OrderServiceImpl implements OrderService {
             return orderMap;
         }).collect(Collectors.toList());
     }
+
+    @Override
+    public List<Order> getAllOrders() {
+        return orderRepository.findAll();
+    }
+
+    @Override
+    public List<Order> getOrdersByUserId(Integer userId) {
+        return orderRepository.findByUserId(userId);
+    }
+
+    @Override
+    public List<Order> getOrdersByShopId(Integer shopId) {
+        return orderRepository.findByShopId(shopId);
+    }
+
+    @Override
+    public void updateOrderStatus(Integer orderId, Order.OrderStatus status) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new RuntimeException("订单不存在"));
+        order.setStatus(status);
+        orderRepository.save(order);
+    }
 } 

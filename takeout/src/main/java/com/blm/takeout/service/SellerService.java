@@ -87,11 +87,20 @@ public class SellerService {
             shopRepository.save(shop);
         }
     }
+
+    public List<String> parseTags(String shopTags) throws Exception {
+        return objectMapper.readValue(shopTags, new TypeReference<List<String>>() {});
+    }
+
+    public void saveSeller(Seller seller) {
+        sellerRepository.save(seller);
+    }
+
     public Seller getSellerByUserId(Integer userId) {
         return sellerRepository.findByUser_Userid(userId).orElse(null);
     }
+
     public Seller getSellerById(Integer sellerId) {
         return sellerRepository.findById(sellerId).orElse(null);
     }
-    
 }

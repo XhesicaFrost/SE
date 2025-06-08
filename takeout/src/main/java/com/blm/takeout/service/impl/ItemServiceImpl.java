@@ -165,6 +165,11 @@ public class ItemServiceImpl implements ItemService {
         itemRepository.save(item);
     }
 
+    @Override
+    public List<Item> getAllItems() {
+        return itemRepository.findAll();
+    }
+
     private ItemDTO convertToDTO(Item item) {
         ItemDTO dto = new ItemDTO();
         dto.setId(item.getId());

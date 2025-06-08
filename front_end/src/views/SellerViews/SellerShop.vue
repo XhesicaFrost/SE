@@ -226,6 +226,8 @@ export default {
           return '正常'
         case '下架':
           return '已下架'
+        case '审批中':
+          return '审批中'
         default:
           return '未知'
       }
@@ -241,6 +243,8 @@ export default {
           return 'status-online'
         case '下架':
           return 'status-offline'
+        case '审批中':
+          return 'status-pending'
         default:
           return 'status-unknown'
       }
@@ -252,6 +256,12 @@ export default {
     async toggleItemStatus(item) {
       const isOnline = item.status === '正常'
       const action = isOnline ? '下架' : '上架'
+      
+      // 如果商品状态为"审批中"，不允许上架
+      if (!isOnline && item.status === '审批中') {
+        alert('该商品正在审批中，暂时不能上架')
+        return
+      }
       
       if (!confirm(`确定要${action}商品"${item.name}"吗？`)) {
         return
@@ -489,16 +499,16 @@ export default {
   font-weight: bold;
 }
 .status-online {
-  background: #e8f5e8;
   color: #4caf50;
 }
 .status-offline {
-  background: #ffeaa7;
-  color: #e17055;
+  color: #f44336;
+}
+.status-pending {
+  color: #ff9800;
 }
 .status-unknown {
-  background: #f5f5f5;
-  color: #999;
+  color: #9e9e9e;
 }
 .online-btn {
   background: #4caf50;

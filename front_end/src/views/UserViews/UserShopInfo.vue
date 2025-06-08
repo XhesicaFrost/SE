@@ -190,7 +190,7 @@ export default {
         const response = await fetchWithTimeout(`${BASE_URL}/items?${params}`)
         const result = await response.json()
         if (result.code === 200 && Array.isArray(result.data)) {
-          this.products = result.data
+          this.products = result.data.filter(item => item.status === '正常')
         }
       } catch (e) {
         console.error('获取分类信息失败', e)

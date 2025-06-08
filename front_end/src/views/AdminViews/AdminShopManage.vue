@@ -81,7 +81,7 @@ export default {
       try {
         const response = await fetchWithTimeout(`${BASE_URL}/admin/shops`)
         const result = await response.json()
-        if (result.success && Array.isArray(result.data)) {
+        if (result.code === 200 && Array.isArray(result.data)) {
           this.shops = result.data.map(shop => ({
             ...shop,
             status: shop.isActive ? '正常' : '已禁用'
@@ -111,7 +111,7 @@ export default {
         })
         
         const result = await response.json()
-        if (result.success) {
+        if (result.code === 200) {
           this.fetchShops()
         } else {
           alert('操作失败: ' + (result.message || '未知错误'))

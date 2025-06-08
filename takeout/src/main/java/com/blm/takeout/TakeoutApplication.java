@@ -20,10 +20,10 @@ public class TakeoutApplication {
 	@Bean
 	CommandLineRunner initAdmin(UserRepository userRepository, PasswordEncoder passwordEncoder) {
 		return args -> {
-		if (!userRepository.existsByPhonenumberAndRole("00000000000", Role.admin)) {
+		if (!userRepository.existsByPhonenumberAndRole("11111111111", Role.admin)) {
 			User admin = new User();
 			admin.setUsername("admin");
-			admin.setPhonenumber("00000000000");
+			admin.setPhonenumber("11111111111");
 			admin.setPassword(passwordEncoder.encode("admin123"));
 			admin.setRole(Role.admin);
 			userRepository.save(admin);
