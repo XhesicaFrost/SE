@@ -97,17 +97,28 @@ export default {
     // 获取购物车数据
     async fetchCartItems() {
       try {
-        const params = new URLSearchParams({ userId: this.$store.state.userStore.userId }).toString()
-        const response = await fetchWithTimeout(`${BASE_URL}/shopcart?${params}`)
-        const result = await response.json()
+        const userId = this.$store.state.userStore.userInfo.userId;
+        console.log('获取购物车数据，用户ID:', userId);
+        
+        if (!userId) {
+          console.error('用户ID未获取到');
+          this.groupedCartItems = [];
+          return;
+        }
+        
+        const response = await fetchWithTimeout(`${BASE_URL}/cart_items/user/shopcart?userId=${userId}`);
+        console.log('购物车API响应:', response);
+        const result = await response.json();
+        console.log('购物车数据:', result);
+        
         if (result.code === 200 && Array.isArray(result.data)) {
           this.groupedCartItems = result.data;
         } else {
           this.groupedCartItems = [];
         }
       } catch (error) {
+        console.error('获取购物车数据失败:', error);
         this.groupedCartItems = [];
-        console.error('获取购物车数据失败:', error)
       }
     },
     async submitCartItems(shopId, productId, change) {
@@ -156,7 +167,13 @@ export default {
     }
   },
   mounted() {
-    this.fetchCartItems()
+    console.log('购物车组件挂载，当前用户信息:', this.$store.state.userStore.userInfo);
+    if (!this.$store.state.userStore.userInfo.userId) {
+      console.error('用户未登录，重定向到登录页面');
+      this.$router.push('/login');
+      return;
+    }
+    this.fetchCartItems();
   }
 }
 </script>

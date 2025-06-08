@@ -5,24 +5,20 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "cart_item")
+@Table(name = "cart_items")
 public class CartItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "user_id")
     private Integer userId;
 
-    @Column(name = "item_id", nullable = false)
-    private Integer itemId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "item_id")
+    private Item item;
 
-    @Column(nullable = false)
     private Integer quantity;
-
-    @Column(nullable = false)
     private Double price;
-
-    @Column(nullable = false)
-    private Boolean selected = true;
+    private Boolean selected;
 } 

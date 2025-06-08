@@ -24,11 +24,11 @@
           <div class="goods-desc">{{ product.description }}</div>
           <div class="goods-bottom">
             <div class="goods-price">¥{{ product.price }}</div>
-            <div class="quantity-control" v-if="cart[product.id] && cart[product.id].quantity > 0">
+            <div class="quantity-control" v-if="getCartItemQuantity(product.id) > 0">
               <div class="quantity-btn quantity-minus" @click="decreaseQuantity(product)">
                 -
               </div>
-              <div class="quantity-num">{{ cart[product.id].quantity }}</div>
+              <div class="quantity-num">{{ getCartItemQuantity(product.id) }}</div>
               <div class="quantity-btn" @click="addToCart(product)">
                 +
               </div>
@@ -71,19 +71,19 @@
               <div 
                 class="quantity-btn quantity-minus" 
                 @click="decreaseQuantity(currentProduct)"
-                :class="{ disabled: !cart[currentProduct.id] || cart[currentProduct.id].quantity <= 0 }"
+                :class="{ disabled: getCartItemQuantity(currentProduct.id) <= 0 }"
               >
                 -
               </div>
               <div class="quantity-num">
-                {{ cart[currentProduct.id] ? cart[currentProduct.id].quantity : 0 }}
+                {{ getCartItemQuantity(currentProduct.id) }}
               </div>
               <div class="quantity-btn" @click="addToCart(currentProduct)">
                 +
               </div>
             </div>
             <div class="add-to-cart-btn" @click="addToCart(currentProduct)">
-              {{ cart[currentProduct.id] && cart[currentProduct.id].quantity > 0 ? '继续添加' : '加入购物车' }}
+              {{ getCartItemQuantity(currentProduct.id) > 0 ? '继续添加' : '加入购物车' }}
             </div>
           </div>
         </div>
@@ -142,27 +142,32 @@ export default {
     },
     async submitCartItems(shopId, productId, change) {
       try {
-        const formData = new FormData()
-        formData.append('shopId', shopId)
-        formData.append('productId', productId)
-        if(change) formData.append('change', change)
+        const userId = this.$store.state.userStore.userInfo.userId;
+        if (!userId) {
+          console.error('用户未登录');
+          this.$router.push('/login');
+          return;
+        }
 
-        const params = new URLSearchParams({ userId: this.$store.state.userStore.userId }).toString()
-        const response = await fetchWithTimeout(`${BASE_URL}/edit/shopcart?${params}`, {
+        const formData = new FormData();
+        formData.append('shopId', shopId);
+        formData.append('productId', productId);
+        if(change) formData.append('change', change);
+
+        const response = await fetchWithTimeout(`${BASE_URL}/edit/shopcart?userId=${userId}`, {
           method: 'POST',
           body: formData
-        })
+        });
 
-        const result = await response.json()
+        const result = await response.json();
         if (result.success) {
-          alert('购物车修改成功！')
-          this.$router.go(-1)
+          this.fetchCartItems();
         } else {
-          alert('购物车修改失败，请重试！')
+          alert('购物车修改失败，请重试！');
         }
       } catch (error) {
-        console.error('购物车修改失败:', error)
-        alert('购物车修改失败，请检查网络连接！')
+        console.error('购物车修改失败:', error);
+        alert('购物车修改失败，请检查网络连接！');
       }
     },
     async fetchShopInfo() {
@@ -196,24 +201,39 @@ export default {
         console.error('获取分类信息失败', e)
       }
     },
+    getCartItemQuantity(productId) {
+      console.log(this.cart.length)
+      const cartItem = this.cart.find(item => item.product.id === productId);
+      return cartItem ? cartItem.quantity : 0;
+    },
     async fetchCartItems() {
       try {
-        const params = new URLSearchParams({ userId: this.$store.state.userStore.userId }).toString()
-        const response = await fetchWithTimeout(`${BASE_URL}/shopcart?${params}`)
-        const result = await response.json()
+        const userId = this.$store.state.userStore.userInfo.userId;
+        if (!userId) {
+          console.error('用户ID未获取到');
+          this.cart = [];
+          return;
+        }
+
+        const response = await fetchWithTimeout(`${BASE_URL}/cart_items/user/shopcart?userId=${userId}`);
+        const result = await response.json();
+        console.log('获取到的购物车数据:', result);
+        
         if (result.code === 200 && Array.isArray(result.data)) {
-          for (let index = 0; index < result.data.length; index++) {
-            const element = result.data[index];
-            if(this.$route.params.shopId === element.shop.id) {
-              this.cart = element.items;
-            }
-          }
+          // 找到当前店铺的购物车数据
+          const shopCart = result.data.find(shopCart => 
+            String(this.$route.params.shopId) === String(shopCart.shop.id)
+          );
+          console.log('当前店铺ID:', this.$route.params.shopId);
+          console.log('找到的店铺购物车:', shopCart);
+          this.cart = shopCart ? shopCart.items : [];
+          console.log('处理后的购物车数据:', this.cart);
         } else {
           this.cart = [];
         }
       } catch (error) {
-          this.cart = [];
-        console.error('获取购物车数据失败:', error)
+        this.cart = [];
+        console.error('获取购物车数据失败:', error);
       }
     },
     showProductDetail(product) {
