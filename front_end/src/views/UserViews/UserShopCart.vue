@@ -17,7 +17,7 @@
     <!-- 按店铺分组的购物车商品 -->
     <div class="shop-group" v-for="(group, index) in groupedCartItems" :key="index">
       <div class="shop-header">
-        <img :src="group.shop.image" alt="店铺图片" class="shop-img">
+        <img :src="getImageUrl(group.shop.image)" alt="店铺图片" class="shop-img">
         <div class="shop-info">
           <h3>{{ group.shop.name }}</h3>
           <p class="shop-address">{{ group.shop.address }}</p>
@@ -26,7 +26,7 @@
       
       <div class="cart-items">
         <div class="cart-item" v-for="item in group.items" :key="item.product.id">
-          <img :src="item.product.image" alt="商品图片" class="item-img">
+          <img :src="getImageUrl(item.product.image)" alt="商品图片" class="item-img">
           <div class="item-info">
             <div class="item-name">{{ item.product.name }}</div>
             <div class="item-desc">{{ item.product.description }}</div>
@@ -87,6 +87,13 @@ export default {
     }
   },
   methods: {
+    getImageUrl(img) {
+      // 支持base64或url
+      if (!img) return ''
+      if (img.startsWith('data:image')) return img
+      if (img.length > 100) return `data:image/png;base64,${img}`
+      return img
+    },
     // 获取购物车数据
     async fetchCartItems() {
       try {

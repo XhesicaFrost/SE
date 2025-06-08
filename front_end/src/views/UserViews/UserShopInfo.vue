@@ -3,7 +3,7 @@
   <div class="user-shopinfo">
     <!-- 店铺信息栏 -->
     <div class="shop-info-bar">
-      <img :src="shopInfo.image" class="shop-img" />
+      <img :src="getImageUrl(shopInfo.image)" class="shop-img" />
       <div class="shop-info-center">
         <div class="shop-name">{{ shopInfo.name }}</div>
         <div class="shop-address">{{ shopInfo.address }}</div>
@@ -17,7 +17,7 @@
     <div class="goods-list">
       <div v-for="product in products" :key="product.id" class="goods-item">
         <div class="product-img" @click="showProductDetail(product)">
-          <img :src="product.image" alt="商品图片" class="goods-img" />
+          <img :src="getImageUrl(product.image)" alt="商品图片" class="goods-img" />
         </div>
         <div class="goods-info">
           <div class="goods-name">{{ product.name }}</div>
@@ -60,7 +60,7 @@
           ×
         </div>
         <div class="detail-img">
-          <img :src="currentProduct.image" alt="商品图片" class="goods-img" />
+          <img :src="getImageUrl(currentProduct.image)" alt="商品图片" class="goods-img" />
         </div>
         <div class="goods-info">
           <div class="goods-name">{{ currentProduct.name }}</div>
@@ -133,6 +133,13 @@ export default {
     }
   },
   methods: {
+    getImageUrl(img) {
+      // 支持base64或url
+      if (!img) return ''
+      if (img.startsWith('data:image')) return img
+      if (img.length > 100) return `data:image/png;base64,${img}`
+      return img
+    },
     async submitCartItems(shopId, productId, change) {
       try {
         const formData = new FormData()

@@ -61,7 +61,7 @@
         :key="shop.id"
         @click="viewShop(shop.id)"
       >
-        <img :src="shop.image" alt="店铺图片" class="shop-img">
+        <img :src="getImageUrl(shop.image)" alt="店铺图片" class="shop-img">
         <div class="shop-info">
           <div>
             <div class="shop-header">
@@ -157,6 +157,13 @@ export default {
     }
   },
   methods: {
+    getImageUrl(img) {
+      // 支持base64或url
+      if (!img) return ''
+      if (img.startsWith('data:image')) return img
+      if (img.length > 100) return `data:image/png;base64,${img}`
+      return img
+    },
     setFilter(filterType) {
       this.activeFilter = filterType;
     },

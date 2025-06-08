@@ -3,7 +3,7 @@
   <div class="user-payment">
     <!-- 商家信息 -->
     <div class="shop-info">
-      <img :src="shopInfo.image" class="shop-img" />
+      <img :src="getImageUrl(shopInfo.image)" class="shop-img" />
       <div class="shop-details">
         <div class="shop-name">{{ shopInfo.name }}</div>
         <div class="shop-address">{{ shopInfo.address }}</div>
@@ -64,6 +64,13 @@ export default {
     }
   },
   methods: {
+    getImageUrl(img) {
+      // 支持base64或url
+      if (!img) return ''
+      if (img.startsWith('data:image')) return img
+      if (img.length > 100) return `data:image/png;base64,${img}`
+      return img
+    },
     async fetchShopInfo() {
       try {
         const params = new URLSearchParams({ shopId: this.$route.params.shopId }).toString()
