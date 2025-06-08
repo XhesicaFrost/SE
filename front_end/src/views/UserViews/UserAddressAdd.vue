@@ -21,7 +21,7 @@
 
 <script>
 import TopNav from '@/components/topNav.vue'
-import { BASE_URL } from '@/config.js'
+import { BASE_URL, fetchWithTimeout } from '@/config.js'
 
 export default {
   name: 'userAddressAdd',
@@ -49,7 +49,7 @@ export default {
         formData.append('fullAddress', this.address.fullAddress)
         formData.append('current', this.address.current)
 
-        const response = await fetch(`${BASE_URL}/address/add`, {
+        const response = await fetchWithTimeout(`${BASE_URL}/address/add`, {
           method: 'POST',
           body: formData
         })
