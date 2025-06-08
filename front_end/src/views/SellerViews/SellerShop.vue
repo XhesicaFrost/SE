@@ -166,7 +166,7 @@ export default {
     async fetchShopInfo() {
       try {
         const params = new URLSearchParams({ sellerId: this.sellerId }).toString()
-        const response = await fetchWithTimeout(`${BASE_URL}/shop?${params}`)
+        const response = await fetchWithTimeout(`${BASE_URL}/seller/shop?${params}`)
         const result = await response.json()
         if (result.code === 200) {
           this.shopInfo = {
