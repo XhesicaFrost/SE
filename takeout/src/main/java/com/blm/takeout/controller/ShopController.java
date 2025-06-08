@@ -3,6 +3,7 @@ package com.blm.takeout.controller;
 import com.blm.takeout.dto.ShopDTO;
 import com.blm.takeout.entity.Shop;
 import com.blm.takeout.service.ShopService;
+import com.blm.takeout.util.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,15 +70,39 @@ public class ShopController {
         try {
             ShopDTO shop = shopService.getShopById(shopId);
             Map<String, Object> response = new HashMap<>();
-            response.put("name", shop.getName());
-            response.put("image", shop.getImage());
-            response.put("address", shop.getAddress());
-            response.put("rating", shop.getRating());
-            response.put("monthlySales", shop.getSales());
-            response.put("deliveryTime", shop.getDeliverTime());
+            response.put("code", 200);
+            response.put("success", true);
+            
+            Map<String, Object> data = new HashMap<>();
+            data.put("id", shop.getId());
+            data.put("name", shop.getName());
+            
+            // 将图片转换为base64
+            if (shop.getImage() != null && !shop.getImage().isEmpty()) {
+                try {
+                    String base64Image = FileUtils.convertImageToBase64(shop.getImage());
+                    data.put("image", base64Image);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    data.put("image", "");
+                }
+            } else {
+                data.put("image", "");
+            }
+            
+            data.put("address", shop.getAddress());
+            data.put("rating", shop.getRating());
+            data.put("monthlySales", shop.getSales());
+            data.put("deliveryTime", shop.getDeliverTime());
+            
+            response.put("data", data);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("code", 500);
+            errorResponse.put("success", false);
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
         }
     }
 

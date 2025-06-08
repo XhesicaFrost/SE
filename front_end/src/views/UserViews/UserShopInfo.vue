@@ -134,11 +134,14 @@ export default {
   },
   methods: {
     getImageUrl(img) {
-      // 支持base64或url
-      if (!img) return ''
-      if (img.startsWith('data:image')) return img
-      if (img.length > 100) return `data:image/png;base64,${img}`
-      return img
+      console.log('原始图片数据:', img)
+      if (!img) {
+        console.log('图片数据为空')
+        return ''
+      }
+      const base64Url = `data:image/jpeg;base64,${img}`
+      console.log('生成的base64 URL:', base64Url)
+      return base64Url
     },
     async submitCartItems(shopId, productId, change) {
       try {
@@ -175,16 +178,19 @@ export default {
         const params = new URLSearchParams({ shopId: this.$route.params.shopId }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/shop?${params}`)
         const result = await response.json()
+        console.log('API返回的原始数据:', result)
         if (result.code === 200) {
+          console.log('店铺图片数据:', result.data.image)
           this.shopInfo = {
             id: result.data.id,
-            name: result.data.shopName,
-            image: result.data.shopImg,
-            address: result.data.shopAddress,
+            name: result.data.name,
+            image: result.data.image,
+            address: result.data.address,
             rating: result.data.rating,
-            monthlySales: result.data.monthlySales,
-            deliveryTime: result.data.deliveryTime
+            monthlySales: result.data.sales,
+            deliveryTime: result.data.deliverTime
           }
+          console.log('处理后的店铺信息:', this.shopInfo)
         }
       } catch (e) {
         console.error('获取店铺信息失败', e)
