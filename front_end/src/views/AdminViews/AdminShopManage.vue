@@ -19,10 +19,10 @@
           <button class="edit-btn" @click.stop="editShop(shop.id)">编辑</button>
           <button 
             class="toggle-btn" 
-            :class="{ 'disable-btn': shop.status === '封禁中' }"
+            :class="{ 'disable-btn': shop.status === '封禁中' || shop.status === '审批中' }"
             @click.stop="toggleShopStatus(shop.id, shop.status)"
           >
-            {{ shop.status === '封禁中' ? '启用' : '禁用' }}
+            {{ shop.status === '审批中' || shop.status === '封禁中' ? '启用' : '禁用' }}
           </button>
           <button class="review-btn" @click.stop="reviewComments(shop.id)">审核评论</button>
         </div>
@@ -220,20 +220,20 @@ export default {
 }
 
 .toggle-btn {
-  background: #2196f3;
+  background: #f44336;  /* 默认红色（禁用） */
   color: white;
 }
 
 .toggle-btn:hover {
-  background: #1976d2;
+  background: #d32f2f;
 }
 
 .disable-btn {
-  background: #f44336;
+  background: #2196f3;  /* 蓝色（启用） */
 }
 
 .disable-btn:hover {
-  background: #d32f2f;
+  background: #1976d2;
 }
 
 .pagination-bar {

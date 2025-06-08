@@ -40,10 +40,10 @@
           <button class="edit-btn" @click="editItem(item.id)">编辑</button>
           <button 
             class="toggle-btn" 
-            :class="{ 'disable-btn': item.status === '审批中' }"
+            :class="{ 'disable-btn': item.status === '下架' || item.status === '审批中' }"
             @click.stop="toggleItemStatus(item.id, item.status)"
           >
-            {{ item.status === '正常' ? '下架' : '上架' }}
+            {{ item.status === '下架' || item.status === '审批中' ? '上架' : '下架' }}
           </button>
         </div>
       </div>
@@ -278,20 +278,20 @@ export default {
 }
 
 .toggle-btn {
-  background: #2196f3;
+  background: #f44336;
   color: white;
 }
 
 .toggle-btn:hover {
-  background: #1976d2;
+  background: #d32f2f;
 }
 
 .disable-btn {
-  background: #ff9800;
+  background: #2196f3;
 }
 
 .disable-btn:hover {
-  background: #f57c00;
+  background: #1976d2;
 }
 
 .empty-tip {
