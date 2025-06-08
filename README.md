@@ -231,6 +231,7 @@ GET /user/kind?userId=rider123
 | ----------- | ------- | ------------ | -------- |
 | shopName    | string  | 店铺名称     | 是       |
 | shopAddress | string  | 店铺地址     | 是       |
+| shopTags | string | 店铺tags | 是 |
 | shopImage   | file    | 店铺图片     | 是       |
 
 - **请求示例**：
@@ -305,7 +306,8 @@ shopImage=文件
   "data": {
     "shopName": "示例店铺",
     "shopImg": "https://xxx.com/shop.jpg",
-    "shopAddress": "示例地址"
+    "shopAddress": "示例地址",
+    "shopTags":"['1','2']"
   }
 }
 ```
@@ -428,7 +430,7 @@ itemDescription=奶龙喜欢吃
 #### 1. 下架商品
 
 - **请求方式**：POST  
-- **请求地址**：`${BASE_URL}/item/offline`  
+- **请求地址**：`${BASE_URL}/seller/item/offline`  
 - **发送数据格式**：JSON
 
 | 参数名   | 类型   | 说明     | 是否必填 |
@@ -462,7 +464,7 @@ itemDescription=奶龙喜欢吃
 
 - 请求方式：POST
 
-- 请求地址：${BASE_URL}/item/online
+- 请求地址：${BASE_URL}/seller/item/online
 
 - 发送数据格式：JSON
 
@@ -543,6 +545,7 @@ GET /shop?sellerId=xxx
 | shopName    | string | 店铺名称     | 是       |
 | shopAddress | string | 店铺地址     | 是       |
 | shopImage   | file   | 店铺图片     | 否（如未更改可不传） |
+| shopTags | string | 店铺tags | 是 |
 | sellerId  | string | 商家ID       | 是       |
 
 - **请求示例**：
@@ -554,6 +557,7 @@ shopName=示例店铺
 shopAddress=示例地址
 shopImage=文件（可选）
 sellerId=xxx
+shopTags=['1','2']
 ```
 
 - **返回数据格式**（JSON）：

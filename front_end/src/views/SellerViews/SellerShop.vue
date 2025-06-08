@@ -289,7 +289,7 @@ export default {
     async offlineItem(itemId) {
       console.log('🔽 执行下架商品:', itemId)
       
-      const response = await fetchWithTimeout(`${BASE_URL}/item/offline`, {
+      const response = await fetchWithTimeout(`${BASE_URL}/seller/item/offline`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json' 
@@ -317,7 +317,7 @@ export default {
     async onlineItem(itemId) {
       console.log('🔼 执行上架商品:', itemId)
       
-      const response = await fetchWithTimeout(`${BASE_URL}/item/online`, {
+      const response = await fetchWithTimeout(`${BASE_URL}/seller/item/online`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json' 
