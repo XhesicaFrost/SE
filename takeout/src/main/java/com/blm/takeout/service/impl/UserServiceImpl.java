@@ -10,6 +10,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,6 +20,7 @@ import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -112,35 +115,60 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void updateUser(Integer id, String name, String phone, String image) {
+        logger.debug("Updating user - id: {}, name: {}, phone: {}, image: {}", id, name, phone, image);
+        
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("用户不存在"));
         
-        if (name != null) user.setUsername(name);
-        if (phone != null) user.setPhonenumber(phone);
-        if (image != null) user.setAvatarurl(image);
+        if (name != null && !name.trim().isEmpty()) {
+            user.setUsername(name);
+        }
+        if (phone != null && !phone.trim().isEmpty()) {
+            user.setPhonenumber(phone);
+        }
+        if (image != null && !image.trim().isEmpty()) {
+            user.setAvatarurl(image);
+        }
         
-        userRepository.save(user);
+        try {
+            userRepository.save(user);
+            logger.debug("User updated successfully");
+        } catch (Exception e) {
+            logger.error("Error updating user: {}", e.getMessage());
+            throw new RuntimeException("更新用户信息失败: " + e.getMessage());
+        }
     }
 
     @Override
     public String saveImage(MultipartFile file) throws IOException {
-        // 创建上传目录
-        Path uploadPath = Paths.get(uploadDir);
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
+        if (file == null || file.isEmpty()) {
+            logger.warn("Received empty file");
+            return null;
         }
 
-        // 生成唯一文件名
-        String originalFilename = file.getOriginalFilename();
-        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-        String filename = UUID.randomUUID().toString() + extension;
+        try {
+            // 创建上传目录
+            Path uploadPath = Paths.get(uploadDir);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
 
-        // 保存文件
-        Path filePath = uploadPath.resolve(filename);
-        Files.copy(file.getInputStream(), filePath);
+            // 生成唯一文件名
+            String originalFilename = file.getOriginalFilename();
+            String extension = originalFilename != null ? 
+                originalFilename.substring(originalFilename.lastIndexOf(".")) : ".jpg";
+            String filename = UUID.randomUUID().toString() + extension;
 
-        // 返回文件URL
-        return "/uploads/" + filename;
+            // 保存文件
+            Path filePath = uploadPath.resolve(filename);
+            Files.copy(file.getInputStream(), filePath);
+
+            logger.debug("Image saved successfully at: {}", filePath);
+            return "/uploads/" + filename;
+        } catch (Exception e) {
+            logger.error("Error saving image: {}", e.getMessage());
+            throw new IOException("保存图片失败: " + e.getMessage());
+        }
     }
 
     private UserDTO convertToDTO(User user) {

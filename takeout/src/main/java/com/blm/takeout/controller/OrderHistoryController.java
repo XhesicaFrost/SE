@@ -3,6 +3,9 @@ package com.blm.takeout.controller;
 import com.blm.takeout.service.OrderHistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
@@ -19,10 +22,20 @@ public class OrderHistoryController {
     }
 
     @GetMapping("/history")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Map<String, Object>> getUserOrderHistory(
-            @RequestParam Integer userId,
             @RequestParam(required = false) Integer limit) {
         try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("code", 401);
+                response.put("success", false);
+                response.put("message", "用户未登录");
+                return ResponseEntity.ok(response);
+            }
+            
+            Integer userId = Integer.parseInt(authentication.getName());
             List<Map<String, Object>> orders = orderHistoryService.getUserOrderHistory(userId, limit);
             Map<String, Object> response = new HashMap<>();
             response.put("code", 200);

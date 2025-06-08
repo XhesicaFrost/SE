@@ -18,22 +18,16 @@ public class PersonalController {
 
     @PostMapping("/edit")
     public ResponseEntity<Map<String, String>> editPersonal(
-            @RequestParam(required = false) Integer id,
+            @RequestParam(required = true) Integer id,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String phone,
-            @RequestParam(required = false) MultipartFile image) {
+            @RequestParam(required = false) String image) {
         try {
-            String imageUrl = null;
-            if (image != null && !image.isEmpty()) {
-                // 处理图片上传
-                imageUrl = userService.saveImage(image);
-            }
-            userService.updateUser(id, name, phone, imageUrl);
+            // 更新用户信息
+            userService.updateUser(id, name, phone, image);
+            
             Map<String, String> response = new HashMap<>();
             response.put("status", "success");
-            if (imageUrl != null) {
-                response.put("imageUrl", imageUrl);
-            }
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, String> response = new HashMap<>();

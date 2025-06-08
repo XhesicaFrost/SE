@@ -113,13 +113,18 @@ export default {
         console.log('Login result:', result)
 
         if (result.code === 200) {
+          const token = result.data?.token || result.token || ''
+          // 保存token到localStorage
+          localStorage.setItem('token', token)
+          
           // 保存用户信息和 token
           commit('SET_USER_INFO', {
             userId: result.id || result.data?.id || '',
             userName: loginData.username || result.data?.username || '',
             userKind: loginData.role || result.data?.role || '',
             userPhone: loginData.phonenumber || result.data?.phonenumber || '',
-            token: result.data?.token || result.token || '' // 保存后端返回的 token
+            token: token,
+            userImage: loginData.userImage || ''
           })
           // 检查获得的token是否有效
           console.log('🚀 登录成功，保存用户信息:', 
@@ -129,7 +134,7 @@ export default {
               userKind: loginData.role || result.data?.role || '',
               userPhone: loginData.phonenumber || result.data?.phonenumber || '',
               userImage: loginData.userImage || '',
-              token: result.data?.token || result.token || ''
+              token: token
             }
           )
           commit('SET_ERROR', '')
@@ -186,6 +191,8 @@ export default {
      */
     logout({ commit }) {
       console.log('🚪 用户退出登录')
+      // 清除localStorage中的token
+      localStorage.removeItem('token')
       commit('CLEAR_USER_INFO')
       commit('SET_ERROR', '')
     }

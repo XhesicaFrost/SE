@@ -116,7 +116,15 @@ public class ShopController {
     }
 
     @GetMapping("/user")
-    public List<ShopDTO> getRecommendedShops(@RequestParam Integer userId) {
-        return shopService.getRecommendedShops(userId);
+    public List<ShopDTO> getRecommendedShops(@RequestParam(required = false) String userId) {
+        if (userId == null || userId.equals("undefined")) {
+            return shopService.getAllShops(); // 如果没有userId或userId为undefined，返回所有商店
+        }
+        try {
+            Integer userIdInt = Integer.parseInt(userId);
+            return shopService.getRecommendedShops(userIdInt);
+        } catch (NumberFormatException e) {
+            return shopService.getAllShops(); // 如果userId不是有效的数字，返回所有商店
+        }
     }
 } 
