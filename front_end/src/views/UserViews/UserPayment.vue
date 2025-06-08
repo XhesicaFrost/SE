@@ -78,9 +78,9 @@ export default {
         const result = await response.json()
         if (result.code === 200) {
           this.shopInfo = {
-            name: result.data.shopName,
-            image: result.data.shopImg,
-            address: result.data.shopAddress,
+            name: result.data.name,
+            image: result.data.image,
+            address: result.data.address,
             rating: result.data.rating,
             monthlySales: result.data.monthlySales,
             deliveryTime: result.data.deliveryTime
