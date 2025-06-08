@@ -122,7 +122,7 @@ export default {
     }
   },
   mounted() {
-    this.promotionId = this.$route.params.id
+    this.promotionId = this.$route.params.promotionId
     this.fetchPromotionInfo()
   }
 }
