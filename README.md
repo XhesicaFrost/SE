@@ -231,7 +231,8 @@ GET /user/kind?userId=rider123
 | ----------- | ------- | ------------ | -------- |
 | shopName    | string  | 店铺名称     | 是       |
 | shopAddress | string  | 店铺地址     | 是       |
-| shopTags | string | 店铺tags | 是 |
+| userId | string | 用户id | 是 |
+| shopTags | json string | 店铺tags | 是 |
 | shopImage   | file    | 店铺图片     | 是       |
 
 - **请求示例**：
@@ -545,7 +546,7 @@ GET /shop?sellerId=xxx
 | shopName    | string | 店铺名称     | 是       |
 | shopAddress | string | 店铺地址     | 是       |
 | shopImage   | file   | 店铺图片     | 否（如未更改可不传） |
-| shopTags | string | 店铺tags | 是 |
+| shopTags | json string | 店铺tags | 是 |
 | sellerId  | string | 商家ID       | 是       |
 
 - **请求示例**：

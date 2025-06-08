@@ -121,8 +121,10 @@ export default {
         if ( result.code === 200 && result.data) {
           this.shopName = result.data.shopName
           this.shopAddress = result.data.shopAddress
-          // ✅ 新增：加载店铺标签数据
-          this.shopTags = result.data.shopTags ? JSON.parse(result.data.shopTags) : []
+          // ✅ 修复：根据后端返回的实际数据类型处理
+          this.shopTags = Array.isArray(result.data.shopTags) 
+            ? result.data.shopTags 
+            : (result.data.shopTags ? JSON.parse(result.data.shopTags) : [])
           // 服务器返回 base64 图片数据
           this.shopImageUrl = result.data.shopImg
             ? `data:image/png;base64,${result.data.shopImg}`

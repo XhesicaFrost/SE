@@ -66,7 +66,7 @@ export default {
         formData.append('fullAddress', this.address.fullAddress)
         formData.append('current', this.address.current)
 
-        const response = await fetch(`${BASE_URL}/address/edit`, {
+        const response = await fetchWithTimeout(`${BASE_URL}/address/edit`, {
           method: 'POST',
           body: formData
         })
