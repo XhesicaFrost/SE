@@ -51,12 +51,24 @@ export default {
   methods: {
     async submitEdit() {
       try {
+        const token = localStorage.getItem('token')
+        if (!token) {
+          alert('请先登录')
+          this.$router.push('/login')
+          return
+        }
+        const formData = new FormData()
+        formData.append('id', this.userInfo.userId)
+        formData.append('name', this.formData.name)
+        formData.append('phone', this.formData.phone)
+        formData.append('image', this.formData.image)
+
         const response = await fetchWithTimeout(`${BASE_URL}/personal/edit`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'multipart/form-data'
+            'Authorization': `Bearer ${token}`
           },
-          body: this.createFormData(this.formData)
+          body: formData
         });
         const result = await response.json();
         if (result.status === 'success') {
