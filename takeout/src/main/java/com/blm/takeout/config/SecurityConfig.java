@@ -55,7 +55,11 @@ public class SecurityConfig {
                     "/shop",
                     "/shop/**",
                     "/items",
-                    "/items/**"
+                    "/items/**",
+                    "/user/**",
+                    "/seller/**",
+                    "/rider/**",
+                    "/admin/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             )

@@ -3,6 +3,7 @@ package com.blm.takeout.controller;
 import com.blm.takeout.dto.UserDTO;
 import com.blm.takeout.entity.User;
 import com.blm.takeout.service.UserService;
+import com.blm.takeout.service.ShopService;
 import com.blm.takeout.util.FileUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +21,12 @@ import java.util.Map;
 @RequestMapping("/api")
 public class UserController {
     private final UserService userService;
+    private final ShopService shopService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, ShopService shopService) {
         this.userService = userService;
+        this.shopService = shopService;
     }
 
     @GetMapping("/users/{id}")
@@ -134,6 +137,32 @@ public class UserController {
             errorResponse.put("success", false);
             errorResponse.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getRecommendedShops(@RequestHeader("Authorization") String token) {
+        try {
+            // 从 token 中获取用户 ID
+            String userIdStr = token.split("\\.")[1];
+            String decodedPayload = new String(java.util.Base64.getDecoder().decode(userIdStr));
+            Map<String, Object> payload = new com.fasterxml.jackson.databind.ObjectMapper().readValue(decodedPayload, Map.class);
+            Integer userId = (Integer) payload.get("userid");
+
+            // 获取推荐店铺
+            var shops = shopService.getRecommendedShops(userId);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("code", 200);
+            response.put("success", true);
+            response.put("data", shops);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("code", 500);
+            response.put("success", false);
+            response.put("message", "获取推荐店铺失败：" + e.getMessage());
+            return ResponseEntity.ok(response);
         }
     }
 } 

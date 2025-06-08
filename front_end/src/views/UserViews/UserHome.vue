@@ -54,13 +54,13 @@ export default {
           return
         }
 
-        const response = await fetchWithTimeout(`${BASE_URL}/user`, {
+        const response = await fetchWithTimeout(`${BASE_URL}/shops`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         })
         const result = await response.json()
-        if (result.success && result.code === 200) {
+        if (result.code === 200) {
           this.recommendedShops = result.data
         } else {
           this.recommendedShops = []
