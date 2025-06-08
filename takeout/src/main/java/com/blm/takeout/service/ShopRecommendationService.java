@@ -159,7 +159,7 @@ public class ShopRecommendationService {
         
         // 配送时间匹配度
         if (preference.getMaxDeliveryTime() != null && 
-            shop.getDeliveryTime() <= preference.getMaxDeliveryTime()) {
+            shop.getDeliverTime() <= preference.getMaxDeliveryTime()) {
             score += 0.2;
         }
         
@@ -194,7 +194,7 @@ public class ShopRecommendationService {
         }
         
         if (preference.getMaxDeliveryTime() != null && 
-            shop.getDeliveryTime() <= preference.getMaxDeliveryTime()) {
+            shop.getDeliverTime() <= preference.getMaxDeliveryTime()) {
             reasons.add("配送时间符合您的要求");
         }
         
@@ -229,7 +229,7 @@ public class ShopRecommendationService {
                     "rating", shop.getRating(),
                     "minPrice", shop.getMinPrice(),
                     "maxPrice", shop.getMaxPrice(),
-                    "deliveryTime", shop.getDeliveryTime(),
+                    "deliveryTime", shop.getDeliverTime(),
                     "location", Map.of(
                         "latitude", shop.getLatitude(),
                         "longitude", shop.getLongitude()

@@ -40,7 +40,12 @@ public class SecurityConfig {
                     "/register",
                     "/login", 
                     "/v3/api-docs/**",
-                    "/error"
+                    "/error",
+                    "/shops",
+                    "/shop",
+                    "/items",
+                    "/shopcart",
+                    "/history"
                 ).permitAll()
                 .anyRequest().authenticated()
             )

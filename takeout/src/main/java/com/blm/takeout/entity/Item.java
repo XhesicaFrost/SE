@@ -9,14 +9,14 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "items")
+@Table(name = "item")
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false, unique = true)
     private Integer id;
 
-    @Column(nullable = false)
+    @Column(name = "shop_id")
     private Integer shopId;
 
     @Column(nullable = false)
@@ -28,10 +28,10 @@ public class Item {
     @Column(nullable = false)
     private Double price;
 
-    @Column(length = 200)
+    @Column
     private String image;
 
-    @Column(columnDefinition = "TEXT")
+    @Column
     private String description;
 
     @Column(nullable = false)
@@ -50,4 +50,8 @@ public class Item {
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shop_id", referencedColumnName = "id", insertable = false, updatable = false)
+    private Shop shop;
 } 

@@ -2,7 +2,6 @@ package com.blm.takeout.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -12,50 +11,32 @@ import java.util.List;
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false)
+    private Integer id;
+    
+    @Column(unique = true)
+    private String orderNumber;
+    
     private Integer userId;
-
-    @Column(nullable = false)
     private Integer shopId;
-
-    @Column(nullable = false)
     private String shopName;
-
-    @Column(nullable = false)
     private String shopImage;
-
-    @Column(nullable = false)
-    private BigDecimal totalAmount;
-
+    private String shopAddress;
+    private Double totalAmount;
+    
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private OrderStatus status;
-
-    @Column(nullable = false)
+    
     private String deliveryAddress;
-
-    @Column(nullable = false)
     private String deliveryPhone;
-
-    @Column(nullable = false)
     private String deliveryName;
-
     private Integer riderId;
     private String riderName;
     private String riderPhone;
     private String riderLocation;
-
-    @Column(nullable = false)
+    
     private LocalDateTime createdAt;
-
-    @Column(nullable = false)
     private LocalDateTime updatedAt;
-
-    @Column(nullable = false, unique = true)
-    private String orderNumber;
-
+    
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
 

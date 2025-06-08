@@ -8,18 +8,33 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
+import java.util.List;
+import java.util.HashMap;
+import java.util.stream.Collectors;
+import com.blm.takeout.dto.ItemDTO;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
-@RequestMapping("/api/items")
 public class ItemController {
 
     private final ItemService itemService;
 
+    @Autowired
     public ItemController(ItemService itemService) {
         this.itemService = itemService;
     }
 
-    @GetMapping("/search")
+    @GetMapping("/items")
+    public ResponseEntity<List<ItemDTO>> getItemsByShopId(@RequestParam Integer shopId) {
+        try {
+            List<ItemDTO> items = itemService.getItemsByShopId(shopId);
+            return ResponseEntity.ok(items);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/api/items/search")
     public ResponseEntity<Page<Item>> searchItems(
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "0") int page,
@@ -31,8 +46,8 @@ public class ItemController {
         return ResponseEntity.ok(items);
     }
 
-    @GetMapping("/shop/{shopId}")
-    public ResponseEntity<Page<Item>> getItemsByShopId(
+    @GetMapping("/api/items/shop/{shopId}")
+    public ResponseEntity<Map<String, Object>> getItemsByShopId(
             @PathVariable Integer shopId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -40,10 +55,28 @@ public class ItemController {
         
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(sortBy));
         Page<Item> items = itemService.getItemsByShopId(shopId, pageRequest);
-        return ResponseEntity.ok(items);
+        
+        List<Map<String, Object>> itemList = items.getContent().stream()
+            .map(item -> {
+                Map<String, Object> itemMap = new HashMap<>();
+                itemMap.put("id", item.getId());
+                itemMap.put("image", item.getImage());
+                itemMap.put("name", item.getName());
+                itemMap.put("description", item.getDescription());
+                itemMap.put("price", item.getPrice());
+                return itemMap;
+            })
+            .collect(Collectors.toList());
+            
+        Map<String, Object> response = new HashMap<>();
+        response.put("code", 200);
+        response.put("success", true);
+        response.put("data", itemList);
+        
+        return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{itemId}")
+    @GetMapping("/api/items/{itemId}")
     public Map<String, Object> getItemDetails(@PathVariable Integer itemId) {
         try {
             return Map.of(

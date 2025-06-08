@@ -6,10 +6,11 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Entity
-@Table(name = "shops")
+@Table(name = "shop")
 public class Shop {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,16 +20,34 @@ public class Shop {
     private String name;
 
     @Column
-    private String description;
+    private String image;
 
     @Column
-    private String image;
+    private Double rating;
+
+    @Column(name = "avg_price")
+    private Double avgPrice;
+
+    @Column
+    private Double distance;
+
+    @Column(name = "deliver_time")
+    private Integer deliverTime;
+
+    @Column
+    private String address;
+
+    @OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Item> items;
+
+    @OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Tag> tags;
+
+    @Column
+    private String description;
 
     @Column(nullable = false)
     private String type;
-
-    @Column(nullable = false)
-    private Double rating;
 
     @Column(nullable = false)
     private Integer sales;
@@ -41,12 +60,6 @@ public class Shop {
 
     @Column(nullable = false)
     private Double deliveryFee;
-
-    @Column(nullable = false)
-    private Integer deliveryTime;
-
-    @Column(nullable = false)
-    private String address;
 
     @Column(nullable = false)
     private Double latitude;

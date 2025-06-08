@@ -2,7 +2,6 @@ package com.blm.takeout.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.math.BigDecimal;
 
 @Data
 @Entity
@@ -10,27 +9,16 @@ import java.math.BigDecimal;
 public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+    private Integer id;
+    
     @ManyToOne
-    @JoinColumn(name = "order_id", nullable = false)
+    @JoinColumn(name = "order_id")
     private Order order;
-
-    @Column(nullable = false)
+    
     private Integer itemId;
-
-    @Column(nullable = false)
     private String itemName;
-
-    @Column(nullable = false)
+    private String itemDescription;
     private String itemImage;
-
-    @Column(nullable = false)
+    private Double unitPrice;
     private Integer quantity;
-
-    @Column(nullable = false)
-    private BigDecimal unitPrice;
-
-    @Column(nullable = false)
-    private BigDecimal totalPrice;
 } 

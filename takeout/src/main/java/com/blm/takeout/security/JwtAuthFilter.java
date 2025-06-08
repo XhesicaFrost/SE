@@ -71,7 +71,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                path.startsWith("/register") || 
                path.startsWith("/login") || 
                path.startsWith("/v3/api-docs/") ||
-               path.equals("/error");
+               path.equals("/error") ||
+               path.equals("/shops") ||
+               path.equals("/shop") ||
+               path.equals("/items") ||
+               path.equals("/shopcart") ||
+               path.equals("/history");
     }
 
     private void sendError(HttpServletResponse response, int status, String message) throws IOException {
