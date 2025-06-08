@@ -131,6 +131,7 @@ export default {
           this.errorMessage = '店铺信息获取失败'
         }
       } catch (e) {
+        console.log('网络错误，店铺信息获取失败',e)
         this.errorMessage = '网络错误，店铺信息获取失败'
       }
     },
