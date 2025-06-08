@@ -54,6 +54,13 @@ export default {
     }
   },
   methods: {
+    getImageUrl(img) {
+      // 支持base64或url
+      if (!img) return ''
+      if (img.startsWith('data:image')) return img
+      if (img.length > 100) return `data:image/png;base64,${img}`
+      return img
+    },
     async fetchItemInfo() {
       try {
         const response = await fetchWithTimeout(`${BASE_URL}/admin/item/${this.id}`)
@@ -62,7 +69,7 @@ export default {
           this.itemName = result.data.name
           this.itemPrice = result.data.price
           this.itemDescription = result.data.description
-          this.previewImage = result.data.image
+          this.previewImage = this.getImageUrl(result.data.image)
         } else {
           this.errorMessage = '获取商品信息失败'
         }

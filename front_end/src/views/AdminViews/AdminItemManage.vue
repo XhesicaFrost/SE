@@ -31,8 +31,8 @@
           <div class="item-price">¥{{ item.price.toFixed(2) }}</div>
           <div class="item-status">
             状态: 
-            <span :class="item.isActive ? 'active-status' : 'inactive-status'">
-              {{ item.isActive ? '上架' : '下架' }}
+            <span :class="getStatusClass(item.status)">
+              {{ item.status }}
             </span>
           </div>
         </div>
@@ -40,10 +40,10 @@
           <button class="edit-btn" @click="editItem(item.id)">编辑</button>
           <button 
             class="toggle-btn" 
-            :class="{ 'disable-btn': !item.isActive }"
-            @click="toggleItemStatus(item.id, item.isActive)"
+            :class="{ 'disable-btn': item.status === '审批中' }"
+            @click.stop="toggleItemStatus(item.id, item.status)"
           >
-            {{ item.isActive ? '下架' : '上架' }}
+            {{ item.status === '正常' ? '下架' : '上架' }}
           </button>
         </div>
       </div>
@@ -132,15 +132,30 @@ export default {
     editItem(itemId) {
       this.$router.push(`/admin/item/edit/${itemId}`)
     },
+    getStatusClass(status) {
+      switch (status) {
+        case '正常':
+          return 'active-status'
+        case '下架':
+          return 'inactive-status'
+        case '审批中':
+          return 'pending-status'
+        default:
+          return ''
+      }
+    },
     async toggleItemStatus(itemId, currentStatus) {
+      const newStatus = currentStatus === '正常' ? 'disable' : 'enable'
+      
       try {
-        const formData = new FormData()
-        formData.append('itemId', itemId)
-        formData.append('status', currentStatus ? 'disable' : 'enable')
+        const params = new URLSearchParams({
+          itemId: itemId.toString(),
+          status: newStatus
+        }).toString()
         
-        const response = await fetchWithTimeout(`${BASE_URL}/admin/item/status`, {
+        const response = await fetchWithTimeout(`${BASE_URL}/admin/item/status?${params}`, {
           method: 'POST',
-          body: formData
+          headers: { 'Content-Type': 'application/json' }
         })
         
         const result = await response.json()

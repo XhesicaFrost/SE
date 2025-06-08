@@ -185,7 +185,7 @@ const routes = [
   },
   {
     path: '/admin/shop/comments/:shopId',
-    name: 'AdminCommentsManage',
+    name: 'AdminCommentReview',
     component: () => import('@/views/AdminViews/AdminCommentsManage.vue'),
     meta: { allow: ['admin'] },
     props: true

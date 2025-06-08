@@ -19,10 +19,10 @@
           <button class="edit-btn" @click.stop="editShop(shop.id)">编辑</button>
           <button 
             class="toggle-btn" 
-            :class="{ 'disable-btn': shop.status === '已禁用' }"
+            :class="{ 'disable-btn': shop.status === '封禁中' }"
             @click.stop="toggleShopStatus(shop.id, shop.status)"
           >
-            {{ shop.status === '已禁用' ? '启用' : '禁用' }}
+            {{ shop.status === '封禁中' ? '启用' : '禁用' }}
           </button>
           <button class="review-btn" @click.stop="reviewComments(shop.id)">审核评论</button>
         </div>
@@ -89,10 +89,7 @@ export default {
         const response = await fetchWithTimeout(`${BASE_URL}/admin/shops`)
         const result = await response.json()
         if (result.code === 200 && Array.isArray(result.data)) {
-          this.shops = result.data.map(shop => ({
-            ...shop,
-            status: shop.isActive ? '正常' : '已禁用'
-          }))
+          this.shops = result.data
         } else {
           this.shops = []
         }

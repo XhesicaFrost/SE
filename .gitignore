@@ -28,4 +28,8 @@ bin/
 ### Mac OS ###
 .DS_Store
 
+### Node.js ###
+node_modules/
+front_end/node_modules/
+
 takeout/src/main/resources/application.properties
