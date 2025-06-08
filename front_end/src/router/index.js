@@ -75,9 +75,9 @@ const routes = [
     meta: { allow: ['user'] }
   },
   {
-    path: '/user/history',
-    name: 'UserHistory',
-    component: () => import('@/views/UserViews/UserHistory.vue'),
+    path: '/user/payment',
+    name: 'UserPayment',
+    component: () => import('@/views/UserViews/UserPayment.vue'),
     meta: { allow: ['user'] }
   },
   {
