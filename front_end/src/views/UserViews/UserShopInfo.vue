@@ -48,7 +48,7 @@
       <div class="cart-info" :style="{ marginLeft: totalQuantity > 0 ? '30px' : '0' }">
         <div class="cart-total">¥{{ totalPrice.toFixed(2) }}</div>
       </div>
-      <div class="checkout-btn" :class="{ active: totalQuantity > 0 }">
+      <div class="checkout-btn" :class="{ active: totalQuantity > 0 }" @click="toPayment(totalQuantity)">
         去结算
       </div>
     </div>
@@ -104,6 +104,7 @@ export default {
   data() {
     return {
       shopInfo: {
+        id: 0,
         image: '',
         name: '',
         address: '',
@@ -132,21 +133,29 @@ export default {
     }
   },
   methods: {
-    showProductDetail(product) {
-      this.currentProduct = product
-    },
-    addToCart(product) {
-      if (!this.cart[product.id]) {
-        this.cart[product.id] = {
-          product,
-          quantity: 0
+    async submitCartItems(shopId, productId, change) {
+      try {
+        const formData = new FormData()
+        formData.append('shopId', shopId)
+        formData.append('productId', productId)
+        if(change) formData.append('change', change)
+
+        const params = new URLSearchParams({ userId: this.$store.state.userStore.userId }).toString()
+        const response = await fetchWithTimeout(`${BASE_URL}/edit/shopcart?${params}`, {
+          method: 'POST',
+          body: formData
+        })
+
+        const result = await response.json()
+        if (result.success) {
+          alert('购物车修改成功！')
+          this.$router.go(-1)
+        } else {
+          alert('购物车修改失败，请重试！')
         }
-      }
-      this.cart[product.id].quantity += 1
-    },
-    decreaseQuantity(product) {
-      if (this.cart[product.id] && this.cart[product.id].quantity > 0) {
-        this.cart[product.id].quantity -= 1
+      } catch (error) {
+        console.error('购物车修改失败:', error)
+        alert('购物车修改失败，请检查网络连接！')
       }
     },
     async fetchShopInfo() {
@@ -199,6 +208,21 @@ export default {
           this.cart = [];
         console.error('获取购物车数据失败:', error)
       }
+    },
+    showProductDetail(product) {
+      this.currentProduct = product
+    },
+    addToCart(product) {
+      this.submitCartItems(this.shopInfo.id, product.id, 1)
+      this.fetchCartItems()
+    },
+    decreaseQuantity(product) {
+      this.submitCartItems(this.shopInfo.id, product.id, -1)
+      this.fetchCartItems()
+    },
+    toPayment(check) {
+      if(check <= 0) return
+      this.$router.push(`user/payment`)
     }
   },
   mounted() {
