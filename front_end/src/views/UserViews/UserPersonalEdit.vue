@@ -59,7 +59,7 @@ export default {
           body: this.createFormData(this.formData)
         });
         const result = await response.json();
-        if (result.success) {
+        if (result.status === 'success') {
           alert('个人资料修改成功');
           this.$router.push('/user/personal');
         } else {
