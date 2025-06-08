@@ -33,15 +33,16 @@ public class JwtUtils {
 
     public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("id", user.getUserid());
+        claims.put("userid", user.getUserid());
         claims.put("username", user.getUsername());
+        claims.put("phonenumber", user.getPhonenumber());
         claims.put("role", user.getRole());
         
         return Jwts.builder()
                 .claims(claims)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
-                .signWith(key, Jwts.SIG.HS512)
+                .signWith(key, Jwts.SIG.HS256)
                 .compact();
     }
 
@@ -54,7 +55,11 @@ public class JwtUtils {
     }
 
     public String getUsername(String token) {
-        return parseToken(token).get("username", String.class);
+        Claims claims = parseToken(token);
+        String phonenumber = claims.get("phonenumber", String.class);
+        String role = claims.get("role", String.class);
+        return phonenumber + ":" + role;
+
     }
 
     public boolean validateToken(String token) {

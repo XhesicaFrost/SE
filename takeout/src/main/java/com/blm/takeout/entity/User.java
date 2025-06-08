@@ -18,13 +18,13 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer userid;
 
-    @Column(nullable = false, unique = true, length = 20)
+    @Column(nullable = false, length = 20)
     private String username;
 
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 100)
     private String password;
 
-    @Column(nullable = false, unique = true, length = 11)
+    @Column(nullable = false, length = 11)
     private String phonenumber;
 
     @Column(length = 100)
@@ -40,14 +40,15 @@ public class User implements UserDetails {
     @Column(length = 256)
     private String avatarurl;
 
+    @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"phonenumber", "role"}))
+
     public enum Role {
-        USER,       // 顾客用户
-        MERCHANT,   // 商家
-        RIDER,      // 骑手
-        ADMIN       // 管理员
+        user,       // 顾客用户
+        seller,   // 商家
+        rider,      // 骑手
+        admin       // 管理员
     }
 
-    // UserDetails 接口方法实现
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.name()));

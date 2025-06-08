@@ -28,11 +28,8 @@ public class AuthService {
 
     @Transactional
     public User register(UserRegisterDto registerDto) {
-        if (userRepository.existsByUsername(registerDto.getUsername())) {
-            throw new BusinessException("用户名已存在");
-        }
-        if (userRepository.existsByPhonenumber(registerDto.getPhonenumber())) {
-            throw new BusinessException("手机号码已注册");
+        if (userRepository.existsByPhonenumberAndRole(registerDto.getPhonenumber(), registerDto.getRole())) {
+            throw new BusinessException("该手机号已注册该角色");
         }
         
         User user = new User();
@@ -47,17 +44,20 @@ public class AuthService {
     }
 
     public LoginResponseDto login(UserLoginDto loginDto) {
+        String username = loginDto.getPhonenumber() + ":" + loginDto.getRole();
+        System.out.println("登录用户名：" + username);
+        System.out.println("用户输入的密码：" + loginDto.getPassword());
         Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
-                loginDto.getUsername(), 
+                username, 
                 loginDto.getPassword()
             )
         );
-        
         SecurityContextHolder.getContext().setAuthentication(authentication);
         User user = (User) authentication.getPrincipal();
+        System.out.println("数据库中的加密密码：" + user.getPassword());
         String token = jwtUtils.generateToken(user);
-        
+        System.out.println(token);
         return new LoginResponseDto(
             user.getUserid(), 
             user.getUsername(), 
