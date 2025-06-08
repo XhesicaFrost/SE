@@ -71,7 +71,7 @@ export default {
         console.log('LoginView:Login success:', success)
         
         // 修复：使用正确的用户类型判断
-        const userKind = success.data?.userKind || userData.role || this.$store.state.userStore.userInfo.userKind
+        const userKind = userData.role || this.$store.state.userStore.userInfo.userKind
         console.log('LoginView:User kind:', userKind)
         
         switch (userKind) {

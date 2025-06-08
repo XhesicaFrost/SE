@@ -6,7 +6,7 @@ export const debug_seller = false; // 是否启用商家调试模式
 export const debug_rider = false; // 是否启用骑手调试模式
 export const debug_user = false; // 是否启用用户调试模式
 export const debug_admin = false; // 是否启用管理员调试模式
-export const debug_AuthCheck = true; // 是否启用权限检查
+export const debug_AuthCheck = false; // 是否启用权限检查
 export const debug_seller_created = false;//是否默认商家已经创立
 
 let storeInstance = null;

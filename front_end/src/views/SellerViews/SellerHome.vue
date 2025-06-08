@@ -119,7 +119,7 @@ export default {
         const params = new URLSearchParams({ sellerId: sellerId }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/sellerHome?${params}`)
         const result = await response.json()
-        if (result.success && result.code === 200) {
+        if (result.code === 200) {
           this.todayRevenue = result.data.todayRevenue
           this.todayOrderCount = result.data.todayOrderCount
           this.latestComments = result.data.latestComments
@@ -142,12 +142,19 @@ export default {
         console.log('fetchsellerInfo')
         const params = new URLSearchParams({ userId: this.userInfo.userId }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/userToseller?${params}`)
-        const result = await response.json()
+        console.log('fetchsellerInfo response:', response)
+        
+        // ✅ 修复：正确的JSON解析方式
+        const result = await response.json()  // 先解析JSON
         console.log('fetchsellerInfo result:', result)
-        if (result.success && result.code === 200) {
-          this.SET_seller_ID(result.sellerId || '')
-          this.SET_seller_NAME(result.sellerName || '')
-          const status = result.sellerStatus
+        
+        // ✅ 然后检查和访问数据
+        if (result.code === 200) {
+          this.SET_seller_ID(result.data.sellerId || '')
+          this.SET_seller_NAME(result.data.sellerName || '')
+          const status = result.data.sellerStatus  // 注意：这里也需要加.data
+          console.log('sellerStatus:', status)
+          
           if (status === '未注册') {
             // 未注册店铺，仅显示"创建店铺"
             this.navItems = [
@@ -161,7 +168,7 @@ export default {
             // 审批中，仅显示提示
             this.navItems = [
               { label: '正在审批', action: () => {} },
-              { label: '退出登录', action: () => this.goTo('logout') }  // 添加退出登录
+              { label: '退出登录', action: () => this.goTo('logout') }
             ]
             this.todayRevenue = 0
             this.todayOrderCount = 0
@@ -183,20 +190,23 @@ export default {
               { label: '查看数据', action: () => this.goTo('data') },
               { label: '退出登录', action: () => this.goTo('logout') }
             ]
-            this.fetchsellerHomeData(result.sellerId)
+            // ✅ 修复：使用result.data.sellerId
+            this.fetchsellerHomeData(result.data.sellerId)
           }
         } else {
           this.$toast && this.$toast(result.message || '商家信息获取失败')
         }
       } catch (error) {
+        console.error('❌ fetchsellerInfo 错误:', error)
         this.$toast && this.$toast('网络异常，商家信息获取失败')
       }
+      
       if (debug_seller_created) {
         this.navItems = [
           { label: '管理店铺', action: () => this.goTo('shop') },
           { label: '管理订单', action: () => this.goTo('order') },
           { label: '查看数据', action: () => this.goTo('data') },
-          { label: '退出登录', action: () => this.goTo('logout') }  // 修改：使用 logout 而不是 withdraw
+          { label: '退出登录', action: () => this.goTo('logout') }
         ]
       }
     }

@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import { BASE_URL } from '@/config.js'
+import { BASE_URL ,fetchWithTimeout} from '@/config.js'
 import { mapState } from 'vuex'
 import BottomNav from '@/components/bottomNav.vue'
 
@@ -41,9 +41,9 @@ export default {
     async fetchPromotions() {
       try {
         const params = new URLSearchParams({ sellerId: this.sellerId }).toString()
-        const response = await fetch(`${BASE_URL}/seller/promotion?${params}`)
+        const response = await fetchWithTimeout(`${BASE_URL}/seller/promotion?${params}`)
         const result = await response.json()
-        if (result.success && Array.isArray(result.data)) {
+        if (result.code==200 && Array.isArray(result.data)) {
           this.promotions = result.data
         } else {
           this.promotions = []
@@ -54,13 +54,13 @@ export default {
     },
     async deletePromotion(promotionId) {
       try {
-        const response = await fetch(`${BASE_URL}/seller/promotion`, {
+        const response = await fetchWithTimeout(`${BASE_URL}/seller/promotion`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ promotionId })
         })
         const result = await response.json()
-        if (result.success) {
+        if (result.code==200) {
           this.fetchPromotions()
         } else {
           alert('删除失败')

@@ -95,7 +95,7 @@ export default {
         const params = new URLSearchParams({ sellerId: this.sellerId }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/seller/order?${params}`)
         const result = await response.json()
-        if (result.success && Array.isArray(result.data)) {
+        if (result.code==200 && Array.isArray(result.data)) {
           this.orders = result.data
         } else {
           this.orders = []
@@ -112,7 +112,7 @@ export default {
           body: JSON.stringify({ orderId })
         })
         const result = await response.json()
-        if (result.success) {
+        if (result.code==200) {
           this.fetchOrders()
         } else {
           alert('操作失败')

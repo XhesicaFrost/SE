@@ -86,7 +86,7 @@ export default {
         }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/seller/data/sales?${params}`)
         const result = await response.json()
-        if (result.success) {
+        if (result.code==200) {
           this.totalSales = result.data.totalSales
           this.totalOrders = result.data.totalOrders
           this.salesOrderLabels = result.data.labels // 如 ['2025-05-01', ...]
@@ -109,7 +109,7 @@ export default {
         }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/seller/data/comment?${params}`)
         const result = await response.json()
-        if (result.success) {
+        if (result.code==200) {
           this.totalGood = result.data.totalGood
           this.totalBad = result.data.totalBad
           this.commentLabels = result.data.labels // 如 ['2025-05-01', ...]

@@ -113,7 +113,7 @@ export default {
           body: JSON.stringify({ id })
         })
         const result = await response.json()
-        if (result.success) {
+        if (result.code === 200) {
           this.fetchGoods()
         } else {
           alert('删除失败')
@@ -145,7 +145,7 @@ export default {
         const params = new URLSearchParams({ sellerId: this.sellerId }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/shop?${params}`)
         const result = await response.json()
-        if (result.success && result.code === 200) {
+        if (result.code === 200) {
           this.shopInfo = {
             name: result.data.shopName,
             image: result.data.shopImg,
@@ -171,7 +171,7 @@ export default {
         const params = new URLSearchParams({ sellerId: this.sellerId }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/item?${params}`)
         const result = await response.json()
-        if (result.success && result.code === 200 && Array.isArray(result.data)) {
+        if ( result.code === 200 && Array.isArray(result.data)) {
           this.goods = result.data
         } else {
           this.goods = []

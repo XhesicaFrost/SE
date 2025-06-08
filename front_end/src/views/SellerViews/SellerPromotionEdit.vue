@@ -74,7 +74,7 @@ export default {
         const params = new URLSearchParams({ promotionId: this.promotionId }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/seller/promotion/detail?${params}`)
         const result = await response.json()
-        if (result.success && result.data) {
+        if (result.code==200 && result.data) {
           this.promotionName = result.data.promotionName
           this.full = result.data.full
           this.minus = result.data.minus
@@ -108,7 +108,7 @@ export default {
           body: formData
         })
         const result = await response.json()
-        if (result.status === 'success') {
+        if (result.data.status === 'success') {
           this.submitStatus = 'success'
         } else {
           this.errorMessage = '未能成功修改，请重试'

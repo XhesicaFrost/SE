@@ -45,7 +45,7 @@
 
 <script>
 import BottomNav from '@/components/bottomNav.vue'
-import { BASE_URL } from '@/config.js'
+import { BASE_URL ,fetchWithTimeout} from '@/config.js'
 import { mapState } from 'vuex'
 
 export default {
@@ -81,9 +81,9 @@ export default {
     async fetchShopApprovals() {
       try {
         const params = new URLSearchParams({ sellerId: this.sellerId }).toString()
-        const response = await fetch(`${BASE_URL}/approval/shop?${params}`)
+        const response = await fetchWithTimeout(`${BASE_URL}/approval/shop?${params}`)
         const result = await response.json()
-        if (result.success && Array.isArray(result.data)) {
+        if (result.code==200 && Array.isArray(result.data)) {
           this.shopApprovals = result.data
         } else {
           this.shopApprovals = []
@@ -96,9 +96,9 @@ export default {
     async fetchItemApprovals() {
       try {
         const params = new URLSearchParams({ sellerId: this.sellerId }).toString()
-        const response = await fetch(`${BASE_URL}/approval/item?${params}`)
+        const response = await fetchWithTimeout(`${BASE_URL}/approval/item?${params}`)
         const result = await response.json()
-        if (result.success && Array.isArray(result.data)) {
+        if (result.code==200 && Array.isArray(result.data)) {
           this.itemApprovals = result.data
         } else {
           this.itemApprovals = []

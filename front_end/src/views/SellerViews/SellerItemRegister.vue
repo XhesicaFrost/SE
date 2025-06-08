@@ -92,7 +92,7 @@ export default {
           body: formData
         })
         const result = await response.json()
-        if (result.status === 'success') {
+        if (result.code==200) {
           this.submitStatus = 'success'
         } else {
           this.errorMessage = '未能成功发送，请重试'

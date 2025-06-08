@@ -40,7 +40,7 @@
 </template>
 
 <script>
-import { BASE_URL } from '@/config.js'
+import { BASE_URL ,fetchWithTimeout} from '@/config.js'
 import { mapState } from 'vuex'
 
 export default {
@@ -71,9 +71,9 @@ export default {
     async fetchShopInfo() {
       try {
         const params = new URLSearchParams({ sellerId: this.sellerId }).toString()
-        const response = await fetch(`${BASE_URL}/shop?${params}`)
+        const response = await fetchWithTimeout(`${BASE_URL}/shop?${params}`)
         const result = await response.json()
-        if (result.success && result.code === 200 && result.data) {
+        if ( result.code === 200 && result.data) {
           this.shopName = result.data.shopName
           this.shopAddress = result.data.shopAddress
           // 服务器返回 base64 图片数据
@@ -103,12 +103,12 @@ export default {
       formData.append('sellerId', this.sellerId) // 发送商家id
 
       try {
-        const response = await fetch(`${BASE_URL}/seller/edit`, {
+        const response = await fetchWithTimeout(`${BASE_URL}/seller/edit`, {
           method: 'POST',
           body: formData
         })
         const result = await response.json()
-        if (result.status === 'success') {
+        if (result.data.status === 'success') {
           this.submitStatus = 'success'
         } else {
           this.errorMessage = '未能成功修改，请重试'

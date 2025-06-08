@@ -44,7 +44,7 @@
 </template>
 
 <script>
-import { BASE_URL } from '@/config.js'
+import { BASE_URL ,fetchWithTimeout} from '@/config.js'
 
 export default {
   name: 'sellerItemEdit',
@@ -72,9 +72,9 @@ export default {
       // 获取商品信息用于预填充
       try {
         const params = new URLSearchParams({ id: this.itemId }).toString()
-        const response = await fetch(`${BASE_URL}/seller/item?${params}`)
+        const response = await fetchWithTimeout(`${BASE_URL}/seller/item?${params}`)
         const result = await response.json()
-        if (result.success && result.code === 200 && result.data) {
+        if (result.code === 200 && result.data) {
           this.itemName = result.data.itemName
           this.itemPrice = result.data.itemPrice
           // 服务器返回 base64 图片数据
@@ -105,12 +105,12 @@ export default {
         formData.append('itemImage', this.itemImage)
       }
       try {
-        const response = await fetch(`${BASE_URL}/seller/item/register`, {
+        const response = await fetchWithTimeout(`${BASE_URL}/seller/item/edit`, {
           method: 'POST',
           body: formData
         })
         const result = await response.json()
-        if (result.status === 'success') {
+        if (result.data.status === 'success') {
           this.submitStatus = 'success'
         } else {
           this.errorMessage = '未能成功修改，请重试'

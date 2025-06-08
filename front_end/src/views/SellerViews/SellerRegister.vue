@@ -53,7 +53,7 @@
 </template>
 
 <script>
-import { BASE_URL } from '@/config.js'
+import { BASE_URL ,fetchWithTimeout} from '@/config.js'
 import { mapState } from 'vuex'
 
 export default {
@@ -95,12 +95,12 @@ export default {
       formData.append('userId', this.userId) // 发送商家id
 
       try {
-        const response = await fetch(`${BASE_URL}/seller/register`, {
+        const response = await fetchWithTimeout(`${BASE_URL}/seller/register`, {
           method: 'POST',
           body: formData
         })
         const result = await response.json()
-        if (result.status === 'success') {
+        if (result.data.status === 'success') {
           this.submitStatus = 'success'
         } else {
           this.errorMessage = '未能成功发送，请重试'
