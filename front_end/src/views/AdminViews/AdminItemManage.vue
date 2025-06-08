@@ -24,7 +24,7 @@
         v-for="item in filteredItems" 
         :key="item.id"
       >
-        <img :src="item.image" alt="商品图片" class="item-img" />
+        <img :src="getImageUrl(item.image)" alt="商品图片" class="item-img" />
         <div class="item-info">
           <div class="item-name">{{ item.name }}</div>
           <div class="item-shop">店铺: {{ getShopName(item.shopId) }}</div>
@@ -90,6 +90,13 @@ export default {
     }
   },
   methods: {
+    getImageUrl(img) {
+      // 支持base64或url
+      if (!img) return ''
+      if (img.startsWith('data:image')) return img
+      if (img.length > 100) return `data:image/png;base64,${img}`
+      return img
+    },
     async fetchItems() {
       try {
         const response = await fetchWithTimeout(`${BASE_URL}/admin/items`)

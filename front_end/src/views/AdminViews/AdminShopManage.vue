@@ -9,7 +9,7 @@
         :key="shop.id"
         @click="viewShop(shop.id)"
       >
-        <img :src="shop.image" alt="店铺图片" class="shop-img" />
+        <img :src="getImageUrl(shop.image)" alt="店铺图片" class="shop-img" />
         <div class="shop-info">
           <div class="shop-name">{{ shop.name }}</div>
           <div class="shop-address">{{ shop.address }}</div>
@@ -24,6 +24,7 @@
           >
             {{ shop.status === '已禁用' ? '启用' : '禁用' }}
           </button>
+          <button class="review-btn" @click.stop="reviewComments(shop.id)">审核评论</button>
         </div>
       </div>
     </div>
@@ -77,6 +78,12 @@ export default {
     }
   },
   methods: {
+    getImageUrl(img) {
+      if (!img) return ''
+      if (img.startsWith('data:image')) return img
+      if (img.length > 100) return `data:image/png;base64,${img}`
+      return img
+    },
     async fetchShops() {
       try {
         const response = await fetchWithTimeout(`${BASE_URL}/admin/shops`)
@@ -125,6 +132,9 @@ export default {
       if (p > this.totalPages) p = this.totalPages
       this.page = p
       this.jumpPage = p
+    },
+    reviewComments(shopId) {
+      this.$router.push(`/admin/shop/comments/${shopId}`)
     }
   },
   mounted() {
@@ -258,5 +268,14 @@ export default {
   border: 1px solid #ddd;
   border-radius: 4px;
   text-align: center;
+}
+
+.review-btn {
+  background: #ff9800;
+  color: white;
+}
+
+.review-btn:hover {
+  background: #f57c00;
 }
 </style>
