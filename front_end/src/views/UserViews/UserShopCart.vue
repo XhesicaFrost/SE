@@ -123,27 +123,32 @@ export default {
     },
     async submitCartItems(shopId, productId, change) {
       try {
-        const formData = new FormData()
-        formData.append('shopId', shopId)
-        formData.append('productId', productId)
-        if(change) formData.append('change', change)
+        const userId = this.$store.state.userStore.userInfo.userId;
+        if (!userId) {
+          console.error('用户未登录');
+          this.$router.push('/login');
+          return;
+        }
 
-        const params = new URLSearchParams({ userId: this.$store.state.userStore.userId }).toString()
-        const response = await fetchWithTimeout(`${BASE_URL}/edit/shopcart?${params}`, {
+        const formData = new FormData();
+        formData.append('shopId', shopId);
+        formData.append('productId', productId);
+        if(change) formData.append('change', change);
+
+        const response = await fetchWithTimeout(`${BASE_URL}/edit/shopcart?userId=${userId}`, {
           method: 'POST',
           body: formData
-        })
+        });
 
-        const result = await response.json()
+        const result = await response.json();
         if (result.success) {
-          alert('购物车修改成功！')
-          this.$router.go(-1)
+          this.fetchCartItems();
         } else {
-          alert('购物车修改失败，请重试！')
+          alert('购物车修改失败，请重试！');
         }
       } catch (error) {
-        console.error('购物车修改失败:', error)
-        alert('购物车修改失败，请检查网络连接！')
+        console.error('购物车修改失败:', error);
+        alert('购物车修改失败，请检查网络连接！');
       }
     },
     

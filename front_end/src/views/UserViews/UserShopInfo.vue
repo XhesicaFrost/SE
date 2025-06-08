@@ -177,6 +177,7 @@ export default {
         const result = await response.json()
         if (result.code === 200) {
           this.shopInfo = {
+            id: result.data.id,
             name: result.data.shopName,
             image: result.data.shopImg,
             address: result.data.shopAddress,
@@ -249,7 +250,7 @@ export default {
     },
     toPayment(check) {
       if(check <= 0) return
-      this.$router.push(`user/payment`)
+      this.$router.push(`/user/payment/${this.$route.params.shopId}`)
     }
   },
   mounted() {

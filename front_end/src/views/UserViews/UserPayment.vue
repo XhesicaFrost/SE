@@ -92,22 +92,32 @@ export default {
     },
     async fetchCartItems() {
       try {
-        const params = new URLSearchParams({ userId: this.$store.state.userStore.userId }).toString()
-        const response = await fetchWithTimeout(`${BASE_URL}/shopcart?${params}`)
-        const result = await response.json()
+        const userId = this.$store.state.userStore.userInfo.userId;
+        if (!userId) {
+          console.error('用户ID未获取到');
+          this.cart = [];
+          return;
+        }
+
+        const response = await fetchWithTimeout(`${BASE_URL}/cart_items/user/shopcart?userId=${userId}`);
+        const result = await response.json();
+        console.log('获取到的购物车数据:', result);
+        
         if (result.code === 200 && Array.isArray(result.data)) {
-          for (let index = 0; index < result.data.length; index++) {
-            const element = result.data[index];
-            if(this.$route.params.shopId === element.shop.id) {
-              this.cart = element.items;
-            }
-          }
+          // 找到当前店铺的购物车数据
+          const shopCart = result.data.find(shopCart => 
+            String(this.$route.params.shopId) === String(shopCart.shop.id)
+          );
+          console.log('当前店铺ID:', this.$route.params.shopId);
+          console.log('找到的店铺购物车:', shopCart);
+          this.cart = shopCart ? shopCart.items : [];
+          console.log('处理后的购物车数据:', this.cart);
         } else {
           this.cart = [];
         }
       } catch (error) {
-          this.cart = [];
-        console.error('获取购物车数据失败:', error)
+        this.cart = [];
+        console.error('获取购物车数据失败:', error);
       }
     },
     async handlePayment() {
