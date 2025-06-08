@@ -19,20 +19,17 @@ public class Item {
     @Column(name = "shop_id")
     private Integer shopId;
 
-    @Column(name = "category_id")
-    private Integer categoryId;
+    @Column(name = "price")
+    private Double price;
+
+    @Column(name = "description")
+    private String description;
 
     @Column(nullable = false, length = 100)
     private String name;
 
-    @Column(nullable = false)
-    private Double price;
-
     @Column
     private String image;
-
-    @Column
-    private String description;
 
     @Column(nullable = false)
     private Integer sales = 0;

@@ -59,8 +59,7 @@ export default {
             userName: userData.username || result.data?.username || '',
             userKind: userData.role || result.data?.role || '',
             userPhone: userData.phonenumber || result.data?.phonenumber || '',
-            token: token, // ✅ 修改：使用提取的 token
-            token: result.data?.token || result.token || '',
+            token: token,
             userImage: userData.userImage || ''
           })
           commit('SET_ERROR', '')
@@ -129,11 +128,6 @@ export default {
           const token = result.data?.token || result.token || ''
           localStorage.setItem('token', token)
           
-          // 保存用户信息和 token
-          const token = result.data?.token || result.token || ''
-          // 保存token到localStorage
-          localStorage.setItem('token', token)
-          
           // 保存用户信息和 token，确保userId是数字
           const userId = parseInt(result.id || result.data?.id || '')
           if (isNaN(userId)) {
@@ -145,8 +139,6 @@ export default {
             userName: loginData.username || result.data?.username || '',
             userKind: loginData.role || result.data?.role || '',
             userPhone: loginData.phonenumber || result.data?.phonenumber || '',
-            token: token, // ✅ 修改：使用提取的 token
-            userImage: loginData.userImage || '' // ✅ 新增：设置 userImage
             token: token,
             userImage: loginData.userImage || ''
           })

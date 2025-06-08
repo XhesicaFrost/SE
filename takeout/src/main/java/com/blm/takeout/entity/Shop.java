@@ -40,7 +40,12 @@ public class Shop {
     @OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Item> items;
 
-    @OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToMany
+    @JoinTable(
+        name = "shop_tags",
+        joinColumns = @JoinColumn(name = "shop_id"),
+        inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
     private List<Tag> tags;
 
     @Column
@@ -76,6 +81,13 @@ public class Shop {
     @Column(nullable = false)
     private Boolean isOpen;
 
+    @Column(name = "user_id", nullable = false)
+    private Integer userId;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Status status = Status.正常;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -83,4 +95,11 @@ public class Shop {
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    public enum Status {
+        正常,    // 正常营业
+        审批中,  // 等待审核
+        未注册,  // 未完成注册
+        封禁中   // 被封禁
+    }
 } 

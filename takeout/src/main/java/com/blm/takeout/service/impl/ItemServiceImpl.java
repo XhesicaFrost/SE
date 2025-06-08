@@ -75,7 +75,6 @@ public class ItemServiceImpl implements ItemService {
         itemDetails.put("rating", item.getRating());
         itemDetails.put("shopId", item.getShopId());
         itemDetails.put("shopName", shop.getName());
-        itemDetails.put("category", item.getCategoryId());
 
         itemDetails.put("reviews", reviews.stream()
             .map(review -> Map.of(
@@ -93,49 +92,77 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDTO> getItemsByShopId(Integer shopId) {
-        List<Item> items = itemRepository.findByShopId(shopId);
-        return items.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+    public List<Item> getItemsByShopId(Integer shopId) {
+        return itemRepository.findByShopId(shopId);
     }
 
     @Override
     @Transactional
     public void registerItem(String itemName, MultipartFile itemImage, Double itemPrice, Integer sellerId, String itemDescription) throws Exception {
+        // 直接使用sellerId作为shopId
+        Shop shop = shopRepository.findById(sellerId)
+            .orElseThrow(() -> new Exception("未找到对应的店铺信息"));
+        
         String imagePath = FileUtils.saveImage(itemImage);
         Item item = new Item();
         item.setName(itemName);
         item.setImage(imagePath);
-        item.setShopId(sellerId);
+        item.setShopId(shop.getId());
         item.setPrice(itemPrice);
         item.setDescription(itemDescription != null ? itemDescription : "");
         item.setStatus(Item.Status.审批中);
+        item.setRating(0.0);
+        item.setSales(0);
         itemRepository.save(item);
     }
 
     @Override
     @Transactional
-    public void editItem(Integer itemId, String itemName, Double itemPrice, MultipartFile itemImage, String itemDescription) throws Exception {
+    public void editItem(Integer itemId, String itemName, String itemDescription, Double itemPrice, MultipartFile itemImage) throws Exception {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new Exception("商品不存在"));
 
         item.setName(itemName);
         item.setPrice(itemPrice);
+        item.setDescription(itemDescription != null ? itemDescription : "");
 
         if (itemImage != null && !itemImage.isEmpty()) {
             String imagePath = FileUtils.saveImage(itemImage);
             item.setImage(imagePath);
         }
 
-        item.setDescription(itemDescription != null ? itemDescription : "");
+        item.setStatus(Item.Status.审批中);  // 设置状态为审批中
         itemRepository.save(item);
     }
 
     @Override
-    public List<Item> getNormalAndOffShelfItemsBySeller(Integer sellerId) {
-        return itemRepository.findByShopIdAndStatusIn(sellerId, 
+    public List<Item> getNormalAndOffShelfItemsByShop(Integer shopId) {
+        return itemRepository.findByShopIdAndStatusIn(shopId, 
             List.of(Item.Status.正常, Item.Status.下架));
+    }
+
+    @Override
+    @Transactional
+    public void offlineItem(Integer itemId, Integer shopId) throws Exception {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new Exception("商品不存在"));
+        if (!item.getShopId().equals(shopId)) {
+            throw new Exception("商家ID不匹配，无法下架商品");
+        }
+        item.setStatus(Item.Status.下架);
+        itemRepository.save(item);
+    }
+
+    @Override
+    @Transactional
+    public void onlineItem(Integer itemId, Integer shopId) throws Exception {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new Exception("商品不存在"));
+        if (!item.getShopId().equals(shopId)) {
+            throw new Exception("商家ID不匹配，无法上架商品");
+        }
+        item.setStatus(Item.Status.正常);
+        itemRepository.save(item);
     }
 
     private ItemDTO convertToDTO(Item item) {

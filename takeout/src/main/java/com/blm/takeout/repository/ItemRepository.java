@@ -11,13 +11,15 @@ import java.util.List;
 
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Integer> {
-    @Query("SELECT i FROM Item i WHERE i.shopId = :shopId")
-    List<Item> findByShopId(@Param("shopId") Integer shopId);
+    List<Item> findByShopId(Integer shopId);
     
+    @Query("SELECT i FROM Item i WHERE i.shopId = :shopId ORDER BY i.sales DESC")
+    List<Item> findTop5ByShopIdOrderBySalesDesc(@Param("shopId") Integer shopId);
+    
+    @Query("SELECT i FROM Item i WHERE i.shopId = :shopId AND i.status = '正常'")
+    List<Item> findActiveItemsByShopId(@Param("shopId") Integer shopId);
+
     Page<Item> findByNameContainingOrDescriptionContaining(String name, String description, Pageable pageable);
     Page<Item> findByShopId(Integer shopId, Pageable pageable);
-
-    List<Item> findTop5ByShopIdOrderBySalesDesc(Integer shopId);
-    List<Item> findByShopIdAndCategoryId(Integer shopId, Integer categoryId);
     List<Item> findByShopIdAndStatusIn(Integer shopId, List<Item.Status> statuses);
 } 

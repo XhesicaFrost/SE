@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ShopRepository extends JpaRepository<Shop, Integer> {
@@ -18,8 +19,13 @@ public interface ShopRepository extends JpaRepository<Shop, Integer> {
     Page<Shop> findByNameContainingOrDescriptionContaining(String name, String description, Pageable pageable);
     Page<Shop> findByNameContaining(String keyword, Pageable pageable);
     
-    @Query("SELECT DISTINCT s FROM Shop s WHERE s.id IN (SELECT o.shopId FROM Order o WHERE o.userId = :userId) ORDER BY s.id DESC")
-    List<Shop> findShopsByUserOrders(@Param("userId") Integer userId);
+    @Query("SELECT DISTINCT s, o.createdAt FROM Shop s JOIN Order o ON s.id = o.shopId WHERE o.userId = :userId ORDER BY o.createdAt DESC")
+    List<Object[]> findShopsByUserOrders(@Param("userId") Integer userId);
     
+    @Query(value = "SELECT * FROM shop ORDER BY rating DESC LIMIT 10", nativeQuery = true)
     List<Shop> findTop10ByOrderByRatingDesc();
+    
+    Shop findByUserId(Integer userId);
+    
+    List<Shop> findTop10ByStatusOrderByRatingDesc(Shop.Status status);
 } 

@@ -5,10 +5,8 @@ import com.blm.takeout.dto.TagDTO;
 import com.blm.takeout.dto.ProductImageDTO;
 import com.blm.takeout.entity.Shop;
 import com.blm.takeout.entity.Item;
-import com.blm.takeout.entity.ItemCategory;
 import com.blm.takeout.repository.ShopRepository;
 import com.blm.takeout.repository.ItemRepository;
-import com.blm.takeout.repository.ItemCategoryRepository;
 import com.blm.takeout.service.ShopService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,22 +14,22 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+import com.blm.takeout.util.FileUtils;
 
 @Service
 public class ShopServiceImpl implements ShopService {
 
     private final ShopRepository shopRepository;
     private final ItemRepository itemRepository;
-    private final ItemCategoryRepository itemCategoryRepository;
 
     @Autowired
     public ShopServiceImpl(
             ShopRepository shopRepository,
-            ItemRepository itemRepository,
-            ItemCategoryRepository itemCategoryRepository) {
+            ItemRepository itemRepository) {
         this.shopRepository = shopRepository;
         this.itemRepository = itemRepository;
-        this.itemCategoryRepository = itemCategoryRepository;
     }
 
     @Override
@@ -59,6 +57,7 @@ public class ShopServiceImpl implements ShopService {
         dto.setDeliverTime(shop.getDeliverTime());
         dto.setAddress(shop.getAddress());
         dto.setSales(shop.getSales());
+        dto.setStatus(shop.getStatus().toString());
         
         // 转换标签
         if (shop.getTags() != null) {
@@ -129,33 +128,51 @@ public class ShopServiceImpl implements ShopService {
     }
 
     @Override
-    public Map<String, Object> getShopCategories(Integer shopId) {
-        List<ItemCategory> categories = itemCategoryRepository.findByShopIdOrderBySortOrderAsc(shopId);
-        
-        Map<String, Object> result = new HashMap<>();
-        result.put("categories", categories.stream()
-                .map(category -> {
-                    Map<String, Object> categoryMap = new HashMap<>();
-                    categoryMap.put("id", category.getId());
-                    categoryMap.put("name", category.getName());
-                    return categoryMap;
-                })
-                .collect(Collectors.toList()));
-        return result;
-    }
-
-    @Override
     public List<ShopDTO> getRecommendedShops(Integer userId) {
         // 获取用户历史订单中的商店
-        List<Shop> userShops = shopRepository.findShopsByUserOrders(userId);
+        List<Object[]> results = shopRepository.findShopsByUserOrders(userId);
+        List<Shop> userShops = results.stream()
+            .map(result -> (Shop) result[0])
+            .collect(Collectors.toList());
         
-        // 如果用户没有历史订单，返回评分最高的商店
+        // 如果用户没有历史订单，返回评分最高的正常营业商店
         if (userShops.isEmpty()) {
-            userShops = shopRepository.findTop10ByOrderByRatingDesc();
+            userShops = shopRepository.findTop10ByStatusOrderByRatingDesc(Shop.Status.正常);
         }
         
         return userShops.stream()
+                .filter(shop -> shop.getStatus() == Shop.Status.正常) // 只返回正常营业的商店
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Shop> getShopsByUserOrders(Integer userId) {
+        List<Object[]> results = shopRepository.findShopsByUserOrders(userId);
+        return results.stream()
+            .map(result -> (Shop) result[0])
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public Shop getShopByUserId(Integer userId) {
+        Shop shop = shopRepository.findByUserId(userId);
+        if (shop == null) {
+            throw new RuntimeException("未找到该用户的店铺");
+        }
+        return shop;
+    }
+
+    @Override
+    public void updateShopImage(Integer shopId, MultipartFile image) {
+        Shop shop = shopRepository.findById(shopId)
+                .orElseThrow(() -> new RuntimeException("店铺不存在"));
+        try {
+            String imagePath = FileUtils.saveImage(image);
+            shop.setImage(imagePath);
+            shopRepository.save(shop);
+        } catch (IOException e) {
+            throw new RuntimeException("更新店铺图片失败", e);
+        }
     }
 } 

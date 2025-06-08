@@ -16,4 +16,5 @@ public class ShopDTO {
     private List<ProductImageDTO> products;
     private String address;
     private Integer sales;
+    private String status;
 }

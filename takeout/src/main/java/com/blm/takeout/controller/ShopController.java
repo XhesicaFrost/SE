@@ -99,23 +99,6 @@ public class ShopController {
         }
     }
 
-    @GetMapping("/shops/{shopId}/categories")
-    public Map<String, Object> getShopCategories(@PathVariable Integer shopId) {
-        try {
-            return Map.of(
-                "code", 200,
-                "success", true,
-                "data", shopService.getShopCategories(shopId)
-            );
-        } catch (Exception e) {
-            return Map.of(
-                "code", 500,
-                "success", false,
-                "message", "获取店铺商品分类失败：" + e.getMessage()
-            );
-        }
-    }
-
     @GetMapping("/user")
     public ResponseEntity<Map<String, Object>> getRecommendedShops(HttpServletRequest request) {
         try {
