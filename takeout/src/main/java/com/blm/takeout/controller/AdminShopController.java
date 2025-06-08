@@ -7,15 +7,18 @@ import com.blm.takeout.entity.Seller;
 import com.blm.takeout.service.ShopService;
 import com.blm.takeout.repository.ShopRepository;
 import com.blm.takeout.repository.SellerRepository;
+import com.blm.takeout.util.FileUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/admin")
@@ -29,17 +32,31 @@ public class AdminShopController {
     public ApiResponse<?> getAllShops() {
         try {
             List<ShopDTO> shops = shopService.getAllShops();
-            List<Map<String, Object>> shopList = shops.stream()
-                .map(shop -> {
-                    Map<String, Object> shopMap = new HashMap<>();
-                    shopMap.put("id", shop.getId());
-                    shopMap.put("name", shop.getName());
-                    shopMap.put("image", shop.getImage());
-                    shopMap.put("address", shop.getAddress());
-                    shopMap.put("isActive", "正常".equals(shop.getStatus()));
-                    return shopMap;
-                })
-                .collect(Collectors.toList());
+            List<Map<String, Object>> shopList = new ArrayList<>();
+            
+            for (ShopDTO shop : shops) {
+                Map<String, Object> shopMap = new HashMap<>();
+                shopMap.put("id", shop.getId());
+                shopMap.put("name", shop.getName());
+                shopMap.put("address", shop.getAddress());
+                shopMap.put("status", shop.getStatus());
+                
+                // 将图片转换为base64
+                if (shop.getImage() != null && !shop.getImage().isEmpty()) {
+                    try {
+                        String base64Image = FileUtils.convertImageToBase64(shop.getImage());
+                        shopMap.put("image", base64Image);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        shopMap.put("image", "");
+                    }
+                } else {
+                    shopMap.put("image", "");
+                }
+                
+                shopList.add(shopMap);
+            }
+            
             return ApiResponse.success(shopList);
         } catch (Exception e) {
             return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
@@ -56,9 +73,20 @@ public class AdminShopController {
             Map<String, Object> shopMap = new HashMap<>();
             shopMap.put("id", shop.getId());
             shopMap.put("name", shop.getName());
-            shopMap.put("image", shop.getImage());
             shopMap.put("address", shop.getAddress());
-            shopMap.put("isActive", "正常".equals(shop.getStatus()));
+            shopMap.put("status", shop.getStatus());
+            // 将图片转换为base64
+            if (shop.getImage() != null && !shop.getImage().isEmpty()) {
+                try {
+                    String base64Image = FileUtils.convertImageToBase64(shop.getImage());
+                    shopMap.put("image", base64Image);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    shopMap.put("image", "");
+                }
+            } else {
+                shopMap.put("image", "");
+            }
             return ApiResponse.success(shopMap);
         } catch (Exception e) {
             return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
@@ -106,8 +134,10 @@ public class AdminShopController {
             @RequestParam String address,
             @RequestParam(required = false) MultipartFile image) {
         try {
-            Shop shop = shopRepository.findById(shopId)
-                .orElseThrow(() -> new RuntimeException("店铺不存在"));
+            Shop shop = shopService.getShopByUserId(shopId);
+            if (shop == null) {
+                return ApiResponse.error(HttpStatus.NOT_FOUND.value(), "店铺不存在");
+            }
 
             // 更新店铺信息
             shop.setName(name);
@@ -117,15 +147,8 @@ public class AdminShopController {
                 shopService.updateShopImage(shopId, image);
             }
 
-            // 更新商家信息
-            Seller seller = sellerRepository.findByUser_Userid(shop.getUserId())
-                .orElseThrow(() -> new RuntimeException("商家不存在"));
-            seller.setName(name);
-            seller.setAddress(address);
-
             // 保存更新
             shopService.updateShop(shop);
-            sellerRepository.save(seller);
             
             return ApiResponse.success(true);
         } catch (Exception e) {

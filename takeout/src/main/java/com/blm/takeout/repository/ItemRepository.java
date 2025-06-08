@@ -18,7 +18,7 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
     
     @Query("SELECT i FROM Item i WHERE i.shopId = :shopId AND i.status = '正常'")
     List<Item> findActiveItemsByShopId(@Param("shopId") Integer shopId);
-
+    
     Page<Item> findByNameContainingOrDescriptionContaining(String name, String description, Pageable pageable);
     Page<Item> findByShopId(Integer shopId, Pageable pageable);
     List<Item> findByShopIdAndStatusIn(Integer shopId, List<Item.Status> statuses);
