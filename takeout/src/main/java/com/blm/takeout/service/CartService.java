@@ -64,7 +64,7 @@ public class CartService {
                 Shop shop = shopRepository.findById(entry.getKey())
                     .orElseThrow(() -> new RuntimeException("店铺不存在"));
                 Map<String, Object> shopInfo = new HashMap<>();
-                shopInfo.put("id", shop.getId());
+                shopInfo.put("id", shop.getId().toString());
                 shopInfo.put("name", shop.getName());
                 shopInfo.put("image", shop.getImage());
                 shopInfo.put("address", shop.getAddress());
@@ -77,7 +77,7 @@ public class CartService {
                         Item product = itemService.getItemById(cartItem.getItemId());
                         
                         Map<String, Object> productInfo = new HashMap<>();
-                        productInfo.put("id", product.getId());
+                        productInfo.put("id", product.getId().toString());
                         productInfo.put("name", product.getName());
                         productInfo.put("description", product.getDescription());
                         productInfo.put("price", product.getPrice());

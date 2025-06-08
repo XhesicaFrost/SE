@@ -42,20 +42,26 @@ export default {
         const response = await fetchWithTimeout(`${BASE_URL}/register?${params}`)
         const result = await response.json()
         if (result.code === 200) {
+          // 确保userId是数字
+          const userId = parseInt(result.id || result.data?.id || '')
+          if (isNaN(userId)) {
+            throw new Error('无效的用户ID')
+          }
+          
           // 保存用户信息和 token
           commit('SET_USER_INFO', {
-            userId: result.id || result.data?.id || '',
+            userId: userId,
             userName: userData.username || result.data?.username || '',
             userKind: userData.role || result.data?.role || '',
             userPhone: userData.phonenumber || result.data?.phonenumber || '',
-            token: result.data?.token || result.token || '', // 保存后端返回的 token,
+            token: result.data?.token || result.token || '',
             userImage: userData.userImage || ''
           })
           commit('SET_ERROR', '')
           return { 
             code: result.code, 
             success: true, 
-            id: result.id,
+            id: userId,
             data: {
               userKind: userData.role || result.data?.role
             }
@@ -117,9 +123,14 @@ export default {
           // 保存token到localStorage
           localStorage.setItem('token', token)
           
-          // 保存用户信息和 token
+          // 保存用户信息和 token，确保userId是数字
+          const userId = parseInt(result.id || result.data?.id || '')
+          if (isNaN(userId)) {
+            throw new Error('无效的用户ID')
+          }
+          
           commit('SET_USER_INFO', {
-            userId: result.id || result.data?.id || '',
+            userId: userId,
             userName: loginData.username || result.data?.username || '',
             userKind: loginData.role || result.data?.role || '',
             userPhone: loginData.phonenumber || result.data?.phonenumber || '',
@@ -129,7 +140,7 @@ export default {
           // 检查获得的token是否有效
           console.log('🚀 登录成功，保存用户信息:', 
             {
-              userId: result.id || result.data?.id || '',
+              userId: userId,
               userName: loginData.username || result.data?.username || '',
               userKind: loginData.role || result.data?.role || '',
               userPhone: loginData.phonenumber || result.data?.phonenumber || '',
@@ -141,7 +152,6 @@ export default {
           return { 
             code: result.code, 
             success: true, 
-            id: result.id,
             data: {
               userKind: loginData.role || result.data?.role
             }

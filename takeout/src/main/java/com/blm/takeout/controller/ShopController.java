@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.HashMap;
 import java.util.List;
@@ -116,15 +117,65 @@ public class ShopController {
     }
 
     @GetMapping("/user")
-    public List<ShopDTO> getRecommendedShops(@RequestParam(required = false) String userId) {
-        if (userId == null || userId.equals("undefined")) {
-            return shopService.getAllShops(); // 如果没有userId或userId为undefined，返回所有商店
-        }
+    public ResponseEntity<Map<String, Object>> getRecommendedShops(HttpServletRequest request) {
         try {
-            Integer userIdInt = Integer.parseInt(userId);
-            return shopService.getRecommendedShops(userIdInt);
-        } catch (NumberFormatException e) {
-            return shopService.getAllShops(); // 如果userId不是有效的数字，返回所有商店
+            // 从请求头中获取token
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("code", 401);
+                response.put("success", false);
+                response.put("message", "无效的认证信息");
+                return ResponseEntity.status(401).body(response);
+            }
+            
+            String token = authHeader.substring(7); // 移除"Bearer "前缀
+            String[] parts = token.split("\\.");
+            String payload = new String(java.util.Base64.getUrlDecoder().decode(parts[1]));
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            Map<String, Object> claims = mapper.readValue(payload, Map.class);
+            
+            // 打印claims内容以便调试
+            System.out.println("JWT Claims: " + claims);
+            
+            // 尝试不同的字段名
+            Object userIdObj = claims.get("userId");
+            if (userIdObj == null) {
+                userIdObj = claims.get("userid");
+            }
+            if (userIdObj == null) {
+                userIdObj = claims.get("user_id");
+            }
+            
+            if (userIdObj == null) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("code", 401);
+                response.put("success", false);
+                response.put("message", "无效的用户信息");
+                return ResponseEntity.status(401).body(response);
+            }
+            
+            Integer userId;
+            if (userIdObj instanceof Integer) {
+                userId = (Integer) userIdObj;
+            } else if (userIdObj instanceof String) {
+                userId = Integer.parseInt((String) userIdObj);
+            } else {
+                userId = Integer.parseInt(userIdObj.toString());
+            }
+            
+            List<ShopDTO> shops = shopService.getRecommendedShops(userId);
+            Map<String, Object> response = new HashMap<>();
+            response.put("code", 200);
+            response.put("success", true);
+            response.put("data", shops);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("code", 500);
+            response.put("success", false);
+            response.put("message", "获取推荐店铺失败：" + e.getMessage());
+            return ResponseEntity.ok(response);
         }
     }
 } 

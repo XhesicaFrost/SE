@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +26,7 @@ public class CartController {
 
     @GetMapping("/shopcart")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Map<String, Object>> getCartItems() {
+    public ResponseEntity<Map<String, Object>> getCartItems(HttpServletRequest request) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication == null || !authentication.isAuthenticated()) {
@@ -36,7 +37,51 @@ public class CartController {
                 return ResponseEntity.status(401).body(response);
             }
             
-            Integer userId = Integer.parseInt(authentication.getName());
+            // 从请求头中获取token
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("code", 401);
+                response.put("success", false);
+                response.put("message", "无效的认证信息");
+                return ResponseEntity.status(401).body(response);
+            }
+            
+            String token = authHeader.substring(7); // 移除"Bearer "前缀
+            String[] parts = token.split("\\.");
+            String payload = new String(java.util.Base64.getUrlDecoder().decode(parts[1]));
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            Map<String, Object> claims = mapper.readValue(payload, Map.class);
+            
+            // 打印claims内容以便调试
+            System.out.println("JWT Claims: " + claims);
+            
+            // 尝试不同的字段名
+            Object userIdObj = claims.get("userId");
+            if (userIdObj == null) {
+                userIdObj = claims.get("userid");
+            }
+            if (userIdObj == null) {
+                userIdObj = claims.get("user_id");
+            }
+            
+            if (userIdObj == null) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("code", 401);
+                response.put("success", false);
+                response.put("message", "无效的用户信息");
+                return ResponseEntity.status(401).body(response);
+            }
+            
+            Integer userId;
+            if (userIdObj instanceof Integer) {
+                userId = (Integer) userIdObj;
+            } else if (userIdObj instanceof String) {
+                userId = Integer.parseInt((String) userIdObj);
+            } else {
+                userId = Integer.parseInt(userIdObj.toString());
+            }
+            
             List<CartDTO> cartItems = cartService.getCartItems(userId);
             Map<String, Object> response = new HashMap<>();
             response.put("code", 200);

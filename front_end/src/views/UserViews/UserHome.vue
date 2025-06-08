@@ -40,17 +40,29 @@ export default {
   methods: {
     async fetchRecommendedShops() {
       try {
-        const params = new URLSearchParams({ userId: this.$store.state.userStore.userId }).toString()
-        const response = await fetchWithTimeout(`${BASE_URL}/user?${params}`)
+        const token = localStorage.getItem('token')
+        if (!token) {
+          alert('请先登录')
+          this.$router.push('/login')
+          return
+        }
+
+        const response = await fetchWithTimeout(`${BASE_URL}/user`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
         const result = await response.json()
-        if (Array.isArray(result)) {
-          this.recommendedShops = result
+        if (result.success && result.code === 200) {
+          this.recommendedShops = result.data
         } else {
           this.recommendedShops = []
+          alert('获取推荐店铺失败')
         }
       } catch (error) {
         console.error('获取推荐商店失败:', error)
         this.recommendedShops = []
+        alert('获取推荐商店失败，请检查网络连接')
       }
     },
     goToShop(shopId) {
