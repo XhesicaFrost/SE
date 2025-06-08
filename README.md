@@ -458,7 +458,7 @@ itemDescription=奶龙喜欢吃
   "message": "下架失败"
 }
 ```
-### 商家商品
+### 2.上架商品
 
 - 请求方式：POST
 
@@ -468,8 +468,8 @@ itemDescription=奶龙喜欢吃
 
 | 参数名	 | 类型	| 说明	| 是否必填 |
 | ----      | --- | ------ | ----|
-| itemId	 | string |	商品ID	| 是 |
-| sellerId |	string |	商家ID |	是 |
+| itemId	| string |	商品ID	| 是 |
+| sellerId  |	string |	商家ID |	是 |
 
 - **请求示例**：
 ```json
