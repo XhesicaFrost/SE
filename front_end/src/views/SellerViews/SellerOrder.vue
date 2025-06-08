@@ -1,4 +1,4 @@
-  <template>
+<template>
     <TopNav :navInfo="navInfo" />
     <div class="seller-order-view">
       <div class="order-list">
@@ -66,6 +66,7 @@
         page: 1,
         pageSize: 10,
         jumpPage: 1,
+        alertTimer: null,
         navItems: [
           { label: '管理店铺', action: () => { this.$router.push('/seller/shop') } },
           { label: '管理订单', action: () => { this.$router.push('/seller/order') }, isActive: true },
@@ -76,7 +77,11 @@
       }
     },
     computed: {
+      ...mapState('userStore', ['userInfo']),
       ...mapState('sellerStore', ['sellerId']),
+      userId() {
+        return this.userInfo?.userId || this.sellerId
+      },
       sortedOrders() {
         // 未出餐的订单排前面，已出餐的排后面，同组内按订单编号降序
         return [...this.orders].sort((a, b) => {
@@ -126,6 +131,49 @@
           alert('网络错误，操作失败')
         }
       },
+      async fetchAlertMessage() {
+        try {
+          if (!this.userId) {
+            console.warn('⚠️ 用户ID不存在，跳过提醒消息检查')
+            return
+          }
+          
+          const params = new URLSearchParams({ userId: this.userId }).toString()
+          const response = await fetchWithTimeout(`${BASE_URL}/alertMessage?${params}`)
+          const result = await response.json()
+          
+          console.log('📢 提醒消息检查:', result)
+          
+          // ✅ 修改：检查 alertMessage 字段而不是 message
+          if (result.success && result.alertMessage && result.alertMessage.trim()) {
+            alert(`📢 系统提醒：\n${result.alertMessage}`)
+            console.log('✅ 显示提醒消息:', result.alertMessage)
+          } else if (result.code === 200 && result.alertMessage && result.alertMessage.trim()) {
+            alert(`📢 系统提醒：\n${result.alertMessage}`)
+            console.log('✅ 显示提醒消息:', result.alertMessage)
+          }
+          // 如果 alertMessage 为空或不存在，什么都不做
+          
+        } catch (error) {
+          console.warn('⚠️ 获取提醒消息失败:', error.message)
+        }
+      },
+      startAlertTimer() {
+        console.log('🔔 启动提醒消息定时器')
+        
+        this.fetchAlertMessage()
+        
+        this.alertTimer = setInterval(() => {
+          this.fetchAlertMessage()
+        }, 5000)
+      },
+      stopAlertTimer() {
+        if (this.alertTimer) {
+          console.log('🔕 停止提醒消息定时器')
+          clearInterval(this.alertTimer)
+          this.alertTimer = null
+        }
+      },
       changePage(p) {
         if (p < 1) p = 1
         if (p > this.totalPages) p = this.totalPages
@@ -136,8 +184,17 @@
         this.expandedOrderId = this.expandedOrderId === orderId ? null : orderId
       }
     },
-    mounted() {
-      this.fetchOrders()
+    async mounted() {
+      console.log('🚀 SellerOrder 页面挂载')
+      console.log('👤 当前用户ID:', this.userId)
+      
+      await this.fetchOrders()
+      
+      this.startAlertTimer()
+    },
+    beforeUnmount() {
+      console.log('🚪 SellerOrder 页面销毁')
+      this.stopAlertTimer()
     }
   }
   </script>
