@@ -42,22 +42,34 @@ export default {
   },
   methods: {
     async submitAddress() {
+      if (!this.address.name || !this.address.phone || !this.address.fullAddress) {
+        alert('请填写完整信息')
+        return
+      }
       try {
+        const token = localStorage.getItem('token')
+        if (!token) {
+          alert('请先登录')
+          this.$router.push('/login')
+          return
+        }
         const formData = new FormData()
+        formData.append('userId', this.$store.state.userStore.userInfo.userId)
         formData.append('name', this.address.name)
         formData.append('phone', this.address.phone)
         formData.append('fullAddress', this.address.fullAddress)
-        formData.append('current', this.address.current)
-
+        formData.append('current', this.address.current.toString())
         const response = await fetch(`${BASE_URL}/address/add`, {
           method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
           body: formData
         })
-
         const result = await response.json()
         if (result.success) {
           alert('地址添加成功！')
-          this.$router.go(-1)
+          this.$router.push('/user/address')
         } else {
           alert('地址添加失败，请重试！')
         }

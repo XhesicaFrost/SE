@@ -23,6 +23,7 @@ body {
 }
 
 #app {
+  user-select: none;
   max-width: 400px;
   margin: 0 auto;
   padding: 20px;

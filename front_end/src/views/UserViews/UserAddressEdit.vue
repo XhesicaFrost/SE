@@ -44,30 +44,71 @@ export default {
   methods: {
     async fetchAddressInfo() {
       try {
-        const params = new URLSearchParams({ userId: this.$store.state.userStore.userId }).toString()
-        const response = await fetchWithTimeout(`${BASE_URL}/address?${params}`)
+        const token = localStorage.getItem('token')
+        if (!token) {
+          alert('请先登录')
+          this.$router.push('/login')
+          return
+        }
+
+        const addressId = parseInt(this.$route.params.addressId)
+        if (isNaN(addressId)) {
+          alert('无效的地址ID')
+          this.$router.go(-1)
+          return
+        }
+
+        const params = new URLSearchParams({ userId: this.$store.state.userStore.userInfo.userId }).toString()
+        const response = await fetchWithTimeout(`${BASE_URL}/address?${params}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
         const result = await response.json()
-        if (result && Array.isArray(result)) {
-          const address = result.find(addr => addr.id === this.$route.params.addressId)
+        if (result.success && result.code === 200 && result.data) {
+          const address = result.data.find(addr => addr.id === addressId)
           if (address) {
             this.address = { ...address }
+          } else {
+            alert('未找到地址信息')
+            this.$router.go(-1)
           }
+        } else {
+          alert('获取地址信息失败')
+          this.$router.go(-1)
         }
       } catch (error) {
         console.error('获取地址信息失败:', error)
+        alert('获取地址信息失败，请检查网络连接')
+        this.$router.go(-1)
       }
     },
     async submitAddress() {
       try {
+        const token = localStorage.getItem('token')
+        if (!token) {
+          alert('请先登录')
+          this.$router.push('/login')
+          return
+        }
+
+        if (!this.address.id) {
+          alert('地址ID无效')
+          return
+        }
+
         const formData = new FormData()
-        formData.append('id', this.address.id)
+        formData.append('id', this.address.id.toString())
         formData.append('name', this.address.name)
         formData.append('phone', this.address.phone)
         formData.append('fullAddress', this.address.fullAddress)
-        formData.append('current', this.address.current)
+        formData.append('current', this.address.current.toString())
 
         const response = await fetch(`${BASE_URL}/address/edit`, {
           method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
           body: formData
         })
 
