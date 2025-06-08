@@ -1,429 +1,201 @@
 <template>
-  <div class="user-shopcart">
-    <div class="cart-header">
-      <h2>我的购物车</h2>
-      <div class="cart-summary">
-        共<span class="total-count">{{ totalItems }}</span>件商品
+  <TopNav :navInfo="navInfo" />
+  <div class="user-payment">
+    <!-- 商家信息 -->
+    <div class="shop-info">
+      <img :src="shopInfo.image" class="shop-img" />
+      <div class="shop-details">
+        <div class="shop-name">{{ shopInfo.name }}</div>
+        <div class="shop-address">{{ shopInfo.address }}</div>
       </div>
     </div>
-    
-    <!-- 空购物车提示 -->
-    <div class="empty-cart" v-if="Object.keys(groupedCartItems).length === 0">
-      <img src="" alt="空购物车" class="empty-img">
-      <p>购物车空空如也</p>
-      <button class="shop-btn" @click="$router.push('/user/search')">去逛逛</button>
-    </div>
-    
-    <!-- 按店铺分组的购物车商品 -->
-    <div class="shop-group" v-for="(group, index) in groupedCartItems" :key="index">
-      <div class="shop-header">
-        <img :src="group.shop.image" alt="店铺图片" class="shop-img">
-        <div class="shop-info">
-          <h3>{{ group.shop.name }}</h3>
-          <p class="shop-address">{{ group.shop.address }}</p>
-        </div>
-      </div>
-      
-      <div class="cart-items">
-        <div class="cart-item" v-for="item in group.items" :key="item.product.id">
-          <img :src="item.product.image" alt="商品图片" class="item-img">
-          <div class="item-info">
-            <div class="item-name">{{ item.product.name }}</div>
-            <div class="item-desc">{{ item.product.description }}</div>
-            <div class="item-bottom">
-              <div class="item-price">¥{{ item.product.price.toFixed(2) }}</div>
-              <div class="item-quantity">
-                <button class="quantity-btn" 
-                  @click="updateQuantity(index, item, -1)">-</button>
-                <span class="quantity">{{ item.quantity }}</span>
-                <button class="quantity-btn" @click="updateQuantity(index, item, 1)">+</button>
-              </div>
-            </div>
-          </div>
-          <!-- 目前弃用
-          <button class="delete-btn" @click="removeItem(index, item.product.id)">
-            <i class="fas fa-trash-alt"></i>
-          </button>
-          -->
-        </div>
-      </div>
-      
-      <div class="shop-footer">
-        <div class="shop-total">
-          店铺合计: <span class="total-price">¥{{ calculateShopTotal(group.items).toFixed(2) }}</span>
-        </div>
-        <button class="checkout-btn" @click="goToCheckout(group.shop.id)">进店结算</button>
+
+    <!-- 商品信息 -->
+    <div class="product-list">
+      <div v-for="item in cart" :key="item.product.id" class="product-item">
+        <div class="product-name">{{ item.product.name }}</div>
+        <div class="product-quantity">数量: {{ item.quantity }}</div>
+        <div class="product-price">¥{{ (item.product.price * item.quantity).toFixed(2) }}</div>
       </div>
     </div>
-    
-    <BottomNav :navItems="navItems" />
+
+    <!-- 总价格 -->
+    <div class="total-price">
+      总价格: ¥{{ totalPrice.toFixed(2) }}
+    </div>
+
+    <!-- 付款按钮 -->
+    <button class="payment-btn" @click="handlePayment">付款</button>
   </div>
 </template>
 
 <script>
-import BottomNav from '@/components/bottomNav.vue'
+import { mapState } from 'vuex'
 import { BASE_URL, fetchWithTimeout } from '@/config.js'
+import TopNav from '@/components/topNav.vue'
 
 export default {
-  name: 'userShopCart',
-  components: { BottomNav },
+  props: ['shopId'],
+  name: 'UserPayment',
+  components: { TopNav },
   data() {
     return {
-      navItems: [
-        { label: '首页', action: () => { this.$router.push('/user') } },
-        { label: '搜索', action: () => { this.$router.push('/user/search') } },
-        { label: '购物车', action: () => { this.$router.push('/user/shopcart') }, isActive: true },
-        { label: '我的', action: () => { this.$router.push('/user/personal') } }
-      ],
-      groupedCartItems: [
+      navInfo: { 
+        title: '结算', 
+        pageReturn: () => { this.$router.go(-1) } 
+      },
+      shopInfo: {
+        image: '',
+        name: '',
+        address: '',
+        rating: 0,
+        monthlySales: 0,
+        deliveryTime: ''
+      },
+      cart: [
       ]
     }
   },
   computed: {
-    totalItems() {
-      return Object.values(this.groupedCartItems).reduce((total, group) => {
-        return total + group.items.reduce((sum, item) => sum + item.quantity, 0)
-      }, 0)
+    ...mapState('userStore', ['userId']),
+    totalPrice() {
+      return Object.values(this.cart).reduce((total, item) => 
+        total + (item.product.price * item.quantity), 0)
     }
   },
   methods: {
-    // 获取购物车数据
+    async fetchShopInfo() {
+      try {
+        const params = new URLSearchParams({ shopId: this.$route.params.shopId }).toString()
+        const response = await fetchWithTimeout(`${BASE_URL}/shop?${params}`)
+        const result = await response.json()
+        if (result.code === 200) {
+          this.shopInfo = {
+            name: result.data.shopName,
+            image: result.data.shopImg,
+            address: result.data.shopAddress,
+            rating: result.data.rating,
+            monthlySales: result.data.monthlySales,
+            deliveryTime: result.data.deliveryTime
+          }
+        }
+      } catch (e) {
+        console.error('获取店铺信息失败', e)
+      }
+    },
     async fetchCartItems() {
       try {
         const params = new URLSearchParams({ userId: this.$store.state.userStore.userId }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/shopcart?${params}`)
         const result = await response.json()
         if (result.code === 200 && Array.isArray(result.data)) {
-          this.groupedCartItems = result.data;
+          for (let index = 0; index < result.data.length; index++) {
+            const element = result.data[index];
+            if(this.$route.params.shopId === element.shop.id) {
+              this.cart = element.items;
+            }
+          }
         } else {
-          this.groupedCartItems = [];
+          this.cart = [];
         }
       } catch (error) {
-        this.groupedCartItems = [];
+          this.cart = [];
         console.error('获取购物车数据失败:', error)
       }
     },
-    async submitCartItems(shopId, productId, change) {
+    async handlePayment() {
       try {
-        const formData = new FormData()
-        formData.append('shopId', shopId)
-        formData.append('productId', productId)
-        if(change) formData.append('change', change)
-
-        const params = new URLSearchParams({ userId: this.$store.state.userStore.userId }).toString()
-        const response = await fetchWithTimeout(`${BASE_URL}/edit/shopcart?${params}`, {
+        const response = await fetchWithTimeout(`${BASE_URL}/payment`, {
           method: 'POST',
-          body: formData
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: this.$store.state.userStore.userId,
+            shopId: this.$router.params.shopId,
+            items: this.cart,
+          }),
         })
-
         const result = await response.json()
-        if (result.success) {
-          alert('购物车修改成功！')
-          this.$router.go(-1)
+        if (result.code === 200) {
+          alert('支付成功！')
+          this.$router.push('/user/history')
         } else {
-          alert('购物车修改失败，请重试！')
+          alert('支付失败，请重试！')
         }
       } catch (error) {
-        console.error('购物车修改失败:', error)
-        alert('购物车修改失败，请检查网络连接！')
+        console.error('支付失败:', error)
+        alert('支付失败，请重试！')
       }
     },
-    
-    // 更新商品数量
-    updateQuantity(shopId, item, change) {
-      this.submitCartItems(shopId, item.product.id, change);
-      this.fetchCartItems();
-    },
-    
-    // 计算店铺总价
-    calculateShopTotal(items) {
-      return items.reduce((total, item) => {
-        return total + (item.product.price * item.quantity)
-      }, 0)
-    },
-    
-    // 跳转到结算页面
-    goToCheckout(shopId) {
-      // 实际项目中应传递选中的商品信息
-      this.$router.push(`/user/shopping/${shopId}`);
-    }
   },
   mounted() {
+    this.fetchShopInfo()
     this.fetchCartItems()
-  }
+  },
 }
 </script>
 
 <style scoped>
-.user-shopcart {
+.user-payment {
   max-width: 400px;
-  margin: 0 auto 36px auto;
+  margin: 48px auto;
   padding: 1em;
   background: #fff;
   min-height: 100vh;
 }
-
-.cart-header {
-  padding: 15px 0;
-  border-bottom: 1px solid #eee;
-  margin-bottom: 15px;
+.shop-info {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-}
-
-.cart-header h2 {
-  margin: 0;
-  font-size: 1.3em;
-  color: #333;
-}
-
-.cart-summary {
-  font-size: 0.9em;
-  color: #666;
-}
-
-.total-count {
-  color: #ff6a00;
-  font-weight: bold;
-  margin: 0 3px;
-}
-
-.empty-cart {
-  text-align: center;
-  padding: 50px 0;
-}
-
-.empty-img {
-  width: 120px;
-  height: 120px;
-  opacity: 0.6;
-  margin-bottom: 20px;
-}
-
-.empty-cart p {
-  color: #999;
-  margin-bottom: 20px;
-}
-
-.shop-btn {
-  background: #1249d5;
-  color: white;
-  border: none;
-  padding: 10px 30px;
-  border-radius: 20px;
-  font-size: 1em;
-  cursor: pointer;
-}
-
-.shop-group {
+  margin-bottom: 1.2em;
   background: #f8f8f8;
-  border-radius: 10px;
-  margin-bottom: 15px;
-  overflow: hidden;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  padding: 0.7em 1em;
+  border-radius: 8px;
 }
-
-.shop-header {
-  display: flex;
-  align-items: center;
-  padding: 10px 15px;
-  background: #fff;
-  border-bottom: 1px solid #eee;
-}
-
 .shop-img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-right: 10px;
-}
-
-.shop-info h3 {
-  margin: 0;
-  font-size: 1.1em;
-  color: #333;
-}
-
-.shop-address {
-  margin: 3px 0 0;
-  font-size: 0.8em;
-  color: #888;
-}
-
-.cart-items {
-  background: #fff;
-}
-
-.cart-item {
-  display: flex;
-  padding: 15px;
-  border-bottom: 1px solid #f5f5f5;
-  align-items: center;
-}
-
-.item-selector {
-  margin-right: 10px;
-}
-
-.item-checkbox {
-  width: 18px;
-  height: 18px;
-}
-
-.item-img {
   width: 80px;
   height: 80px;
   object-fit: cover;
   border-radius: 8px;
-  margin-right: 15px;
+  margin-right: 1em;
 }
-
-.item-info {
+.shop-details {
   flex: 1;
 }
-
-.item-name {
+.shop-name {
+  font-size: 1.2em;
   font-weight: bold;
-  margin-bottom: 5px;
-  color: #333;
 }
-
-.item-desc {
-  font-size: 0.9em;
+.shop-address {
   color: #888;
-  margin-bottom: 10px;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  font-size: 0.95em;
 }
-
-.item-bottom {
+.product-list {
+  margin-bottom: 1.5em;
+}
+.product-item {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  margin-bottom: 0.8em;
 }
-
-.item-price {
-  color: #ff6a00;
+.product-name {
   font-weight: bold;
-  font-size: 1.1em;
 }
-
-.item-quantity {
-  display: flex;
-  align-items: center;
-  border: 1px solid #ddd;
-  border-radius: 15px;
-  overflow: hidden;
-}
-
-.quantity-btn {
-  width: 28px;
-  height: 28px;
-  background: #f5f5f5;
-  border: none;
-  font-size: 1.1em;
+.product-quantity,
+.product-price {
   color: #666;
-  cursor: pointer;
 }
-
-.quantity-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.quantity {
-  min-width: 30px;
-  text-align: center;
-  font-weight: bold;
-}
-
-.delete-btn {
-  background: none;
-  border: none;
-  color: #999;
-  font-size: 1.1em;
-  margin-left: 10px;
-  cursor: pointer;
-}
-
-.delete-btn:hover {
-  color: #ff4d4f;
-}
-
-.shop-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 15px;
-  background: #fff;
-}
-
-.shop-total {
-  font-size: 1em;
-}
-
 .total-price {
-  color: #ff6a00;
+  font-size: 1.2em;
   font-weight: bold;
-  font-size: 1.1em;
+  margin-bottom: 1.5em;
 }
-
-.checkout-btn {
+.payment-btn {
   background: #1249d5;
   color: white;
-  border: none;
-  padding: 8px 20px;
-  border-radius: 15px;
-  font-size: 0.95em;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.cart-footer {
-  position: fixed;
-  bottom: 36px;
-  left: 0;
-  right: 0;
-  max-width: 400px;
-  margin: 0 auto;
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 15px;
-  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-  z-index: 100;
-}
-
-.select-all {
-  display: flex;
-  align-items: center;
-  font-size: 0.95em;
-}
-
-.select-all-checkbox {
-  margin-right: 8px;
-  width: 18px;
-  height: 18px;
-}
-
-.cart-total {
-  font-size: 1em;
-  margin-left: 10px;
-}
-
-.cart-footer .checkout-btn {
-  padding: 10px 25px;
+  padding: 10px 20px;
   border-radius: 20px;
   font-weight: bold;
-}
-
-.cart-footer .checkout-btn.disabled {
-  background: #ccc;
-  cursor: not-allowed;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
 }
 </style>
