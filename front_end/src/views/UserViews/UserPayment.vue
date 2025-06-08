@@ -127,7 +127,7 @@ export default {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             userId: this.$store.state.userStore.userId,
-            shopId: this.$router.params.shopId,
+            shopId: this.$route.params.shopId,
             items: this.cart,
           }),
         })
