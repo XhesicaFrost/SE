@@ -25,10 +25,11 @@ public class SellerController {
     @PostMapping("/register")
     public ApiResponse<?> registerSeller(@RequestParam String shopName,
                                          @RequestParam String shopAddress,
+                                         @RequestParam String shopTags,
                                          @RequestParam MultipartFile shopImage,
                                          @RequestParam Integer userId) {
         try {
-            sellerService.registerSeller(shopName, shopAddress, shopImage, userId);
+            sellerService.registerSeller(shopName, shopAddress, shopTags, shopImage, userId);
             return ApiResponse.success(Map.of("status", "success"));
         } catch (Exception e) {
             return ApiResponse.error(HttpStatus.BAD_REQUEST.value(), e.getMessage());
@@ -39,9 +40,10 @@ public class SellerController {
     public ApiResponse<?> editShopInfo(@RequestParam String shopName,
                                     @RequestParam String shopAddress,
                                     @RequestParam(required = false) MultipartFile shopImage,
+                                    @RequestParam String shopTags,
                                     @RequestParam Integer sellerId) {
         try {
-            sellerService.editSellerInfo(sellerId, shopName, shopAddress, shopImage);
+            sellerService.editSellerInfo(sellerId, shopName, shopAddress, shopImage, shopTags);
             return ApiResponse.success(Map.of("status", "success"));
         } catch (Exception e) {
             return ApiResponse.error(HttpStatus.BAD_REQUEST.value(), e.getMessage());
@@ -56,7 +58,8 @@ public class SellerController {
                 return ApiResponse.success(Map.of(
                     "shopName", seller.getName(),
                     "shopAddress", seller.getAddress(),
-                    "shopImg", base64Image
+                    "shopImg", base64Image,
+                    "shopTags", seller.getTags()
                 ));
             } else {
                 return ApiResponse.error(HttpStatus.NOT_FOUND.value(), "商家信息不存在");

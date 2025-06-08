@@ -3,6 +3,8 @@ package com.blm.takeout.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Entity
 @Table(name = "seller")
 @Data
@@ -23,6 +25,11 @@ public class Seller {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status sellerStatus;
+
+    @ElementCollection
+    @CollectionTable(name = "seller_tags", joinColumns = @JoinColumn(name = "seller_id"))
+    @Column(name = "tag")
+    private List<String> tags;
 
     @ManyToOne
     @JoinColumn(name = "userId", nullable = false, referencedColumnName = "userid")
