@@ -91,7 +91,7 @@
             <img 
               v-for="(product, idx) in shop.products" 
               :key="idx" 
-              :src="product.image" 
+              :src="getImageUrl(product.image)" 
               alt="商品" 
               class="product-img"
             >
@@ -171,13 +171,17 @@ export default {
       try {
         const response = await fetchWithTimeout(`${BASE_URL}/shops`)
         const result = await response.json()
+        console.log("API Response:", result)
         if (result.code === 200 && Array.isArray(result.data)) {
           this.allShops = result.data
+          console.log("Shops data:", this.allShops)
         } else {
           this.allShops = []
+          console.log("Response data is not an array:", result.data)
         }
       } catch (e) {
         this.allShops = []
+        console.log("Error fetching shops:", e)
       }
     },
     performSearch(value) {
@@ -185,7 +189,7 @@ export default {
       if (!this.searchKeyword.trim()) return;
       
       this.isLoading = true;
-      console.log(this.searchKeyword);
+      console.log(this.allShops);
       this.searchResults = [];
       
       setTimeout(() => {

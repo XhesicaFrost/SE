@@ -1,24 +1,30 @@
 package com.blm.takeout.controller;
 
 import com.blm.takeout.dto.ShopDTO;
+import com.blm.takeout.dto.ItemDTO;
+import com.blm.takeout.dto.ProductImageDTO;
 import com.blm.takeout.entity.Shop;
 import com.blm.takeout.service.ShopService;
 import com.blm.takeout.util.FileUtils;
+import com.blm.takeout.dto.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
+@RequestMapping("/shops")
 public class ShopController {
 
     private final ShopService shopService;
@@ -28,8 +34,70 @@ public class ShopController {
         this.shopService = shopService;
     }
 
-    @GetMapping("/shops")
+    @GetMapping
     public ResponseEntity<?> getAllShops() {
+        try {
+            List<ShopDTO> shops = shopService.getRecommendedShops(1); // 暂时使用固定用户ID
+            List<Map<String, Object>> shopList = new ArrayList<>();
+            
+            for (ShopDTO shop : shops) {
+                Map<String, Object> shopMap = new HashMap<>();
+                shopMap.put("id", shop.getId());
+                shopMap.put("name", shop.getName());
+                shopMap.put("address", shop.getAddress());
+                shopMap.put("rating", shop.getRating());
+                shopMap.put("sales", shop.getSales());
+                shopMap.put("status", shop.getStatus());
+                shopMap.put("userId", shop.getUserId());
+                shopMap.put("deliverTime", shop.getDeliverTime());
+                shopMap.put("avgPrice", shop.getAvgPrice());
+                shopMap.put("distance", shop.getDistance());
+                shopMap.put("tags", shop.getTags());
+                
+                // 转换店铺图片为base64
+                if (shop.getImage() != null && !shop.getImage().isEmpty()) {
+                    try {
+                        String base64Image = FileUtils.convertImageToBase64(shop.getImage());
+                        shopMap.put("image", base64Image);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        shopMap.put("image", "");
+                    }
+                } else {
+                    shopMap.put("image", "");
+                }
+                
+                // 转换商品图片为base64
+                List<Map<String, Object>> products = new ArrayList<>();
+                for (ProductImageDTO item : shop.getProducts()) {
+                    Map<String, Object> productMap = new HashMap<>();
+                    
+                    if (item.getImage() != null && !item.getImage().isEmpty()) {
+                        try {
+                            String base64Image = FileUtils.convertImageToBase64(item.getImage());
+                            productMap.put("image", base64Image);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            productMap.put("image", "");
+                        }
+                    } else {
+                        productMap.put("image", "");
+                    }
+                    products.add(productMap);
+                }
+                shopMap.put("products", products);
+                shopList.add(shopMap);
+            }
+            
+            return ResponseEntity.ok(new ApiResponse<>(200, "获取推荐店铺成功", shopList));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ApiResponse<>(500, "获取推荐店铺失败: " + e.getMessage(), null));
+        }
+    }
+
+    @GetMapping("/shops")
+    public ResponseEntity<?> getAllShopsOld() {
         try {
             List<ShopDTO> shops = shopService.getAllShops();
             List<Map<String, Object>> response = shops.stream()
@@ -161,124 +229,6 @@ public class ShopController {
                 "success", false,
                 "message", "获取店铺热销商品失败：" + e.getMessage()
             );
-        }
-    }
-
-    @GetMapping("/user")
-    public ResponseEntity<Map<String, Object>> getRecommendedShops(HttpServletRequest request) {
-        try {
-            // 从请求头中获取token
-            String authHeader = request.getHeader("Authorization");
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                Map<String, Object> response = new HashMap<>();
-                response.put("code", 401);
-                response.put("success", false);
-                response.put("message", "无效的认证信息");
-                return ResponseEntity.status(401).body(response);
-            }
-            
-            String token = authHeader.substring(7); // 移除"Bearer "前缀
-            String[] parts = token.split("\\.");
-            String payload = new String(java.util.Base64.getUrlDecoder().decode(parts[1]));
-            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-            Map<String, Object> claims = mapper.readValue(payload, Map.class);
-            
-            // 打印claims内容以便调试
-            System.out.println("JWT Claims: " + claims);
-            
-            // 尝试不同的字段名
-            Object userIdObj = claims.get("userId");
-            if (userIdObj == null) {
-                userIdObj = claims.get("userid");
-            }
-            if (userIdObj == null) {
-                userIdObj = claims.get("user_id");
-            }
-            
-            if (userIdObj == null) {
-                Map<String, Object> response = new HashMap<>();
-                response.put("code", 401);
-                response.put("success", false);
-                response.put("message", "无效的用户信息");
-                return ResponseEntity.status(401).body(response);
-            }
-            
-            Integer userId;
-            if (userIdObj instanceof Integer) {
-                userId = (Integer) userIdObj;
-            } else if (userIdObj instanceof String) {
-                userId = Integer.parseInt((String) userIdObj);
-            } else {
-                userId = Integer.parseInt(userIdObj.toString());
-            }
-            
-            List<ShopDTO> shops = shopService.getRecommendedShops(userId);
-            List<Map<String, Object>> shopList = shops.stream()
-                .map(shop -> {
-                    Map<String, Object> shopMap = new HashMap<>();
-                    shopMap.put("id", shop.getId());
-                    
-                    // 将店铺图片转换为base64
-                    if (shop.getImage() != null && !shop.getImage().isEmpty()) {
-                        try {
-                            String base64Image = FileUtils.convertImageToBase64(shop.getImage());
-                            shopMap.put("image", base64Image);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            shopMap.put("image", "");
-                        }
-                    } else {
-                        shopMap.put("image", "");
-                    }
-                    
-                    shopMap.put("name", shop.getName());
-                    shopMap.put("rating", shop.getRating());
-                    shopMap.put("tags", shop.getTags());
-                    shopMap.put("avgPrice", shop.getAvgPrice());
-                    shopMap.put("distance", shop.getDistance());
-                    shopMap.put("deliverTime", shop.getDeliverTime());
-                    
-                    // 处理商品图片
-                    if (shop.getProducts() != null) {
-                        List<Map<String, Object>> products = shop.getProducts().stream()
-                            .map(product -> {
-                                Map<String, Object> productMap = new HashMap<>();
-                                if (product.getImage() != null && !product.getImage().isEmpty()) {
-                                    try {
-                                        String base64Image = FileUtils.convertImageToBase64(product.getImage());
-                                        productMap.put("image", base64Image);
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                        productMap.put("image", "");
-                                    }
-                                } else {
-                                    productMap.put("image", "");
-                                }
-                                return productMap;
-                            })
-                            .collect(Collectors.toList());
-                        shopMap.put("products", products);
-                    }
-                    
-                    shopMap.put("address", shop.getAddress());
-                    shopMap.put("sales", shop.getSales());
-                    shopMap.put("status", shop.getStatus());
-                    shopMap.put("userId", shop.getUserId());
-                    return shopMap;
-                })
-                .collect(Collectors.toList());
-            
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 200);
-            response.put("success", true);
-            response.put("data", shopList);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 500);
-            response.put("success", false);
-            response.put("message", "获取推荐店铺失败：" + e.getMessage());
-            return ResponseEntity.ok(response);
         }
     }
 } 

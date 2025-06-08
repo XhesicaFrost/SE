@@ -88,11 +88,8 @@ export default {
   },
   methods: {
     getImageUrl(img) {
-      // 支持base64或url
       if (!img) return ''
-      if (img.startsWith('data:image')) return img
-      if (img.length > 100) return `data:image/png;base64,${img}`
-      return img
+      return `data:image/jpeg;base64,${img}`
     },
     // 获取购物车数据
     async fetchCartItems() {
@@ -112,6 +109,7 @@ export default {
         console.log('购物车数据:', result);
         
         if (result.code === 200 && Array.isArray(result.data)) {
+          console.log('购物车商品数据:', result.data);
           this.groupedCartItems = result.data;
         } else {
           this.groupedCartItems = [];

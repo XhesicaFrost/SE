@@ -73,66 +73,67 @@ public class CartServiceImpl implements CartService {
         Map<Integer, List<CartItem>> shopItemsMap = cartItems.stream()
             .collect(Collectors.groupingBy(item -> item.getItem().getShopId()));
             
-        return shopItemsMap.entrySet().stream()
-            .map(entry -> {
-                CartDTO cartDTO = new CartDTO();
-                
-                // 设置店铺信息
-                Shop shop = shopRepository.findById(entry.getKey())
-                    .orElseThrow(() -> new RuntimeException("店铺不存在"));
-                Map<String, Object> shopInfo = new HashMap<>();
-                shopInfo.put("id", shop.getId());
-                shopInfo.put("name", shop.getName());
-                
-                // 将店铺图片转换为base64
-                if (shop.getImage() != null && !shop.getImage().isEmpty()) {
-                    try {
-                        String base64Image = FileUtils.convertImageToBase64(shop.getImage());
-                        shopInfo.put("image", base64Image);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        shopInfo.put("image", "");
-                    }
-                } else {
+        List<CartDTO> result = new ArrayList<>();
+        
+        for (Map.Entry<Integer, List<CartItem>> entry : shopItemsMap.entrySet()) {
+            CartDTO cartDTO = new CartDTO();
+            
+            // 设置店铺信息
+            Shop shop = shopRepository.findById(entry.getKey())
+                .orElseThrow(() -> new RuntimeException("店铺不存在"));
+            Map<String, Object> shopInfo = new HashMap<>();
+            shopInfo.put("id", shop.getId());
+            shopInfo.put("name", shop.getName());
+            
+            // 将店铺图片转换为base64
+            if (shop.getImage() != null && !shop.getImage().isEmpty()) {
+                try {
+                    String base64Image = FileUtils.convertImageToBase64(shop.getImage());
+                    shopInfo.put("image", base64Image);
+                } catch (IOException e) {
+                    e.printStackTrace();
                     shopInfo.put("image", "");
                 }
+            } else {
+                shopInfo.put("image", "");
+            }
+            
+            shopInfo.put("address", shop.getAddress());
+            cartDTO.setShop(shopInfo);
+            
+            // 设置商品信息
+            List<CartItemDTO> items = new ArrayList<>();
+            for (CartItem cartItem : entry.getValue()) {
+                CartItemDTO itemDTO = new CartItemDTO();
+                Item item = cartItem.getItem();
+                Map<String, Object> productInfo = new HashMap<>();
+                productInfo.put("id", item.getId());
+                productInfo.put("name", item.getName());
+                productInfo.put("description", item.getDescription());
+                productInfo.put("price", item.getPrice());
                 
-                shopInfo.put("address", shop.getAddress());
-                cartDTO.setShop(shopInfo);
+                // 将商品图片转换为base64
+                if (item.getImage() != null && !item.getImage().isEmpty()) {
+                    try {
+                        String base64Image = FileUtils.convertImageToBase64(item.getImage());
+                        productInfo.put("image", base64Image);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        productInfo.put("image", "");
+                    }
+                } else {
+                    productInfo.put("image", "");
+                }
                 
-                // 设置商品信息
-                List<CartItemDTO> items = entry.getValue().stream()
-                    .map(cartItem -> {
-                        CartItemDTO itemDTO = new CartItemDTO();
-                        Item item = cartItem.getItem();
-                        Map<String, Object> productInfo = new HashMap<>();
-                        productInfo.put("id", item.getId());
-                        productInfo.put("name", item.getName());
-                        productInfo.put("description", item.getDescription());
-                        productInfo.put("price", item.getPrice());
-                        
-                        // 将商品图片转换为base64
-                        if (item.getImage() != null && !item.getImage().isEmpty()) {
-                            try {
-                                String base64Image = FileUtils.convertImageToBase64(item.getImage());
-                                productInfo.put("image", base64Image);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                                productInfo.put("image", "");
-                            }
-                        } else {
-                            productInfo.put("image", "");
-                        }
-                        
-                        itemDTO.setProduct(productInfo);
-                        itemDTO.setQuantity(cartItem.getQuantity());
-                        return itemDTO;
-                    })
-                    .collect(Collectors.toList());
-                cartDTO.setItems(items);
-                return cartDTO;
-            })
-            .collect(Collectors.toList());
+                itemDTO.setProduct(productInfo);
+                itemDTO.setQuantity(cartItem.getQuantity());
+                items.add(itemDTO);
+            }
+            cartDTO.setItems(items);
+            result.add(cartDTO);
+        }
+        
+        return result;
     }
 
     @Override
