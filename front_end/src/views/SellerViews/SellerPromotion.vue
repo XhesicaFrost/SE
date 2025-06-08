@@ -70,12 +70,7 @@ export default {
       }
     },
     editPromotion(promotionId) {
-<<<<<<< HEAD
-      console.log(`sellerPromotion: go to /seller/promotion/${promotionId}`)
-      this.$router.push(`/seller/edit/${promotionId}`)
-=======
       this.$router.push(`/seller/promotion/${promotionId}`)
->>>>>>> 9967df7ee1cc743fc1021d0f2a755cde8172e794
     }
   },
   mounted() {
