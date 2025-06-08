@@ -1,5 +1,6 @@
 package com.blm.takeout.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,8 +26,20 @@ public class FileUtils {
     }
 
     public static String convertImageToBase64(String imagePath) throws IOException {
-        Path filePath = Paths.get(IMAGE_UPLOAD_DIR + imagePath.replace("/uploads", ""));
-        byte[] imageBytes = Files.readAllBytes(filePath);
-        return Base64.getEncoder().encodeToString(imageBytes);
+        if (imagePath == null || imagePath.isEmpty()) {
+            return "";
+        }
+        
+        // 从 /uploads/xxx.jpg 转换为 uploads/xxx.jpg
+        String relativePath = imagePath.replace("/uploads/", "");
+        Path filePath = Paths.get(IMAGE_UPLOAD_DIR, relativePath);
+        
+        if (!Files.exists(filePath)) {
+            System.err.println("图片文件不存在: " + filePath);
+            return "";
+        }
+        
+        byte[] fileContent = Files.readAllBytes(filePath);
+        return Base64.getEncoder().encodeToString(fileContent);
     }
 }

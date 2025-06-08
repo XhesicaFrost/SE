@@ -9,10 +9,14 @@ import com.blm.takeout.repository.ShopRepository;
 import com.blm.takeout.service.CartService;
 import com.blm.takeout.dto.CartDTO;
 import com.blm.takeout.dto.CartItemDTO;
+import com.blm.takeout.util.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StringUtils;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -79,7 +83,20 @@ public class CartServiceImpl implements CartService {
                 Map<String, Object> shopInfo = new HashMap<>();
                 shopInfo.put("id", shop.getId());
                 shopInfo.put("name", shop.getName());
-                shopInfo.put("image", shop.getImage());
+                
+                // 将店铺图片转换为base64
+                if (shop.getImage() != null && !shop.getImage().isEmpty()) {
+                    try {
+                        String base64Image = FileUtils.convertImageToBase64(shop.getImage());
+                        shopInfo.put("image", base64Image);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        shopInfo.put("image", "");
+                    }
+                } else {
+                    shopInfo.put("image", "");
+                }
+                
                 shopInfo.put("address", shop.getAddress());
                 cartDTO.setShop(shopInfo);
                 
@@ -87,21 +104,31 @@ public class CartServiceImpl implements CartService {
                 List<CartItemDTO> items = entry.getValue().stream()
                     .map(cartItem -> {
                         CartItemDTO itemDTO = new CartItemDTO();
-                        Item product = cartItem.getItem();
-                        
+                        Item item = cartItem.getItem();
                         Map<String, Object> productInfo = new HashMap<>();
-                        productInfo.put("id", product.getId());
-                        productInfo.put("name", product.getName());
-                        productInfo.put("description", product.getDescription());
-                        productInfo.put("price", product.getPrice());
-                        productInfo.put("image", product.getImage());
+                        productInfo.put("id", item.getId());
+                        productInfo.put("name", item.getName());
+                        productInfo.put("description", item.getDescription());
+                        productInfo.put("price", item.getPrice());
+                        
+                        // 将商品图片转换为base64
+                        if (item.getImage() != null && !item.getImage().isEmpty()) {
+                            try {
+                                String base64Image = FileUtils.convertImageToBase64(item.getImage());
+                                productInfo.put("image", base64Image);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                productInfo.put("image", "");
+                            }
+                        } else {
+                            productInfo.put("image", "");
+                        }
                         
                         itemDTO.setProduct(productInfo);
                         itemDTO.setQuantity(cartItem.getQuantity());
                         return itemDTO;
                     })
                     .collect(Collectors.toList());
-                    
                 cartDTO.setItems(items);
                 return cartDTO;
             })
