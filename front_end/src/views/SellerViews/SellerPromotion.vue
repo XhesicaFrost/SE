@@ -70,7 +70,7 @@ export default {
       }
     },
     editPromotion(promotionId) {
-      this.$router.push(`/seller/edit/${promotionId}`)
+      this.$router.push(`/seller/promotion/${promotionId}`)
     }
   },
   mounted() {
