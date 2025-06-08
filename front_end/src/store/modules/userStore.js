@@ -8,7 +8,8 @@ export default {
       userName: '',    // 用户名
       userKind: '',    // 用户类型
       userPhone: '',   // 用户手机号
-      token: ''        // 用户令牌
+      token: '',        // 用户令牌
+      userImage: ''
     },
     errorMessage: ''
   }),
@@ -47,7 +48,8 @@ export default {
             userName: userData.username || result.data?.username || '',
             userKind: userData.role || result.data?.role || '',
             userPhone: userData.phonenumber || result.data?.phonenumber || '',
-            token: result.data?.token || result.token || '' // 保存后端返回的 token
+            token: result.data?.token || result.token || '', // 保存后端返回的 token,
+            userImage: userData.userImage || ''
           })
           commit('SET_ERROR', '')
           return { 
@@ -126,6 +128,7 @@ export default {
               userName: loginData.username || result.data?.username || '',
               userKind: loginData.role || result.data?.role || '',
               userPhone: loginData.phonenumber || result.data?.phonenumber || '',
+              userImage: loginData.userImage || '',
               token: result.data?.token || result.token || ''
             }
           )

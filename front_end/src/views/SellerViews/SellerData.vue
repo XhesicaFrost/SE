@@ -1,4 +1,5 @@
 <template>
+  <TopNav :navInfo="navInfo" />
   <div class="seller-data-view">
     <!-- 时间选择 -->
     <div class="date-picker-section">
@@ -41,13 +42,14 @@
 
 <script>
 import BottomNav from '@/components/bottomNav.vue'
+import TopNav from '@/components/topNav.vue'
 import { BASE_URL, fetchWithTimeout } from '@/config.js'
 import { mapState } from 'vuex'
 import Chart from 'chart.js/auto'
 
 export default {
   name: 'sellerData',
-  components: { BottomNav },
+  components: { BottomNav, TopNav },
   data() {
     return {
       startDate: '',
@@ -62,8 +64,11 @@ export default {
       commentLabels: [],
       downloadUrl: '',
       navItems: [
-        { label: '返回主页', action: () => { this.$router.push('/seller') } }
+        { label: '管理店铺', action: () => { this.$router.push('/seller/shop') } },
+        { label: '管理订单', action: () => { this.$router.push('/seller/order') } },
+        { label: '查看数据', action: () => { this.$router.push('/seller/data') }, isActive: true }
       ],
+      navInfo: { title: '查看数据', pageReturn: () => { this.$router.push('/seller') } },
       salesOrderChartInstance: null,
       commentChartInstance: null
     }
@@ -201,7 +206,7 @@ export default {
 <style scoped>
 .seller-data-view {
   max-width: 600px;
-  margin: 0 auto 70px auto;
+  margin: 48px auto 36px auto;
   padding: 1em;
   background: #fff;
   min-height: 100vh;

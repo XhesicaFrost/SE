@@ -174,8 +174,11 @@ export default {
       
       // 导航
       navItems: [
-        { label: '返回主页', action: () => { this.$router.push('/rider') } }
-      ]
+        { label: '订单搜索', action: () => { this.$router.push('/rider/orders') }, isActive: true },
+        { label: '历史订单', action: () => { this.$router.push('/rider/history') } },
+        { label: '个人中心', action: () => { /* 暂时不跳转 */ } }
+      ],
+      locationUpdateTimer: null,
     }
   },
   

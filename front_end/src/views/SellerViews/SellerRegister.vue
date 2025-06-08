@@ -12,6 +12,7 @@
 -->
 
 <template>
+  <TopNav :navInfo="navInfo" />
   <div class="register-view">
     <div class="login-header">
       <img src="@/assets/logo.jpg" alt="logo" class="login-logo" />
@@ -53,11 +54,13 @@
 </template>
 
 <script>
-import { BASE_URL ,fetchWithTimeout} from '@/config.js'
+import TopNav from '@/components/topNav.vue'
+import { BASE_URL } from '@/config.js'
 import { mapState } from 'vuex'
 
 export default {
   name: 'sellerRegister',
+  components: { TopNav },
   computed: {
     ...mapState('userStore', {
       userId: state => state.userInfo.userId
@@ -70,7 +73,8 @@ export default {
       shopImage: null,
       shopImageUrl: '',
       errorMessage: '',
-      submitStatus: 'normal' // normal | success
+      submitStatus: 'normal', // normal | success
+      navInfo: { title: '创建店铺', pageReturn: () => { this.$router.push('/seller') } }
     }
   },
   methods: {
@@ -130,6 +134,13 @@ export default {
 </script>
 
 <style scoped>
+.register-view {
+  max-width: 400px;
+  margin: 48px auto 36px auto;
+  padding: 1em;
+  background: #fff;
+  min-height: 100vh;
+}
 .login-header {
   display: flex;
   align-items: center;
