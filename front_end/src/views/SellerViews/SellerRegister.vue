@@ -55,7 +55,7 @@
 
 <script>
 import TopNav from '@/components/topNav.vue'
-import { BASE_URL } from '@/config.js'
+import { BASE_URL ,fetchWithTimeout} from '@/config.js'
 import { mapState } from 'vuex'
 
 export default {

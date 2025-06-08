@@ -28,11 +28,22 @@
           <div class="goods-detail">
             <span class="goods-price">￥{{ item.price }}</span>
             <span class="goods-sales">销量：{{ item.sales }}</span>
+            <!-- ✅ 新增：显示商品状态 -->
+            <span class="goods-status" :class="getStatusClass(item.status)">
+              {{ getStatusText(item.status) }}
+            </span>
           </div>
         </div>
         <div class="goods-actions">
           <button class="edit-btn" @click="editItem(item.id)">编辑</button>
-          <button class="delete-btn" @click="deleteItem(item.id)">删除</button>
+          <!-- ✅ 修改：根据状态动态显示上架/下架按钮 -->
+          <button 
+            :class="item.status === '正常' ? 'offline-btn' : 'online-btn'"
+            @click="toggleItemStatus(item)"
+            :disabled="item.isUpdating"
+          >
+            {{ item.isUpdating ? '处理中...' : (item.status === '正常' ? '下架' : '上架') }}
+          </button>
         </div>
       </div>
     </div>
@@ -102,48 +113,56 @@ export default {
     }
   },
   methods: {
+    /**
+     * 编辑店铺信息
+     */
     editShop() {
       this.$router.push('/seller/shop/edit')
     },
+    /**
+     * 编辑商品信息
+     * @param {number} id - 商品ID
+     */
     editItem(id) {
       this.$router.push(`/seller/item/${id}`)
     },
-    async deleteItem(id) {
-      if (!confirm('确定要删除该商品吗？')) return
-      try {
-        const response = await fetchWithTimeout(`${BASE_URL}/seller/item`, {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id })
-        })
-        const result = await response.json()
-        if (result.code === 200) {
-          this.fetchGoods()
-        } else {
-          alert('删除失败')
-        }
-      } catch (e) {
-        alert('网络错误，删除失败')
-      }
-    },
+    /**
+     * 商品排序
+     */
     sortGoods() {
       this.page = 1
     },
+    /**
+     * 切换分页
+     * @param {number} p - 页码
+     */
     changePage(p) {
       if (p < 1) p = 1
       if (p > this.totalPages) p = this.totalPages
       this.page = p
       this.jumpPage = p
     },
+    /**
+     * 跳转到新增商品页面
+     */
     goToAddItem() {
       this.$router.push('/seller/item/register')
     },
+    /**
+     * 跳转到促销活动管理页面
+     */
     goToPromotion() {
       this.$router.push('/seller/promotion')
     },
+    /**
+     * 跳转到审批信息查看页面
+     */
     goToApproval() {
       this.$router.push('/seller/approval')
     },
+    /**
+     * 获取店铺信息
+     */
     async fetchShopInfo() {
       try {
         const params = new URLSearchParams({ sellerId: this.sellerId }).toString()
@@ -152,7 +171,8 @@ export default {
         if (result.code === 200) {
           this.shopInfo = {
             name: result.data.shopName,
-            image: result.data.shopImg,
+            // ✅ 处理base64图片数据
+            image: result.data.shopImg ? `data:image/jpeg;base64,${result.data.shopImg}` : '',
             address: result.data.shopAddress
           }
         } else {
@@ -170,19 +190,152 @@ export default {
         }
       }
     },
+    /**
+     * 获取商品列表
+     */
     async fetchGoods() {
       try {
         const params = new URLSearchParams({ sellerId: this.sellerId }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/item?${params}`)
         const result = await response.json()
-        if ( result.code === 200 && Array.isArray(result.data)) {
-          this.goods = result.data
+        if (result.code === 200 && Array.isArray(result.data)) {
+          // ✅ 确保每个商品都有status字段，并处理base64图片
+          this.goods = result.data.map(item => ({
+            ...item,
+            // ✅ 处理base64图片数据
+            image: item.image ? `data:image/jpeg;base64,${item.image}` : '',
+            status: item.status || '正常', // 默认为正常状态
+            isUpdating: false // 添加更新状态标志
+          }))
         } else {
           this.goods = []
         }
       } catch (e) {
+        console.error('获取商品列表失败:', e)
         this.goods = []
       }
+    },
+    /**
+     * 获取状态显示文本
+     * @param {string} status - 商品状态
+     * @returns {string} 显示文本
+     */
+    getStatusText(status) {
+      switch (status) {
+        case '正常':
+          return '正常'
+        case '下架':
+          return '已下架'
+        default:
+          return '未知'
+      }
+    },
+    /**
+     * 获取状态样式类名
+     * @param {string} status - 商品状态
+     * @returns {string} CSS类名
+     */
+    getStatusClass(status) {
+      switch (status) {
+        case '正常':
+          return 'status-online'
+        case '下架':
+          return 'status-offline'
+        default:
+          return 'status-unknown'
+      }
+    },
+    /**
+     * 切换商品上架/下架状态
+     * @param {Object} item - 商品对象
+     */
+    async toggleItemStatus(item) {
+      const isOnline = item.status === '正常'
+      const action = isOnline ? '下架' : '上架'
+      
+      if (!confirm(`确定要${action}商品"${item.name}"吗？`)) {
+        return
+      }
+      
+      // ✅ Vue 3: 直接赋值，不使用 $set
+      item.isUpdating = true
+      
+      try {
+        if (isOnline) {
+          // 下架商品
+          await this.offlineItem(item.id)
+        } else {
+          // 上架商品
+          await this.onlineItem(item.id)
+        }
+        
+        // 刷新商品列表
+        await this.fetchGoods()
+        
+        this.$toast && this.$toast(`${action}成功`)
+      } catch (error) {
+        console.error(`${action}失败:`, error)
+        this.$toast && this.$toast(`${action}失败，请重试`)
+      } finally {
+        // ✅ Vue 3: 直接赋值，不使用 $set
+        item.isUpdating = false
+      }
+    },
+    /**
+     * 下架商品
+     * @param {string|number} itemId - 商品ID
+     * @returns {Promise} 请求Promise
+     */
+    async offlineItem(itemId) {
+      console.log('🔽 执行下架商品:', itemId)
+      
+      const response = await fetchWithTimeout(`${BASE_URL}/item/offline`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json' 
+        },
+        body: JSON.stringify({ 
+          itemId: itemId,
+          sellerId: this.sellerId 
+        })
+      })
+      
+      const result = await response.json()
+      
+      if (result.code !== 200) {
+        throw new Error(result.message || '下架失败')
+      }
+      
+      console.log('✅ 下架成功:', result)
+      return result
+    },
+    /**
+     * 上架商品
+     * @param {string|number} itemId - 商品ID  
+     * @returns {Promise} 请求Promise
+     */
+    async onlineItem(itemId) {
+      console.log('🔼 执行上架商品:', itemId)
+      
+      const response = await fetchWithTimeout(`${BASE_URL}/item/online`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json' 
+        },
+        body: JSON.stringify({ 
+          itemId: itemId,
+          sellerId: this.sellerId 
+        })
+      })
+      
+      const result = await response.json()
+      
+      if (result.code !== 200) {
+        throw new Error(result.message || '上架失败')
+      }
+      
+      console.log('✅ 上架成功:', result)
+      return result
     }
   },
   mounted() {
@@ -290,7 +443,9 @@ export default {
   color: #888;
   font-size: 0.95em;
   display: flex;
-  gap: 1.2em;
+  flex-wrap: wrap;
+  gap: 0.8em;
+  align-items: center;
 }
 .pagination-bar {
   display: flex;
@@ -326,5 +481,59 @@ export default {
 }
 .delete-btn:hover {
   background: #b71c1c;
+}
+.goods-status {
+  font-size: 0.85em;
+  padding: 0.2em 0.5em;
+  border-radius: 4px;
+  font-weight: bold;
+}
+.status-online {
+  background: #e8f5e8;
+  color: #4caf50;
+}
+.status-offline {
+  background: #ffeaa7;
+  color: #e17055;
+}
+.status-unknown {
+  background: #f5f5f5;
+  color: #999;
+}
+.online-btn {
+  background: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4em 1.2em;
+  font-size: 1em;
+  cursor: pointer;
+  margin-top: 0.2em;
+  transition: background 0.2s;
+}
+.online-btn:hover {
+  background: #388e3c;
+}
+.online-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+.offline-btn {
+  background: #ff9800;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4em 1.2em;
+  font-size: 1em;
+  cursor: pointer;
+  margin-top: 0.2em;
+  transition: background 0.2s;
+}
+.offline-btn:hover {
+  background: #f57c00;
+}
+.offline-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
 }
 </style>

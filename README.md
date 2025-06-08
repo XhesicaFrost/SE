@@ -423,6 +423,82 @@ itemDescription=奶龙喜欢吃
   "status": "fail"
 }
 ```
+### 商品上下架相关接口说明
+
+#### 1. 下架商品
+
+- **请求方式**：POST  
+- **请求地址**：`${BASE_URL}/item/offline`  
+- **发送数据格式**：JSON
+
+| 参数名   | 类型   | 说明     | 是否必填 |
+| -------- | ------ | -------- | -------- |
+| itemId   | string | 商品ID   | 是       |
+| sellerId | string | 商家ID   | 是       |
+
+- **请求示例**：
+
+`{ "itemId": "123", "sellerId": "seller456" }`
+
+- **返回数据格式**（JSON）：
+
+成功：
+```json
+{
+  "code": 200,
+  "success": true,
+  "message": "下架成功"
+}
+```
+失败:
+```
+{
+  "code": 400,
+  "success": false,
+  "message": "下架失败"
+}
+```
+### 商家商品
+
+- 请求方式：POST
+
+- 请求地址：${BASE_URL}/item/online
+
+- 发送数据格式：JSON
+
+| 参数名	 | 类型	| 说明	| 是否必填 |
+| ----      | --- | ------ | ----|
+| itemId	 | string |	商品ID	| 是 |
+| sellerId |	string |	商家ID |	是 |
+
+- **请求示例**：
+```json
+POST /item/online
+Content-Type: application/json
+
+{
+  "itemId": "123",
+  "sellerId": "seller456"
+}
+```
+- **返回数据格式**
+
+成功
+```json
+{
+  "code": 200,
+  "success": true,
+  "message": "上架成功"
+}
+```
+失败
+```json
+{
+  "code": 400,
+  "success": false,
+  "message": "上架失败"
+}
+```
 
 ### 本页面用到的网络接口格式说明
 

@@ -178,7 +178,6 @@ export default {
         { label: '历史订单', action: () => { this.$router.push('/rider/history') } },
         { label: '个人中心', action: () => { /* 暂时不跳转 */ } }
       ],
-      locationUpdateTimer: null,
     }
   },
   
