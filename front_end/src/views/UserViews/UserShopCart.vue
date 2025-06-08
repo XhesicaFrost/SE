@@ -90,17 +90,36 @@ export default {
     // 获取购物车数据
     async fetchCartItems() {
       try {
-        const params = new URLSearchParams({ userId: this.$store.state.userStore.userId }).toString()
-        const response = await fetchWithTimeout(`${BASE_URL}/shopcart?${params}`)
+        const token = localStorage.getItem('token')
+        if (!token) {
+          alert('请先登录')
+          this.$router.push('/login')
+          return
+        }
+
+        const userId = parseInt(this.$store.state.userStore.userInfo.userId)
+        if (isNaN(userId)) {
+          alert('用户信息无效')
+          this.$router.push('/login')
+          return
+        }
+
+        const response = await fetchWithTimeout(`${BASE_URL}/shopcart`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
         const result = await response.json()
-        if (result.code === 200 && Array.isArray(result.data)) {
-          this.groupedCartItems = result.data;
+        if (result.success && result.code === 200) {
+          this.groupedCartItems = result.data
         } else {
-          this.groupedCartItems = [];
+          this.groupedCartItems = []
+          alert('获取购物车信息失败')
         }
       } catch (error) {
-        this.groupedCartItems = [];
+        this.groupedCartItems = []
         console.error('获取购物车数据失败:', error)
+        alert('获取购物车数据失败，请检查网络连接')
       }
     },
     

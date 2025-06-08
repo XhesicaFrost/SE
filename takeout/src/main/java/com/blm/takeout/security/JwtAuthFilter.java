@@ -11,6 +11,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.blm.takeout.service.CustomUserDetailsService;
 
@@ -18,6 +22,7 @@ import java.io.IOException;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthFilter.class);
 
     private final JwtUtils jwtUtils;
     private final CustomUserDetailsService userDetailsService;
@@ -35,27 +40,37 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         
         final String path = request.getServletPath();
+        logger.debug("Processing request for path: {}", path);
+
         if (isPublicPath(path)) {
+            logger.debug("Path {} is public, skipping authentication", path);
             filterChain.doFilter(request, response);
             return;
         }
 
         final String authHeader = request.getHeader("Authorization");
+        logger.debug("Authorization header: {}", authHeader);
+        
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            logger.warn("Missing or invalid Authorization header for path: {}", path);
             sendError(response, 401, "Missing or invalid Authorization header");
             return;
         }
 
         try {
             final String jwt = authHeader.substring(7);
+            logger.debug("Validating JWT token for path: {}", path);
+
             if (!jwtUtils.validateToken(jwt)) {
+                logger.warn("Invalid JWT token for path: {}", path);
                 sendError(response, 401, "Invalid JWT token");
                 return;
             }
 
             String username = jwtUtils.getUsername(jwt);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            logger.debug("Loading user details for username: {}", username);
             
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                 userDetails,
                 null,
@@ -63,9 +78,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             );
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authToken);
+            logger.debug("Authentication successful for user: {}", username);
+
             filterChain.doFilter(request, response);
         } catch (Exception e) {
-            sendError(response, 401, "Invalid JWT token: " + e.getMessage());
+            logger.error("Error processing request: {}", e.getMessage());
+            sendError(response, 401, "Authentication failed: " + e.getMessage());
         }
     }
 
@@ -78,8 +96,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                path.equals("/shops") ||
                path.equals("/shop") ||
                path.equals("/items") ||
-               path.equals("/shopcart") ||
-               path.equals("/history") ||
                path.startsWith("/items?") ||
                path.startsWith("/shops?") ||
                path.startsWith("/shop?");
@@ -90,5 +106,4 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         response.setStatus(status);
         response.getWriter().write("{\"error\":\"" + message + "\"}");
     }
-
 }

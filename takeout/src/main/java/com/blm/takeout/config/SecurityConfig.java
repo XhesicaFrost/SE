@@ -53,18 +53,14 @@ public class SecurityConfig {
                     "/shop",
                     "/shop/**",
                     "/items",
-                    "/items/**",
-                    "/shopcart",
-                    "/shopcart/**",
-                    "/history",
-                    "/history/**"
+                    "/items/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
-            .exceptionHandling(ex -> ex
+            .exceptionHandling(exception -> exception
                 .authenticationEntryPoint((request, response, authException) -> {
                     response.setContentType("application/json;charset=UTF-8");
                     response.setStatus(401);

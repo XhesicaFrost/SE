@@ -6,6 +6,8 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -14,6 +16,7 @@ import java.util.Map;
 
 @Component
 public class JwtUtils {
+    private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
     @Value("${app.jwtSecret}")
     private String jwtSecret;
@@ -46,35 +49,48 @@ public class JwtUtils {
                 .compact();
     }
 
-    public Claims parseToken(String token) throws JwtException {
-        return Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+    public Claims parseToken(String token) {
+        try {
+            return Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+        } catch (Exception e) {
+            logger.error("Error parsing JWT token: {}", e.getMessage());
+            throw e;
+        }
     }
 
     public String getUsername(String token) {
-        Claims claims = parseToken(token);
-        String phonenumber = claims.get("phonenumber", String.class);
-        String role = claims.get("role", String.class);
-        return phonenumber + ":" + role;
+        try {
+            Claims claims = parseToken(token);
+            String phonenumber = claims.get("phonenumber", String.class);
+            String role = claims.get("role", String.class);
+            return phonenumber + ":" + role;
+        } catch (Exception e) {
+            logger.error("Error getting username from token: {}", e.getMessage());
+            throw e;
+        }
     }
 
     public boolean validateToken(String token) {
         try {
-            parseToken(token);
-            return true;
+            Claims claims = parseToken(token);
+            Date expiration = claims.getExpiration();
+            return expiration != null && !expiration.before(new Date());
         } catch (SecurityException e) {
-            System.err.println("Invalid JWT signature: " + e.getMessage());
+            logger.error("Invalid JWT signature: {}", e.getMessage());
         } catch (MalformedJwtException e) {
-            System.err.println("Invalid JWT token: " + e.getMessage());
+            logger.error("Invalid JWT token: {}", e.getMessage());
         } catch (ExpiredJwtException e) {
-            System.err.println("JWT token is expired: " + e.getMessage());
+            logger.error("JWT token is expired: {}", e.getMessage());
         } catch (UnsupportedJwtException e) {
-            System.err.println("JWT token is unsupported: " + e.getMessage());
+            logger.error("JWT token is unsupported: {}", e.getMessage());
         } catch (IllegalArgumentException e) {
-            System.err.println("JWT claims string is empty: " + e.getMessage());
+            logger.error("JWT claims string is empty: {}", e.getMessage());
+        } catch (Exception e) {
+            logger.error("Error validating JWT token: {}", e.getMessage());
         }
         return false;
     }
