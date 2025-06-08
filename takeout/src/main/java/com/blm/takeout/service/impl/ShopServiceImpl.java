@@ -6,7 +6,6 @@ import com.blm.takeout.dto.ProductImageDTO;
 import com.blm.takeout.entity.Shop;
 import com.blm.takeout.entity.Item;
 import com.blm.takeout.entity.ItemCategory;
-import com.blm.takeout.entity.Tag;
 import com.blm.takeout.repository.ShopRepository;
 import com.blm.takeout.repository.ItemRepository;
 import com.blm.takeout.repository.ItemCategoryRepository;

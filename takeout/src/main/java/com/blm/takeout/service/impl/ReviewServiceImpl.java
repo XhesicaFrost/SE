@@ -64,9 +64,12 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     @Transactional
     public void adminDeleteReview(Long reviewId, Integer adminId) {
-        // 验证管理员存在
+        // 验证管理员存在且具有管理员权限
         User admin = userRepository.findById(adminId)
                 .orElseThrow(() -> new RuntimeException("管理员不存在"));
+        if (!"ADMIN".equals(admin.getRole())) {
+            throw new RuntimeException("无管理员权限");
+        }
 
         // 删除评价
         Review review = reviewRepository.findById(reviewId)

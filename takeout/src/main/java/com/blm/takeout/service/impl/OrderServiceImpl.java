@@ -4,7 +4,6 @@ import com.blm.takeout.dto.OrderDTO;
 import com.blm.takeout.dto.OrderItemDTO;
 import com.blm.takeout.entity.Order;
 import com.blm.takeout.entity.OrderItem;
-import com.blm.takeout.entity.OrderStatus;
 import com.blm.takeout.entity.Shop;
 import com.blm.takeout.repository.OrderRepository;
 import com.blm.takeout.repository.ShopRepository;
