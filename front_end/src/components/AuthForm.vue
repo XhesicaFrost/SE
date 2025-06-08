@@ -17,7 +17,7 @@
     </div>
     <div class="form-group">
       <label>Phone:</label>
-      <input v-model="formData.phone" type="tel" required pattern="^1\d{10}$" placeholder="请输入11位手机号" />
+      <input v-model="formData.phonenumber" type="tel" required pattern="^1\d{10}$" placeholder="请输入11位手机号" />
     </div>
     <div class="form-group">
       <label>Password:</label>
@@ -26,7 +26,7 @@
     <!-- 用户类型选择 -->
     <div class="form-group">
       <label>用户类型:</label>
-      <select v-model="formData.userKind">
+      <select v-model="formData.role">
         <option value="user">用户</option>
         <option value="rider">骑手</option>
         <option value="seller">商家</option>
@@ -52,9 +52,9 @@ export default {
     return {
       formData: {
         username: '',
-        phone: '',      // 改为手机号
+        phonenumber: '',      // 改为手机号
         password: '',
-        userKind: 'user'
+        role: 'user'
       }
     }
   },
