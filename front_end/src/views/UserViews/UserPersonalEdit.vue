@@ -12,8 +12,8 @@
           <input type="text" id="phone" v-model="formData.phone" placeholder="请输入手机号" />
         </div>
         <div class="form-group">
-          <label for="image">头像链接</label>
-          <input type="text" id="image" v-model="formData.image" placeholder="请输入头像链接" />
+          <label for="image">头像</label>
+          <input type="text" id="image" v-model="formData.image" placeholder="请输入头像" />
         </div>
         <button type="submit" class="submit-btn">保存</button>
       </form>

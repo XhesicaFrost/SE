@@ -38,6 +38,13 @@ const routes = [
     props: true
   },
   {
+    path: '/user/payment/:shopId',
+    name: 'UserPayment',
+    component: () => import('@/views/UserViews/UserPayment.vue'),
+    meta: { allow: ['user'] },
+    props: true
+  },
+  {
     path: '/user/shopcart',
     name: 'UserShopCart',
     component: () => import('@/views/UserViews/UserShopCart.vue'),
@@ -72,12 +79,6 @@ const routes = [
     path: '/user/address/add',
     name: 'UserAddressAdd',
     component: () => import('@/views/UserViews/UserAddressAdd.vue'),
-    meta: { allow: ['user'] }
-  },
-  {
-    path: '/user/history',
-    name: 'UserHistory',
-    component: () => import('@/views/UserViews/UserHistory.vue'),
     meta: { allow: ['user'] }
   },
   {

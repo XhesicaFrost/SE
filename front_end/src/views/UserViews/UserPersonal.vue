@@ -34,6 +34,11 @@
         <span>支付设置</span>
         <i class="icon-arrow"></i>
       </div>
+      <div class="function-item" @click="goTologout">
+        <i class="icon-logout"></i>
+        <span>登出</span>
+        <i class="icon-arrow"></i>
+      </div>
     </div>
 
     <BottomNav :navItems="navItems" />
@@ -42,7 +47,7 @@
 
 <script>
 import BottomNav from '@/components/bottomNav.vue'
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'vuex'  // 添加 mapActions
 
 export default {
   name: 'userPersonal',
@@ -63,6 +68,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions('userStore', ['logout']),  // 添加 logout action
     goToEdit() {
       this.$router.push('/user/personal/edit');
     },
@@ -79,6 +85,32 @@ export default {
     goToPayment() {
       alert("奶龙已经设置过了！");
       //this.$router.push('/user/payment');
+    },
+    async goTologout() {
+      try {
+        // 确认对话框
+        if (confirm('确定要退出登录吗？')) {
+          console.log('🚪 执行退出登录流程')
+          
+          // 调用 userStore 的 logout action
+          await this.logout()
+          
+          // 可选：清除商家相关信息
+          this.SET_seller_ID('')
+          this.SET_seller_NAME('')
+          
+          // 显示提示信息
+          alert('已成功退出登录')
+          
+          // 导航到登录页
+          this.$router.push('/login')
+          
+          console.log('✅ 退出登录流程完成')
+        }
+      } catch (error) {
+        console.error('❌ 退出登录失败:', error)
+        alert('退出登录失败，请重试')
+      }
     }
   }
 }

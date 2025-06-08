@@ -17,7 +17,7 @@
     <!-- 按店铺分组的购物车商品 -->
     <div class="shop-group" v-for="(group, index) in groupedCartItems" :key="index">
       <div class="shop-header">
-        <img :src="group.shop.image" alt="店铺图片" class="shop-img">
+        <img :src="getImageUrl(group.shop.image)" alt="店铺图片" class="shop-img">
         <div class="shop-info">
           <h3>{{ group.shop.name }}</h3>
           <p class="shop-address">{{ group.shop.address }}</p>
@@ -26,7 +26,7 @@
       
       <div class="cart-items">
         <div class="cart-item" v-for="item in group.items" :key="item.product.id">
-          <img :src="item.product.image" alt="商品图片" class="item-img">
+          <img :src="getImageUrl(item.product.image)" alt="商品图片" class="item-img">
           <div class="item-info">
             <div class="item-name">{{ item.product.name }}</div>
             <div class="item-desc">{{ item.product.description }}</div>
@@ -87,64 +87,59 @@ export default {
     }
   },
   methods: {
+    getImageUrl(img) {
+      // 支持base64或url
+      if (!img) return ''
+      if (img.startsWith('data:image')) return img
+      if (img.length > 100) return `data:image/png;base64,${img}`
+      return img
+    },
     // 获取购物车数据
     async fetchCartItems() {
       try {
-        const token = localStorage.getItem('token')
-        if (!token) {
-          alert('请先登录')
-          this.$router.push('/login')
-          return
-        }
-
-        const userId = parseInt(this.$store.state.userStore.userInfo.userId)
-        if (isNaN(userId)) {
-          alert('用户信息无效')
-          this.$router.push('/login')
-          return
-        }
-
-        const response = await fetchWithTimeout(`${BASE_URL}/shopcart`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        })
+        const params = new URLSearchParams({ userId: this.$store.state.userStore.userId }).toString()
+        const response = await fetchWithTimeout(`${BASE_URL}/shopcart?${params}`)
         const result = await response.json()
-        if (result.success && result.code === 200) {
-          this.groupedCartItems = result.data
+        if (result.code === 200 && Array.isArray(result.data)) {
+          this.groupedCartItems = result.data;
         } else {
-          this.groupedCartItems = []
-          alert('获取购物车信息失败')
+          this.groupedCartItems = [];
         }
       } catch (error) {
-        this.groupedCartItems = []
+        this.groupedCartItems = [];
         console.error('获取购物车数据失败:', error)
-        alert('获取购物车数据失败，请检查网络连接')
+      }
+    },
+    async submitCartItems(shopId, productId, change) {
+      try {
+        const formData = new FormData()
+        formData.append('shopId', shopId)
+        formData.append('productId', productId)
+        if(change) formData.append('change', change)
+
+        const params = new URLSearchParams({ userId: this.$store.state.userStore.userId }).toString()
+        const response = await fetchWithTimeout(`${BASE_URL}/edit/shopcart?${params}`, {
+          method: 'POST',
+          body: formData
+        })
+
+        const result = await response.json()
+        if (result.success) {
+          alert('购物车修改成功！')
+          this.$router.go(-1)
+        } else {
+          alert('购物车修改失败，请重试！')
+        }
+      } catch (error) {
+        console.error('购物车修改失败:', error)
+        alert('购物车修改失败，请检查网络连接！')
       }
     },
     
     // 更新商品数量
     updateQuantity(shopId, item, change) {
-      item.quantity += change
-      if(item.quantity <= 0) {
-        this.removeItem(shopId, item.product.id)
-      }
-    },
-    
-    // 删除商品
-    removeItem(shopIndex, productId) {
-      // 获取店铺分组
-      const shopGroup = this.groupedCartItems[shopIndex]
-      if (!shopGroup) return
-      
-      // 删除商品项
-      shopGroup.items = shopGroup.items.filter(
-        item => item.product.id !== productId
-      )
-      
-      if (shopGroup.items.length === 0) {
-        this.groupedCartItems.splice(shopIndex, 1) // 使用splice删除数组元素
-      }
+      this.submitCartItems(shopId, item.product.id, change);
+      this.fetchCartItems();
     },
     
     // 计算店铺总价

@@ -3,7 +3,7 @@
   <div class="user-shopinfo">
     <!-- 店铺信息栏 -->
     <div class="shop-info-bar">
-      <img :src="shopInfo.image" class="shop-img" />
+      <img :src="getImageUrl(shopInfo.image)" class="shop-img" />
       <div class="shop-info-center">
         <div class="shop-name">{{ shopInfo.name }}</div>
         <div class="shop-address">{{ shopInfo.address }}</div>
@@ -17,7 +17,7 @@
     <div class="goods-list">
       <div v-for="product in products" :key="product.id" class="goods-item">
         <div class="product-img" @click="showProductDetail(product)">
-          <img :src="product.image" alt="商品图片" class="goods-img" />
+          <img :src="getImageUrl(product.image)" alt="商品图片" class="goods-img" />
         </div>
         <div class="goods-info">
           <div class="goods-name">{{ product.name }}</div>
@@ -48,7 +48,7 @@
       <div class="cart-info" :style="{ marginLeft: totalQuantity > 0 ? '30px' : '0' }">
         <div class="cart-total">¥{{ totalPrice.toFixed(2) }}</div>
       </div>
-      <div class="checkout-btn" :class="{ active: totalQuantity > 0 }">
+      <div class="checkout-btn" :class="{ active: totalQuantity > 0 }" @click="toPayment(totalQuantity)">
         去结算
       </div>
     </div>
@@ -60,7 +60,7 @@
           ×
         </div>
         <div class="detail-img">
-          <img :src="currentProduct.image" alt="商品图片" class="goods-img" />
+          <img :src="getImageUrl(currentProduct.image)" alt="商品图片" class="goods-img" />
         </div>
         <div class="goods-info">
           <div class="goods-name">{{ currentProduct.name }}</div>
@@ -104,6 +104,7 @@ export default {
   data() {
     return {
       shopInfo: {
+        id: 0,
         image: '',
         name: '',
         address: '',
@@ -132,21 +133,36 @@ export default {
     }
   },
   methods: {
-    showProductDetail(product) {
-      this.currentProduct = product
+    getImageUrl(img) {
+      // 支持base64或url
+      if (!img) return ''
+      if (img.startsWith('data:image')) return img
+      if (img.length > 100) return `data:image/png;base64,${img}`
+      return img
     },
-    addToCart(product) {
-      if (!this.cart[product.id]) {
-        this.cart[product.id] = {
-          product,
-          quantity: 0
+    async submitCartItems(shopId, productId, change) {
+      try {
+        const formData = new FormData()
+        formData.append('shopId', shopId)
+        formData.append('productId', productId)
+        if(change) formData.append('change', change)
+
+        const params = new URLSearchParams({ userId: this.$store.state.userStore.userId }).toString()
+        const response = await fetchWithTimeout(`${BASE_URL}/edit/shopcart?${params}`, {
+          method: 'POST',
+          body: formData
+        })
+
+        const result = await response.json()
+        if (result.success) {
+          alert('购物车修改成功！')
+          this.$router.go(-1)
+        } else {
+          alert('购物车修改失败，请重试！')
         }
-      }
-      this.cart[product.id].quantity += 1
-    },
-    decreaseQuantity(product) {
-      if (this.cart[product.id] && this.cart[product.id].quantity > 0) {
-        this.cart[product.id].quantity -= 1
+      } catch (error) {
+        console.error('购物车修改失败:', error)
+        alert('购物车修改失败，请检查网络连接！')
       }
     },
     async fetchShopInfo() {
@@ -199,6 +215,21 @@ export default {
           this.cart = [];
         console.error('获取购物车数据失败:', error)
       }
+    },
+    showProductDetail(product) {
+      this.currentProduct = product
+    },
+    addToCart(product) {
+      this.submitCartItems(this.shopInfo.id, product.id, 1)
+      this.fetchCartItems()
+    },
+    decreaseQuantity(product) {
+      this.submitCartItems(this.shopInfo.id, product.id, -1)
+      this.fetchCartItems()
+    },
+    toPayment(check) {
+      if(check <= 0) return
+      this.$router.push(`user/payment`)
     }
   },
   mounted() {
