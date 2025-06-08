@@ -182,7 +182,13 @@ export default {
   },
   
   computed: {
-    ...mapState('userStore', ['userId']),
+    // ✅ 修复：正确映射 userInfo 而不是直接映射 userId
+    ...mapState('userStore', ['userInfo']),
+    
+    // ✅ 添加 userId 计算属性
+    userId() {
+      return this.userInfo?.userId || ''
+    },
     
     orderId() {
       return this.$route.params.id

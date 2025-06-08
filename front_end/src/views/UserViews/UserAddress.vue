@@ -52,13 +52,12 @@ export default {
   components: { TopNav },
   computed: {
     ...mapState('userStore', {
-      userId: state => state.userId
+      userInfo: state => state.userInfo
     })
   },
   data() {
     return {
-      addresses: [
-      ],
+      addresses: [],
       navInfo: { 
         title: '收货地址', 
         pageReturn: () => { this.$router.go(-1) },
@@ -71,16 +70,26 @@ export default {
   methods: {
     async fetchAddress() {
       try {
-        const params = new URLSearchParams({ userId: this.userId }).toString()
-        const response = await fetchWithTimeout(`${BASE_URL}/address?${params}`)
+        const token = localStorage.getItem('token')
+        if (!token) {
+          alert('请先登录')
+          this.$router.push('/login')
+          return
+        }
+        const params = new URLSearchParams({ userId: this.userInfo.userId }).toString()
+        const response = await fetchWithTimeout(`${BASE_URL}/address?${params}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
         const result = await response.json()
         if (result.success && result.code === 200 && result.data) {
           this.addresses = result.data
         } else {
-          this.errorMessage = '店铺信息获取失败'
+          this.errorMessage = '地址信息获取失败'
         }
       } catch (e) {
-        this.errorMessage = '网络错误，店铺信息获取失败'
+        this.errorMessage = '网络错误，地址信息获取失败'
       }
     },
     async deleteAddress(id) {
@@ -118,8 +127,8 @@ export default {
         alert('网络错误，更改失败')
       }
     },
-    handleEdit(id) {
-      this.$router.push(`/user/address/edit/${id}`)
+    handleEdit(address) {
+      this.$router.push(`/user/address/edit/${address.id}`)
     }
   },
   mounted() {

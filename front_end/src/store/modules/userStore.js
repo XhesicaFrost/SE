@@ -27,7 +27,8 @@ export default {
         userName: '',
         userKind: '',
         userPhone: '',
-        token: ''
+        token: '',
+        userImage: ''  // ✅ 修复：添加 userImage 重置
       }
     }
   },
@@ -42,13 +43,17 @@ export default {
         const response = await fetchWithTimeout(`${BASE_URL}/register?${params}`)
         const result = await response.json()
         if (result.code === 200) {
+          // ✅ 新增：保存 token 到 localStorage
+          const token = result.data?.token || result.token || ''
+          localStorage.setItem('token', token)
+          
           // 保存用户信息和 token
           commit('SET_USER_INFO', {
             userId: result.id || result.data?.id || '',
             userName: userData.username || result.data?.username || '',
             userKind: userData.role || result.data?.role || '',
             userPhone: userData.phonenumber || result.data?.phonenumber || '',
-            token: result.data?.token || result.token || '', // 保存后端返回的 token,
+            token: token, // ✅ 修改：使用提取的 token
             userImage: userData.userImage || ''
           })
           commit('SET_ERROR', '')
@@ -113,13 +118,18 @@ export default {
         console.log('Login result:', result)
 
         if (result.code === 200) {
+          // ✅ 新增：提取 token 并保存到 localStorage
+          const token = result.data?.token || result.token || ''
+          localStorage.setItem('token', token)
+          
           // 保存用户信息和 token
           commit('SET_USER_INFO', {
             userId: result.id || result.data?.id || '',
             userName: loginData.username || result.data?.username || '',
             userKind: loginData.role || result.data?.role || '',
             userPhone: loginData.phonenumber || result.data?.phonenumber || '',
-            token: result.data?.token || result.token || '' // 保存后端返回的 token
+            token: token, // ✅ 修改：使用提取的 token
+            userImage: loginData.userImage || '' // ✅ 新增：设置 userImage
           })
           // 检查获得的token是否有效
           console.log('🚀 登录成功，保存用户信息:', 
@@ -129,7 +139,7 @@ export default {
               userKind: loginData.role || result.data?.role || '',
               userPhone: loginData.phonenumber || result.data?.phonenumber || '',
               userImage: loginData.userImage || '',
-              token: result.data?.token || result.token || ''
+              token: token // ✅ 修改：使用提取的 token
             }
           )
           commit('SET_ERROR', '')
@@ -186,6 +196,8 @@ export default {
      */
     logout({ commit }) {
       console.log('🚪 用户退出登录')
+      // ✅ 新增：清除 localStorage 中的 token
+      localStorage.removeItem('token')
       commit('CLEAR_USER_INFO')
       commit('SET_ERROR', '')
     }

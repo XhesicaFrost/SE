@@ -1,4 +1,5 @@
 <template>
+  <TopNav :navInfo="navInfo" />
   <div class="promotion-view">
     <div class="promotion-list">
       <div class="promotion-item" v-for="promo in promotions" :key="promo.promotionId">
@@ -22,16 +23,18 @@
 import { BASE_URL ,fetchWithTimeout} from '@/config.js'
 import { mapState } from 'vuex'
 import BottomNav from '@/components/bottomNav.vue'
+import TopNav from '@/components/topNav.vue'
 
 export default {
   name: 'sellerPromotion',
-  components: { BottomNav },
+  components: { BottomNav, TopNav },
   data() {
     return {
       promotions: [],
       navItems: [
         { label: '新建促销活动', action: () => { this.$router.push('/seller/promotion/register') } }
-      ]
+      ],
+      navInfo: { title: '管理促销活动', pageReturn: () => { this.$router.push('/seller') } }
     }
   },
   computed: {
@@ -53,6 +56,10 @@ export default {
       }
     },
     async deletePromotion(promotionId) {
+      if (!confirm('确定要删除这个促销活动吗？')) {
+        return
+      }
+      
       try {
         const response = await fetchWithTimeout(`${BASE_URL}/seller/promotion`, {
           method: 'DELETE',
@@ -61,16 +68,20 @@ export default {
         })
         const result = await response.json()
         if (result.code==200) {
+          alert('删除成功')
           this.fetchPromotions()
         } else {
-          alert('删除失败')
+          alert('删除失败：' + (result.message || '未知错误'))
         }
       } catch (e) {
         alert('网络错误，删除失败')
       }
     },
     editPromotion(promotionId) {
-      this.$router.push(`/seller/promotion/${promotionId}`)
+      this.$router.push({ 
+        name: 'sellerPromotionEdit', 
+        params: { id: promotionId } 
+      })
     }
   },
   mounted() {
@@ -82,7 +93,7 @@ export default {
 <style scoped>
 .promotion-view {
   max-width: 400px;
-  margin: 0 auto 36px auto;
+  margin: 48px auto 36px auto;
   padding: 1em;
   background: #fff;
   min-height: 100vh;
