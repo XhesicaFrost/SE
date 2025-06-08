@@ -375,8 +375,8 @@ export default {
         })
         
         const result = await response.json()
-        
-        if (result.code === 200) {
+        const isSuccess = response.ok || result.code === 200 || result.success === true
+        if (isSuccess) {
           this.orderDetail.status = nextStatus
           
           if (nextStatus === 'completed') {
