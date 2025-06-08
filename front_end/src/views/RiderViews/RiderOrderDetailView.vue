@@ -373,7 +373,6 @@ export default {
             status: nextStatus
           })
         })
-        
         const result = await response.json()
         const isSuccess = response.ok || result.code === 200 || result.success === true
         if (isSuccess) {
