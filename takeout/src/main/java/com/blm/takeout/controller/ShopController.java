@@ -36,14 +36,53 @@ public class ShopController {
                 .map(shop -> {
                     Map<String, Object> shopMap = new HashMap<>();
                     shopMap.put("id", shop.getId());
-                    shopMap.put("image", shop.getImage());
+                    
+                    // 将图片转换为base64
+                    if (shop.getImage() != null && !shop.getImage().isEmpty()) {
+                        try {
+                            String base64Image = FileUtils.convertImageToBase64(shop.getImage());
+                            shopMap.put("image", base64Image);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            shopMap.put("image", "");
+                        }
+                    } else {
+                        shopMap.put("image", "");
+                    }
+                    
                     shopMap.put("name", shop.getName());
                     shopMap.put("rating", shop.getRating());
                     shopMap.put("tags", shop.getTags());
                     shopMap.put("avgPrice", shop.getAvgPrice());
                     shopMap.put("distance", shop.getDistance());
                     shopMap.put("deliverTime", shop.getDeliverTime());
-                    shopMap.put("products", shop.getProducts());
+                    
+                    // 处理商品图片
+                    if (shop.getProducts() != null) {
+                        List<Map<String, Object>> products = shop.getProducts().stream()
+                            .map(product -> {
+                                Map<String, Object> productMap = new HashMap<>();
+                                if (product.getImage() != null && !product.getImage().isEmpty()) {
+                                    try {
+                                        String base64Image = FileUtils.convertImageToBase64(product.getImage());
+                                        productMap.put("image", base64Image);
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                        productMap.put("image", "");
+                                    }
+                                } else {
+                                    productMap.put("image", "");
+                                }
+                                return productMap;
+                            })
+                            .collect(Collectors.toList());
+                        shopMap.put("products", products);
+                    }
+                    
+                    shopMap.put("address", shop.getAddress());
+                    shopMap.put("sales", shop.getSales());
+                    shopMap.put("status", shop.getStatus());
+                    shopMap.put("userId", shop.getUserId());
                     return shopMap;
                 })
                 .collect(Collectors.toList());
@@ -174,10 +213,65 @@ public class ShopController {
             }
             
             List<ShopDTO> shops = shopService.getRecommendedShops(userId);
+            List<Map<String, Object>> shopList = shops.stream()
+                .map(shop -> {
+                    Map<String, Object> shopMap = new HashMap<>();
+                    shopMap.put("id", shop.getId());
+                    
+                    // 将店铺图片转换为base64
+                    if (shop.getImage() != null && !shop.getImage().isEmpty()) {
+                        try {
+                            String base64Image = FileUtils.convertImageToBase64(shop.getImage());
+                            shopMap.put("image", base64Image);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            shopMap.put("image", "");
+                        }
+                    } else {
+                        shopMap.put("image", "");
+                    }
+                    
+                    shopMap.put("name", shop.getName());
+                    shopMap.put("rating", shop.getRating());
+                    shopMap.put("tags", shop.getTags());
+                    shopMap.put("avgPrice", shop.getAvgPrice());
+                    shopMap.put("distance", shop.getDistance());
+                    shopMap.put("deliverTime", shop.getDeliverTime());
+                    
+                    // 处理商品图片
+                    if (shop.getProducts() != null) {
+                        List<Map<String, Object>> products = shop.getProducts().stream()
+                            .map(product -> {
+                                Map<String, Object> productMap = new HashMap<>();
+                                if (product.getImage() != null && !product.getImage().isEmpty()) {
+                                    try {
+                                        String base64Image = FileUtils.convertImageToBase64(product.getImage());
+                                        productMap.put("image", base64Image);
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                        productMap.put("image", "");
+                                    }
+                                } else {
+                                    productMap.put("image", "");
+                                }
+                                return productMap;
+                            })
+                            .collect(Collectors.toList());
+                        shopMap.put("products", products);
+                    }
+                    
+                    shopMap.put("address", shop.getAddress());
+                    shopMap.put("sales", shop.getSales());
+                    shopMap.put("status", shop.getStatus());
+                    shopMap.put("userId", shop.getUserId());
+                    return shopMap;
+                })
+                .collect(Collectors.toList());
+            
             Map<String, Object> response = new HashMap<>();
             response.put("code", 200);
             response.put("success", true);
-            response.put("data", shops);
+            response.put("data", shopList);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, Object> response = new HashMap<>();
