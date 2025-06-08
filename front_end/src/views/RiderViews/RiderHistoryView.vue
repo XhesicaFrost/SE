@@ -107,7 +107,7 @@ export default {
     }
   },
   computed: {
-    ...mapState('userStore', ['userId'])
+    ...mapState('userStore', ['userInfo'])
   },
   methods: {
     // 获取历史订单列表
@@ -179,6 +179,7 @@ export default {
   },
 
   async mounted() {
+    this.userId = this.userInfo.userId
     console.log('历史订单页面挂载，用户ID:', this.userId)
     await this.fetchHistoryOrders()
   }

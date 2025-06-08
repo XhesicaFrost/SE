@@ -30,8 +30,8 @@
         <option value="user">用户</option>
         <option value="rider">骑手</option>
         <option value="seller">商家</option>
-        <option value="admin">管理员</option>
-      </select>
+        <option v-if="formType === 'login'" value="admin">管理员</option>
+    </select>
     </div>
     <button type="submit" class="submit-btn">
       {{ formType === 'login' ? 'Login' : 'Register' }}

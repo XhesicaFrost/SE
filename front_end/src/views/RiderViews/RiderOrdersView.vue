@@ -78,7 +78,14 @@ export default {
     }
   },
   computed: {
-    ...mapState('userStore', ['userId']),
+    // ✅ 修复：正确映射 userInfo 而不是直接映射 userId
+    ...mapState('userStore', ['userInfo']),
+    
+    // ✅ 添加 userId 计算属性
+    userId() {
+      return this.userInfo?.userId || ''
+    },
+    
     filteredOrders() {
       return this.allOrders.filter(order => {
         const matchseller = !this.sellerNameFilter || 
@@ -88,10 +95,12 @@ export default {
         return matchseller && matchAddress
       })
     },
+    
     pagedOrders() {
       const start = (this.page - 1) * this.pageSize
       return this.filteredOrders.slice(start, start + this.pageSize)
     },
+    
     totalPages() {
       return Math.ceil(this.filteredOrders.length / this.pageSize) || 1
     }
