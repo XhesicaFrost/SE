@@ -27,13 +27,13 @@ public class AdminOrderController {
                     Map<String, Object> orderMap = new HashMap<>();
                     orderMap.put("id", order.getId());
                     orderMap.put("status", order.getStatus().toString().toLowerCase());
-                    orderMap.put("shopName", order.getShopName());
+                    orderMap.put("shopName", order.getShop().getName());
                     orderMap.put("createTime", order.getCreatedAt());
                     orderMap.put("totalAmount", order.getTotalAmount());
                     orderMap.put("items", order.getOrderItems().stream()
                         .map(item -> {
                             Map<String, Object> itemMap = new HashMap<>();
-                            itemMap.put("name", item.getItemName());
+                            itemMap.put("name", item.getItem().getName());
                             itemMap.put("quantity", item.getQuantity());
                             return itemMap;
                         })

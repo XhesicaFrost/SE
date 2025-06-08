@@ -1,0 +1,7 @@
+ # ... existing config ...
+
+# 高德地图API配置
+amap:
+  key: your_amap_key_here  # 替换为实际的高德地图API密钥
+  api:
+    driving: https://restapi.amap.com/v3/direction/driving  # 驾车路径规划API

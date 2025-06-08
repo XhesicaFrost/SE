@@ -19,8 +19,8 @@ public interface ShopRepository extends JpaRepository<Shop, Integer> {
     Page<Shop> findByNameContainingOrDescriptionContaining(String name, String description, Pageable pageable);
     Page<Shop> findByNameContaining(String keyword, Pageable pageable);
     
-    @Query("SELECT DISTINCT s, o.createdAt FROM Shop s JOIN Order o ON s.id = o.shopId WHERE o.userId = :userId ORDER BY o.createdAt DESC")
-    List<Object[]> findShopsByUserOrders(@Param("userId") Integer userId);
+    @Query("SELECT s FROM Shop s WHERE s.id IN (SELECT o.shop.id FROM Order o WHERE o.user.userid = :userId ORDER BY o.createdAt DESC)")
+    List<Shop> findShopsByUserOrders(@Param("userId") Integer userId);
     
     @Query(value = "SELECT * FROM shop ORDER BY rating DESC LIMIT 10", nativeQuery = true)
     List<Shop> findTop10ByOrderByRatingDesc();

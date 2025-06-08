@@ -12,8 +12,8 @@ public class BrowseHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private String userId;
+    @Column(name = "user_id")
+    private Integer userId;
 
     @Column(name = "target_type", nullable = false)
     @Enumerated(EnumType.STRING)

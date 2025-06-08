@@ -1,13 +1,11 @@
 package com.blm.takeout.controller;
 
 import com.blm.takeout.dto.OrderDTO;
-import com.blm.takeout.entity.Order;
 import com.blm.takeout.entity.Order.OrderStatus;
 import com.blm.takeout.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,9 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -42,8 +38,7 @@ public class OrderController {
             }
             
             Integer userId = Integer.parseInt(authentication.getName());
-            PageRequest pageRequest = PageRequest.of(page, size);
-            Page<Order> orders = orderService.getOrdersByUserId(userId, pageRequest);
+            Page<OrderDTO> orders = orderService.getUserOrders(userId, PageRequest.of(page, size));
             
             Map<String, Object> response = new HashMap<>();
             response.put("code", 200);
@@ -63,10 +58,10 @@ public class OrderController {
         }
     }
 
-    @GetMapping("/{orderNumber}")
-    public ResponseEntity<Map<String, Object>> getOrderDetail(@PathVariable String orderNumber) {
+    @GetMapping("/{orderId}")
+    public ResponseEntity<Map<String, Object>> getOrderDetail(@PathVariable Integer orderId) {
         try {
-            OrderDTO order = orderService.getOrderDetail(orderNumber);
+            OrderDTO order = orderService.getOrderDetail(orderId);
             Map<String, Object> response = new HashMap<>();
             response.put("code", 200);
             response.put("success", true);
@@ -86,7 +81,7 @@ public class OrderController {
             @PathVariable Integer orderId,
             @RequestParam OrderStatus status) {
         try {
-            orderService.updateOrderStatus(orderId, status.toString());
+            orderService.updateOrderStatus(orderId, status);
             Map<String, Object> response = new HashMap<>();
             response.put("code", 200);
             response.put("success", true);

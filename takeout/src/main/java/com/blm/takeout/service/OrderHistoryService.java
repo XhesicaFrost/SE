@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.math.BigDecimal;
+import java.util.HashMap;
 
 @Service
 public class OrderHistoryService {
@@ -24,20 +26,21 @@ public class OrderHistoryService {
         
         return orders.stream()
             .map(order -> {
-                Map<String, Object> orderData = Map.of(
-                    "orderId", order.getId(),
-                    "shopId", order.getShopId(),
-                    "items", order.getOrderItems().stream()
-                        .map(item -> Map.of(
-                            "itemId", item.getItemId(),
-                            "quantity", item.getQuantity(),
-                            "unitPrice", item.getUnitPrice(),
-                            "totalPrice", item.getUnitPrice() * item.getQuantity()
-                        ))
-                        .collect(Collectors.toList()),
-                    "totalAmount", order.getTotalAmount(),
-                    "createTime", order.getCreatedAt()
-                );
+                Map<String, Object> orderData = new HashMap<>();
+                orderData.put("orderId", order.getId());
+                orderData.put("shopId", order.getShop().getId());
+                orderData.put("items", order.getOrderItems().stream()
+                    .map(item -> {
+                        Map<String, Object> itemMap = new HashMap<>();
+                        itemMap.put("itemId", item.getItem().getId());
+                        itemMap.put("quantity", item.getQuantity());
+                        itemMap.put("unitPrice", item.getUnitPrice());
+                        itemMap.put("totalPrice", item.getUnitPrice().multiply(new BigDecimal(item.getQuantity())));
+                        return itemMap;
+                    })
+                    .collect(Collectors.toList()));
+                orderData.put("totalAmount", order.getTotalAmount());
+                orderData.put("createTime", order.getCreatedAt());
                 return orderData;
             })
             .collect(Collectors.toList());

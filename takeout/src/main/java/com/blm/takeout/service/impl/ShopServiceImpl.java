@@ -131,10 +131,7 @@ public class ShopServiceImpl implements ShopService {
     @Override
     public List<ShopDTO> getRecommendedShops(Integer userId) {
         // 获取用户历史订单中的商店
-        List<Object[]> results = shopRepository.findShopsByUserOrders(userId);
-        List<Shop> userShops = results.stream()
-            .map(result -> (Shop) result[0])
-            .collect(Collectors.toList());
+        List<Shop> userShops = shopRepository.findShopsByUserOrders(userId);
         
         // 如果用户没有历史订单，返回评分最高的正常营业商店
         if (userShops.isEmpty()) {
@@ -149,10 +146,7 @@ public class ShopServiceImpl implements ShopService {
 
     @Override
     public List<Shop> getShopsByUserOrders(Integer userId) {
-        List<Object[]> results = shopRepository.findShopsByUserOrders(userId);
-        return results.stream()
-            .map(result -> (Shop) result[0])
-            .collect(Collectors.toList());
+        return shopRepository.findShopsByUserOrders(userId);
     }
 
     @Override

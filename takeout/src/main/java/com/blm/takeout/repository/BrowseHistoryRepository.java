@@ -12,13 +12,13 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BrowseHistoryRepository extends JpaRepository<BrowseHistory, Long> {
-    Page<BrowseHistory> findByUserId(String userId, Pageable pageable);
-    Page<BrowseHistory> findByUserIdAndTargetType(String userId, TargetType targetType, Pageable pageable);
-    void deleteByUserIdAndTargetTypeAndTargetId(String userId, TargetType targetType, String targetId);
+    Page<BrowseHistory> findByUserId(Integer userId, Pageable pageable);
+    Page<BrowseHistory> findByUserIdAndTargetType(Integer userId, TargetType targetType, Pageable pageable);
+    void deleteByUserIdAndTargetTypeAndTargetId(Integer userId, TargetType targetType, String targetId);
     
     @Query("SELECT bh FROM BrowseHistory bh WHERE bh.userId = :userId AND bh.targetType = :targetType ORDER BY bh.browseTime DESC")
     Page<BrowseHistory> findByUserIdAndTargetTypeOrderByBrowseTimeDesc(
-            @Param("userId") String userId,
+            @Param("userId") Integer userId,
             @Param("targetType") TargetType targetType,
             Pageable pageable);
 } 

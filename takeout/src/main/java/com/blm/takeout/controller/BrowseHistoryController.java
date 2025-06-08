@@ -22,7 +22,7 @@ public class BrowseHistoryController {
     @PostMapping
     public ResponseEntity<Map<String, Object>> addBrowseHistory(@RequestBody BrowseHistoryDTO request) {
         browseHistoryService.addBrowseHistory(
-            request.getUserId(),
+            Integer.parseInt(request.getUserId()),
             request.getTargetType(),
             request.getTargetId(),
             request.getName(),
@@ -39,7 +39,7 @@ public class BrowseHistoryController {
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<Map<String, Object>> getUserBrowseHistory(
-            @PathVariable String userId,
+            @PathVariable Integer userId,
             Pageable pageable) {
         Page<BrowseHistory> page = browseHistoryService.getUserBrowseHistory(userId, pageable);
         Map<String, Object> response = new HashMap<>();
@@ -51,7 +51,7 @@ public class BrowseHistoryController {
 
     @GetMapping("/user/{userId}/type/{targetType}")
     public ResponseEntity<Map<String, Object>> getUserBrowseHistoryByType(
-            @PathVariable String userId,
+            @PathVariable Integer userId,
             @PathVariable TargetType targetType,
             Pageable pageable) {
         Page<BrowseHistory> page = browseHistoryService.getUserBrowseHistoryByType(userId, targetType, pageable);
@@ -64,7 +64,7 @@ public class BrowseHistoryController {
 
     @DeleteMapping("/user/{userId}/type/{targetType}/target/{targetId}")
     public ResponseEntity<Map<String, Object>> deleteBrowseHistory(
-            @PathVariable String userId,
+            @PathVariable Integer userId,
             @PathVariable TargetType targetType,
             @PathVariable String targetId) {
         browseHistoryService.deleteBrowseHistory(userId, targetType, targetId);

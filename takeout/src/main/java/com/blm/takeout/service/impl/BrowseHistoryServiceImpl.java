@@ -18,7 +18,7 @@ public class BrowseHistoryServiceImpl implements BrowseHistoryService {
 
     @Override
     @Transactional
-    public BrowseHistory addBrowseHistory(String userId, TargetType targetType, String targetId, String name, String image, String description) {
+    public BrowseHistory addBrowseHistory(Integer userId, TargetType targetType, String targetId, String name, String image, String description) {
         BrowseHistory history = new BrowseHistory();
         history.setUserId(userId);
         history.setTargetType(targetType);
@@ -30,18 +30,18 @@ public class BrowseHistoryServiceImpl implements BrowseHistoryService {
     }
 
     @Override
-    public Page<BrowseHistory> getUserBrowseHistory(String userId, Pageable pageable) {
+    public Page<BrowseHistory> getUserBrowseHistory(Integer userId, Pageable pageable) {
         return browseHistoryRepository.findByUserId(userId, pageable);
     }
 
     @Override
-    public Page<BrowseHistory> getUserBrowseHistoryByType(String userId, TargetType targetType, Pageable pageable) {
+    public Page<BrowseHistory> getUserBrowseHistoryByType(Integer userId, TargetType targetType, Pageable pageable) {
         return browseHistoryRepository.findByUserIdAndTargetType(userId, targetType, pageable);
     }
 
     @Override
     @Transactional
-    public void deleteBrowseHistory(String userId, TargetType targetType, String targetId) {
+    public void deleteBrowseHistory(Integer userId, TargetType targetType, String targetId) {
         browseHistoryRepository.deleteByUserIdAndTargetTypeAndTargetId(userId, targetType, targetId);
     }
 } 

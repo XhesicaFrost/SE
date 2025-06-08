@@ -113,4 +113,24 @@ public class CartService {
     public void clearCart(Integer userId) {
         cartItemRepository.deleteByUserId(userId);
     }
+
+    public CartItem updateCartItem(Integer userId, Integer itemId, Integer change) {
+        // Implementation needed
+        throw new UnsupportedOperationException("Method not implemented");
+    }
+
+    public List<CartItem> getCartItems(Integer userId) {
+        // Implementation needed
+        throw new UnsupportedOperationException("Method not implemented");
+    }
+
+    public void deleteCartItem(Integer userId, Integer itemId) {
+        // Implementation needed
+        throw new UnsupportedOperationException("Method not implemented");
+    }
+
+    public void clearCart(Integer userId) {
+        // Implementation needed
+        throw new UnsupportedOperationException("Method not implemented");
+    }
 } 

@@ -5,16 +5,16 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "cart_items")
+@Table(name = "cart_item")
 public class CartItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "user_id", nullable = false)
     private Integer userId;
 
-    @Column(nullable = false)
+    @Column(name = "item_id", nullable = false)
     private Integer itemId;
 
     @Column(nullable = false)
