@@ -97,7 +97,10 @@ export default {
       try {
         const response = await fetchWithTimeout(`${BASE_URL}/seller/register`, {
           method: 'POST',
-          body: formData
+          body: formData,
+          headers: {
+            'Authorization': `Bearer ${this.$store.state.userStore.userInfo.token}` // 添加 Authorization 头
+          }
         })
         const result = await response.json()
         if (result.data.status === 'success') {
