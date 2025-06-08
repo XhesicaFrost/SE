@@ -3,6 +3,7 @@ package com.blm.takeout.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -70,4 +71,27 @@ public class ItemController {
         }
     }
 
+    @PostMapping("/offline")
+    public ApiResponse<?> offlineItem(@RequestBody Map<String, Integer> requestBody) {
+        try {
+            Integer itemId = requestBody.get("itemId");
+            Integer sellerId = requestBody.get("sellerId");
+            itemService.offlineItem(itemId, sellerId);
+            return ApiResponse.success(Map.of("message", "下架成功"));
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+        }
+    }
+
+    @PostMapping("/online")
+    public ApiResponse<?> onlineItem(@RequestBody Map<String, Integer> requestBody) {
+        try {
+            Integer itemId = requestBody.get("itemId");
+            Integer sellerId = requestBody.get("sellerId");
+            itemService.onlineItem(itemId, sellerId);
+            return ApiResponse.success(Map.of("message", "上架成功"));
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+        }
+    }
 }
