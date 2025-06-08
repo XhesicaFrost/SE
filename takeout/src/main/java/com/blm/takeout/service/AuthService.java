@@ -45,8 +45,8 @@ public class AuthService {
 
     public LoginResponseDto login(UserLoginDto loginDto) {
         String username = loginDto.getPhonenumber() + ":" + loginDto.getRole();
-        //System.out.println("登录用户名：" + username);
-        //System.out.println("用户输入的密码：" + loginDto.getPassword());
+        System.out.println("登录用户名：" + username);
+        System.out.println("用户输入的密码：" + loginDto.getPassword());
         Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
                 username, 
@@ -55,9 +55,9 @@ public class AuthService {
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
         User user = (User) authentication.getPrincipal();
-        //System.out.println("数据库中的加密密码：" + user.getPassword());
+        System.out.println("数据库中的加密密码：" + user.getPassword());
         String token = jwtUtils.generateToken(user);
-        //System.out.println(token);
+        System.out.println(token);
         return new LoginResponseDto(
             user.getUserid(), 
             user.getUsername(), 

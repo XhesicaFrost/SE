@@ -41,6 +41,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         final String authHeader = request.getHeader("Authorization");
+        System.out.println(authHeader);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             sendError(response, 401, "Missing or invalid Authorization header");
             return;
@@ -84,4 +85,5 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         response.setStatus(status);
         response.getWriter().write("{\"error\":\"" + message + "\"}");
     }
+
 }

@@ -7,6 +7,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import com.blm.takeout.common.ApiResponse;
+import com.blm.takeout.util.FileUtils;
 import java.util.Map;
 import java.util.List;
 import java.util.HashMap;
@@ -15,6 +18,7 @@ import com.blm.takeout.dto.ItemDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
+@RequestMapping("/api/items")
 public class ItemController {
 
     private final ItemService itemService;
@@ -24,7 +28,7 @@ public class ItemController {
         this.itemService = itemService;
     }
 
-    @GetMapping("/items")
+    @GetMapping
     public ResponseEntity<List<ItemDTO>> getItemsByShopId(@RequestParam Integer shopId) {
         try {
             List<ItemDTO> items = itemService.getItemsByShopId(shopId);
@@ -34,7 +38,7 @@ public class ItemController {
         }
     }
 
-    @GetMapping("/api/items/search")
+    @GetMapping("/search")
     public ResponseEntity<Page<Item>> searchItems(
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "0") int page,
@@ -46,50 +50,45 @@ public class ItemController {
         return ResponseEntity.ok(items);
     }
 
-    @GetMapping("/api/items/shop/{shopId}")
-    public ResponseEntity<Map<String, Object>> getItemsByShopId(
-            @PathVariable Integer shopId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy) {
-        
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(sortBy));
-        Page<Item> items = itemService.getItemsByShopId(shopId, pageRequest);
-        
-        List<Map<String, Object>> itemList = items.getContent().stream()
-            .map(item -> {
-                Map<String, Object> itemMap = new HashMap<>();
-                itemMap.put("id", item.getId());
-                itemMap.put("image", item.getImage());
-                itemMap.put("name", item.getName());
-                itemMap.put("description", item.getDescription());
-                itemMap.put("price", item.getPrice());
-                return itemMap;
-            })
-            .collect(Collectors.toList());
-            
-        Map<String, Object> response = new HashMap<>();
-        response.put("code", 200);
-        response.put("success", true);
-        response.put("data", itemList);
-        
-        return ResponseEntity.ok(response);
+    @GetMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> getItemDetails(@PathVariable Integer id) {
+        try {
+            Map<String, Object> itemDetails = itemService.getItemDetails(id);
+            return ResponseEntity.ok(itemDetails);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
     }
 
-    @GetMapping("/api/items/{itemId}")
-    public Map<String, Object> getItemDetails(@PathVariable Integer itemId) {
+    @PostMapping("/register")
+    public ApiResponse<?> registerItem(
+            @RequestParam String itemName,
+            @RequestParam MultipartFile itemImage,
+            @RequestParam Double itemPrice,
+            @RequestParam Integer sellerId,
+            @RequestParam(required = false) String itemDescription) {
         try {
-            return Map.of(
-                "code", 200,
-                "success", true,
-                "data", itemService.getItemDetails(itemId)
-            );
+            itemService.registerItem(itemName, itemImage, itemPrice, sellerId, itemDescription);
+            return ApiResponse.success(Map.of("status", "success"));
         } catch (Exception e) {
-            return Map.of(
-                "code", 500,
-                "success", false,
-                "message", "获取商品详情失败：" + e.getMessage()
-            );
+            return ApiResponse.error(400, e.getMessage());
+        }
+    }
+
+    @PostMapping("/edit")
+    public ApiResponse<?> editItem(
+            @RequestParam Integer itemId,
+            @RequestParam String itemName,
+            @RequestParam Double itemPrice,
+            @RequestParam(required = false) MultipartFile itemImage,
+            @RequestParam(required = false) String itemDescription) {
+        try {
+            itemService.editItem(itemId, itemName, itemPrice, itemImage, itemDescription);
+            return ApiResponse.success(Map.of("status", "success"));
+        } catch (Exception e) {
+            return ApiResponse.error(400, e.getMessage());
         }
     }
 } 
