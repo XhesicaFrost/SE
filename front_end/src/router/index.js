@@ -135,7 +135,7 @@ const routes = [
     meta: { allow: ['seller'] }
   },
   {
-    path:'/seller/promotion/:id',
+    path:'/seller/promotion/:promotionId',
     name:'sellerPromotionEdit',
     component: () => import('@/views/SellerViews/SellerPromotionEdit.vue'),
     meta: { allow: ['seller'] }
@@ -237,6 +237,7 @@ const router = createRouter({
 // 全局前置守卫
 // 进行跳转的权限检查
 router.beforeEach(async (to, from, next) => {
+  console.log("go to ",next)
   if (debug_AuthCheck == false) {
     next()
     return

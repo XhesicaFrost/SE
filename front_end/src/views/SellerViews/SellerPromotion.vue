@@ -70,6 +70,7 @@ export default {
       }
     },
     editPromotion(promotionId) {
+      console.log(`sellerPromotion: go to /seller/promotion/${promotionId}`)
       this.$router.push(`/seller/edit/${promotionId}`)
     }
   },
