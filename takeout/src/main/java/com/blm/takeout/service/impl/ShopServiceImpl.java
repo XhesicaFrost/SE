@@ -51,8 +51,8 @@ public class ShopServiceImpl implements ShopService {
     private ShopDTO convertToDTO(Shop shop) {
         ShopDTO dto = new ShopDTO();
         dto.setId(shop.getId());
-        dto.setImage(shop.getImage());
         dto.setName(shop.getName());
+        dto.setImage(shop.getImage());
         dto.setRating(shop.getRating());
         dto.setAvgPrice(shop.getAvgPrice());
         dto.setDistance(shop.getDistance());
@@ -60,24 +60,28 @@ public class ShopServiceImpl implements ShopService {
         dto.setAddress(shop.getAddress());
         dto.setSales(shop.getSales());
         
-        // 设置标签
-        dto.setTags(shop.getTags().stream()
+        // 转换标签
+        if (shop.getTags() != null) {
+            dto.setTags(shop.getTags().stream()
                 .map(tag -> {
                     TagDTO tagDTO = new TagDTO();
-                    tagDTO.setTag(tag.getTag());
+                    tagDTO.setTag(tag.getName());
                     return tagDTO;
                 })
                 .collect(Collectors.toList()));
+        }
         
-        // 设置商品图片（只取前三个）
-        dto.setProducts(shop.getItems().stream()
-                .limit(3)
+        // 转换商品图片
+        if (shop.getItems() != null) {
+            dto.setProducts(shop.getItems().stream()
+                .limit(3) // 只取前3个商品
                 .map(item -> {
                     ProductImageDTO productDTO = new ProductImageDTO();
                     productDTO.setImage(item.getImage());
                     return productDTO;
                 })
                 .collect(Collectors.toList()));
+        }
         
         return dto;
     }

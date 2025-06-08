@@ -18,7 +18,6 @@ import com.blm.takeout.dto.ItemDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
-@RequestMapping("/api/items")
 public class ItemController {
 
     private final ItemService itemService;
@@ -28,7 +27,7 @@ public class ItemController {
         this.itemService = itemService;
     }
 
-    @GetMapping
+    @GetMapping("/items")
     public ResponseEntity<List<ItemDTO>> getItemsByShopId(@RequestParam Integer shopId) {
         try {
             List<ItemDTO> items = itemService.getItemsByShopId(shopId);
@@ -38,7 +37,7 @@ public class ItemController {
         }
     }
 
-    @GetMapping("/search")
+    @GetMapping("/items/search")
     public ResponseEntity<Page<Item>> searchItems(
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "0") int page,
@@ -50,7 +49,7 @@ public class ItemController {
         return ResponseEntity.ok(items);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/items/{id}")
     public ResponseEntity<Map<String, Object>> getItemDetails(@PathVariable Integer id) {
         try {
             Map<String, Object> itemDetails = itemService.getItemDetails(id);
@@ -62,7 +61,7 @@ public class ItemController {
         }
     }
 
-    @PostMapping("/register")
+    @PostMapping("/items/register")
     public ApiResponse<?> registerItem(
             @RequestParam String itemName,
             @RequestParam MultipartFile itemImage,
@@ -77,7 +76,7 @@ public class ItemController {
         }
     }
 
-    @PostMapping("/edit")
+    @PostMapping("/items/edit")
     public ApiResponse<?> editItem(
             @RequestParam Integer itemId,
             @RequestParam String itemName,

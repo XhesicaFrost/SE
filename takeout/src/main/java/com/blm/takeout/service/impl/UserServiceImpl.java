@@ -5,9 +5,16 @@ import com.blm.takeout.entity.User;
 import com.blm.takeout.repository.UserRepository;
 import com.blm.takeout.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -17,6 +24,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Value("${app.upload.dir:uploads}")
+    private String uploadDir;
 
     @Override
     public UserDTO getUserById(Integer id) {
@@ -110,6 +120,27 @@ public class UserServiceImpl implements UserService {
         if (image != null) user.setAvatarurl(image);
         
         userRepository.save(user);
+    }
+
+    @Override
+    public String saveImage(MultipartFile file) throws IOException {
+        // 创建上传目录
+        Path uploadPath = Paths.get(uploadDir);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+
+        // 生成唯一文件名
+        String originalFilename = file.getOriginalFilename();
+        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        String filename = UUID.randomUUID().toString() + extension;
+
+        // 保存文件
+        Path filePath = uploadPath.resolve(filename);
+        Files.copy(file.getInputStream(), filePath);
+
+        // 返回文件URL
+        return "/uploads/" + filename;
     }
 
     private UserDTO convertToDTO(User user) {

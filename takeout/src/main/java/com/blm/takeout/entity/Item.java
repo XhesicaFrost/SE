@@ -19,8 +19,8 @@ public class Item {
     @Column(name = "shop_id")
     private Integer shopId;
 
-    // @Column(nullable = false)
-    // private Integer categoryId;
+    @Column(name = "category_id")
+    private Integer categoryId;
 
     @Column(nullable = false, length = 100)
     private String name;
@@ -48,8 +48,18 @@ public class Item {
         审批中,
         正常,
         下架,
-        封禁中
+        封禁中;
+
+        public static Status fromString(String text) {
+            for (Status status : Status.values()) {
+                if (status.name().equals(text)) {
+                    return status;
+                }
+            }
+            throw new IllegalArgumentException("No enum constant for value: " + text);
+        }
     }
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

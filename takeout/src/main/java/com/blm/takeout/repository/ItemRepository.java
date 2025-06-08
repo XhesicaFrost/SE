@@ -10,7 +10,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-@Repository
 public interface ItemRepository extends JpaRepository<Item, Integer> {
     @Query("SELECT i FROM Item i WHERE i.shopId = :shopId")
     List<Item> findByShopId(@Param("shopId") Integer shopId);
@@ -20,4 +19,5 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
 
     List<Item> findTop5ByShopIdOrderBySalesDesc(Integer shopId);
     List<Item> findByShopIdAndCategoryId(Integer shopId, Integer categoryId);
+    List<Item> findByShopIdAndStatusIn(Integer shopId, List<Item.Status> statuses);
 } 

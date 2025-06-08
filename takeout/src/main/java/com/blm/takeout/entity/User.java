@@ -40,6 +40,9 @@ public class User implements UserDetails {
     @Column(length = 256)
     private String avatarurl;
 
+    @Column(length = 256)
+    private String image;
+
     @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"phonenumber", "role"}))
 
     public enum Role {

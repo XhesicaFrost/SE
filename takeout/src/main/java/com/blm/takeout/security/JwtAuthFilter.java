@@ -41,7 +41,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         final String authHeader = request.getHeader("Authorization");
-        System.out.println(authHeader);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             sendError(response, 401, "Missing or invalid Authorization header");
             return;
@@ -49,18 +48,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         try {
             final String jwt = authHeader.substring(7);
-            if (jwtUtils.validateToken(jwt)) {
-                String username = jwtUtils.getUsername(jwt);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    userDetails,
-                    null,
-                    userDetails.getAuthorities()
-                );
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+            if (!jwtUtils.validateToken(jwt)) {
+                sendError(response, 401, "Invalid JWT token");
+                return;
             }
+
+            String username = jwtUtils.getUsername(jwt);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                userDetails,
+                null,
+                userDetails.getAuthorities()
+            );
+            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authToken);
             filterChain.doFilter(request, response);
         } catch (Exception e) {
             sendError(response, 401, "Invalid JWT token: " + e.getMessage());
@@ -77,11 +79,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                path.equals("/shop") ||
                path.equals("/items") ||
                path.equals("/shopcart") ||
-               path.equals("/history");
+               path.equals("/history") ||
+               path.startsWith("/items?") ||
+               path.startsWith("/shops?") ||
+               path.startsWith("/shop?");
     }
 
     private void sendError(HttpServletResponse response, int status, String message) throws IOException {
-        response.setContentType("application/json");
+        response.setContentType("application/json;charset=UTF-8");
         response.setStatus(status);
         response.getWriter().write("{\"error\":\"" + message + "\"}");
     }

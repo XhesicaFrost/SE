@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 public class ShopController {
@@ -25,12 +26,27 @@ public class ShopController {
     }
 
     @GetMapping("/shops")
-    public ResponseEntity<List<ShopDTO>> getAllShops() {
+    public ResponseEntity<?> getAllShops() {
         try {
             List<ShopDTO> shops = shopService.getAllShops();
-            return ResponseEntity.ok(shops);
+            List<Map<String, Object>> response = shops.stream()
+                .map(shop -> {
+                    Map<String, Object> shopMap = new HashMap<>();
+                    shopMap.put("id", shop.getId());
+                    shopMap.put("image", shop.getImage());
+                    shopMap.put("name", shop.getName());
+                    shopMap.put("rating", shop.getRating());
+                    shopMap.put("tags", shop.getTags());
+                    shopMap.put("avgPrice", shop.getAvgPrice());
+                    shopMap.put("distance", shop.getDistance());
+                    shopMap.put("deliverTime", shop.getDeliverTime());
+                    shopMap.put("products", shop.getProducts());
+                    return shopMap;
+                })
+                .collect(Collectors.toList());
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -59,7 +75,7 @@ public class ShopController {
             response.put("deliveryTime", shop.getDeliverTime());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 

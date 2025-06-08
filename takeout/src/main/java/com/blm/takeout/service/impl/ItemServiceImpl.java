@@ -8,10 +8,14 @@ import com.blm.takeout.repository.ItemRepository;
 import com.blm.takeout.repository.ShopRepository;
 import com.blm.takeout.repository.ItemReviewRepository;
 import com.blm.takeout.service.ItemService;
+import com.blm.takeout.util.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -39,11 +43,11 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Page<Item> searchItems(String keyword, Pageable pageable) {
+    public Page<Item> searchItems(String keyword, PageRequest pageRequest) {
         if (keyword == null || keyword.trim().isEmpty()) {
-            return itemRepository.findAll(pageable);
+            return itemRepository.findAll(pageRequest);
         }
-        return itemRepository.findByNameContainingOrDescriptionContaining(keyword, keyword, pageable);
+        return itemRepository.findByNameContainingOrDescriptionContaining(keyword, keyword, pageRequest);
     }
 
     @Override
@@ -94,6 +98,44 @@ public class ItemServiceImpl implements ItemService {
         return items.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void registerItem(String itemName, MultipartFile itemImage, Double itemPrice, Integer sellerId, String itemDescription) throws Exception {
+        String imagePath = FileUtils.saveImage(itemImage);
+        Item item = new Item();
+        item.setName(itemName);
+        item.setImage(imagePath);
+        item.setShopId(sellerId);
+        item.setPrice(itemPrice);
+        item.setDescription(itemDescription != null ? itemDescription : "");
+        item.setStatus(Item.Status.审批中);
+        itemRepository.save(item);
+    }
+
+    @Override
+    @Transactional
+    public void editItem(Integer itemId, String itemName, Double itemPrice, MultipartFile itemImage, String itemDescription) throws Exception {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new Exception("商品不存在"));
+
+        item.setName(itemName);
+        item.setPrice(itemPrice);
+
+        if (itemImage != null && !itemImage.isEmpty()) {
+            String imagePath = FileUtils.saveImage(itemImage);
+            item.setImage(imagePath);
+        }
+
+        item.setDescription(itemDescription != null ? itemDescription : "");
+        itemRepository.save(item);
+    }
+
+    @Override
+    public List<Item> getNormalAndOffShelfItemsBySeller(Integer sellerId) {
+        return itemRepository.findByShopIdAndStatusIn(sellerId, 
+            List.of(Item.Status.正常, Item.Status.下架));
     }
 
     private ItemDTO convertToDTO(Item item) {

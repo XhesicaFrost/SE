@@ -2,6 +2,8 @@ package com.blm.takeout.service;
 
 import com.blm.takeout.dto.UserDTO;
 import com.blm.takeout.entity.User;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
 
 public interface UserService {
     UserDTO getUserById(Integer id);
@@ -12,4 +14,5 @@ public interface UserService {
     User updateUser(User user);
     User createUser(User user);
     void updateUser(Integer id, String name, String phone, String image);
+    String saveImage(MultipartFile file) throws IOException;
 } 

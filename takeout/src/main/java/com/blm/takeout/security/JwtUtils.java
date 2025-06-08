@@ -17,10 +17,10 @@ public class JwtUtils {
 
     @Value("${app.jwtSecret}")
     private String jwtSecret;
-    
+
     @Value("${app.jwtExpirationMs}")
     private int jwtExpirationMs;
-    
+
     private SecretKey key;
 
     @PostConstruct
@@ -59,7 +59,6 @@ public class JwtUtils {
         String phonenumber = claims.get("phonenumber", String.class);
         String role = claims.get("role", String.class);
         return phonenumber + ":" + role;
-
     }
 
     public boolean validateToken(String token) {

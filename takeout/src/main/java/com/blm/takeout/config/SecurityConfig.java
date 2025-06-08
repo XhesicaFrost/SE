@@ -49,10 +49,15 @@ public class SecurityConfig {
                     "/v3/api-docs/**",
                     "/error",
                     "/shops",
+                    "/shops/**",
                     "/shop",
+                    "/shop/**",
                     "/items",
+                    "/items/**",
                     "/shopcart",
-                    "/history"
+                    "/shopcart/**",
+                    "/history",
+                    "/history/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
@@ -61,7 +66,7 @@ public class SecurityConfig {
             )
             .exceptionHandling(ex -> ex
                 .authenticationEntryPoint((request, response, authException) -> {
-                    response.setContentType("application/json");
+                    response.setContentType("application/json;charset=UTF-8");
                     response.setStatus(401);
                     response.getWriter().write("{\"error\":\"Unauthorized access\"}");
                 })
@@ -71,7 +76,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-
 
     @Bean
     @SuppressWarnings("deprecation")
