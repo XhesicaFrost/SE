@@ -85,7 +85,7 @@ export default {
             this.$router.push('/rider')
             break
           case 'admin':
-            this.$router.push('/admin')
+            this.$router.push('/admin/shops')
             break
           default:
             console.warn('未知的用户类型:', userKind)
