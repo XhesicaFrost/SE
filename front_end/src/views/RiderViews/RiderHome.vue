@@ -57,7 +57,6 @@
 <script>
 import BottomNav from '@/components/bottomNav.vue'
 import { BASE_URL, fetchWithTimeout } from '@/config.js'
-//import { onBeforeUnmount } from 'vue'
 import { mapState, mapActions } from 'vuex'
 
 export default {
@@ -68,29 +67,89 @@ export default {
       acceptedOrders: [],
       recommendedOrders: [],
       userLocation: null,
+      // ✅ 新增：定时器相关变量
+      alertTimer: null,
       navItems: [
         { label: '订单搜索', action: () => { this.$router.push('/rider/orders') } },
         { label: '历史订单', action: () => { this.$router.push('/rider/history') } },
-        { label: '退出登录', action: () => { this.goTo('logout') } }  // 🎯 修改：将个人中心改为退出登录
+        { label: '退出登录', action: () => { this.goTo('logout') } }
       ]
     }
   },
   computed: {
-    ...mapState('userStore', ['userInfo'])  // 🎯 修改：改为 userInfo 以保持一致性
+    ...mapState('userStore', ['userInfo']),
+    
+    // ✅ 新增：获取用户ID
+    userId() {
+      return this.userInfo?.userId
+    }
   },
   methods: {
     ...mapActions('locationStore', ['startLocationTracking', 'stopLocationTracking']),
-    ...mapActions('userStore', ['logout']),  // 🎯 添加：导入 logout action
+    ...mapActions('userStore', ['logout']),
     
-    // 🎯 添加：退出登录处理方法
+    // ✅ 新增：获取提醒消息的方法
+    async fetchAlertMessage() {
+      try {
+        if (!this.userId) {
+          console.warn('⚠️ 骑手用户ID不存在，跳过提醒消息检查')
+          return
+        }
+        
+        const params = new URLSearchParams({ userId: this.userId }).toString()
+        const response = await fetchWithTimeout(`${BASE_URL}/alertMessage?${params}`)
+        const result = await response.json()
+        
+        console.log('🚴 骑手提醒消息检查:', result)
+        
+        // ✅ 检查 alertMessage 字段
+        if (result.success && result.alertMessage && result.alertMessage.trim()) {
+          alert(`📢 骑手提醒：\n${result.alertMessage}`)
+          console.log('✅ 显示骑手提醒消息:', result.alertMessage)
+        } else if (result.code === 200 && result.alertMessage && result.alertMessage.trim()) {
+          alert(`📢 骑手提醒：\n${result.alertMessage}`)
+          console.log('✅ 显示骑手提醒消息:', result.alertMessage)
+        }
+        // 如果 alertMessage 为空或不存在，什么都不做
+        
+      } catch (error) {
+        // ✅ 静默处理错误，不影响主功能
+        console.warn('⚠️ 获取骑手提醒消息失败:', error.message)
+      }
+    },
+    
+    // ✅ 新增：启动定时器
+    startAlertTimer() {
+      console.log('🔔 启动骑手提醒消息定时器')
+      
+      // 立即执行一次
+      this.fetchAlertMessage()
+      
+      // 每5秒执行一次
+      this.alertTimer = setInterval(() => {
+        this.fetchAlertMessage()
+      }, 5000) // 5000ms = 5秒
+    },
+    
+    // ✅ 新增：停止定时器
+    stopAlertTimer() {
+      if (this.alertTimer) {
+        console.log('🔕 停止骑手提醒消息定时器')
+        clearInterval(this.alertTimer)
+        this.alertTimer = null
+      }
+    },
+    
     async goTo(type) {
       console.log('goTo', type)
       
       if (type === 'logout') {
         try {
-          // 确认对话框
-          if (confirm('确定要退出登录吗？这将停止位置追踪。')) {
-            console.log('🚪 执行退出登录流程')
+          if (confirm('确定要退出登录吗？这将停止位置追踪和消息提醒。')) {
+            console.log('🚪 执行骑手退出登录流程')
+            
+            // ✅ 修改：退出时停止提醒定时器
+            this.stopAlertTimer()
             
             // 停止位置追踪
             this.stopLocationTracking()
@@ -104,10 +163,10 @@ export default {
             // 导航到登录页
             this.$router.push('/login')
             
-            console.log('✅ 退出登录流程完成')
+            console.log('✅ 骑手退出登录流程完成')
           }
         } catch (error) {
-          console.error('❌ 退出登录失败:', error)
+          console.error('❌ 骑手退出登录失败:', error)
           alert('退出登录失败，请重试')
         }
       }
@@ -158,7 +217,6 @@ export default {
     // 获取已接订单
     async fetchAcceptedOrders() {
       try {
-        // 🎯 修改：使用 userInfo.userId 而不是 userId
         const params = new URLSearchParams({ riderId: this.userInfo.userId }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/rider/acceptedorders?${params}`)
         const result = await response.json()
@@ -184,7 +242,7 @@ export default {
         }
         
         const params = new URLSearchParams({
-          riderId: this.userInfo.userId,  // 🎯 修改：使用 userInfo.userId
+          riderId: this.userInfo.userId,
           latitude: this.userLocation.latitude,
           longitude: this.userLocation.longitude
         }).toString()
@@ -223,7 +281,7 @@ export default {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
-            riderId: this.userInfo.userId,  // 🎯 修改：使用 userInfo.userId
+            riderId: this.userInfo.userId,
             orderId,
             status: nextStatus
           })
@@ -257,7 +315,7 @@ export default {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
-            riderId: this.userInfo.userId,  // 🎯 修改：使用 userInfo.userId
+            riderId: this.userInfo.userId,
             orderId 
           })
         })
@@ -277,15 +335,21 @@ export default {
   },
   
   async mounted() {
+    console.log('🚀 RiderHome 页面挂载')
+    console.log('🚴 当前骑手用户ID:', this.userId)
+    
+    // 获取订单数据
     await this.fetchAcceptedOrders()
     await this.fetchRecommendedOrders()
+    
+    // ✅ 启动提醒消息定时器
+    this.startAlertTimer()
   },
   
-  // 🎯 添加：组件销毁时的处理
+  // ✅ 新增：页面销毁时清理定时器
   beforeUnmount() {
-    // 如果用户离开页面但不是退出登录，保持位置追踪
-    // 只有在明确退出登录时才停止追踪
-    console.log('RiderHome 组件即将销毁')
+    console.log('🚪 RiderHome 页面销毁')
+    this.stopAlertTimer()
   }
 }
 </script>

@@ -226,8 +226,8 @@ export default {
         
         const response = await fetchWithTimeout(`${BASE_URL}/rider/orderdetail?${params}`)
         const result = await response.json()
-        
-        if (result.code === 200 && result.data) {
+        const isSuccess = response.ok || result.code === 200 || result.success === true
+        if (isSuccess && result.data) {
           this.orderDetail = {
             ...this.orderDetail,
             ...result.data
@@ -373,10 +373,9 @@ export default {
             status: nextStatus
           })
         })
-        
         const result = await response.json()
-        
-        if (result.code === 200) {
+        const isSuccess = response.ok || result.code === 200 || result.success === true
+        if (isSuccess) {
           this.orderDetail.status = nextStatus
           
           if (nextStatus === 'completed') {
