@@ -135,7 +135,7 @@ const routes = [
     meta: { allow: ['seller'] }
   },
   {
-    path:'/seller/promotion/:id',
+    path:'/seller/promotion/:promotionId',
     name:'sellerPromotionEdit',
     component: () => import('@/views/SellerViews/SellerPromotionEdit.vue'),
     meta: { allow: ['seller'] }
