@@ -114,8 +114,8 @@ export default {
       },
       currentProduct: null,
       cart: [],
-      products: [
-      ],
+      addresses: [],
+      products: [],
       navInfo: { 
         title: '店铺详情', 
         pageReturn: () => { this.$router.go(-1) } 
@@ -142,6 +142,30 @@ export default {
       const base64Url = `data:image/jpeg;base64,${img}`
       console.log('生成的base64 URL:', base64Url)
       return base64Url
+    },
+    async fetchAddress() {
+      try {
+        const token = localStorage.getItem('token')
+        if (!token) {
+          alert('请先登录')
+          this.$router.push('/login')
+          return
+        }
+        const params = new URLSearchParams({ userId: this.userInfo.userId }).toString()
+        const response = await fetchWithTimeout(`${BASE_URL}/address?${params}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        const result = await response.json()
+        if (result.success && result.code === 200 && result.data) {
+          this.addresses = result.data
+        } else {
+          this.errorMessage = '地址信息获取失败'
+        }
+      } catch (e) {
+        this.errorMessage = '网络错误，地址信息获取失败'
+      }
     },
     async submitCartItems(shopId, productId, change) {
       try {
@@ -256,6 +280,10 @@ export default {
     },
     toPayment(check) {
       if(check <= 0) return
+      if(addresses.length <= 0) {
+        alert("您还没有设置收货地址！")
+        this.$router.push(`/user/address`)
+      }
       this.$router.push(`/user/payment/${this.$route.params.shopId}`)
     }
   },
@@ -263,6 +291,7 @@ export default {
     this.fetchShopInfo()
     this.fetchproducts()
     this.fetchCartItems()
+    this.fetchAddress()
   }
 }
 </script>
