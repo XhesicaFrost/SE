@@ -24,7 +24,7 @@ public class HistoryController {
 
     @GetMapping("/history")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Map<String, Object>> getOrderHistory() {
+    public ResponseEntity<Map<String, Object>> getOrderHistory(@RequestParam Integer userId) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication == null || !authentication.isAuthenticated()) {
@@ -35,7 +35,6 @@ public class HistoryController {
                 return ResponseEntity.ok(response);
             }
             
-            Integer userId = Integer.parseInt(authentication.getName());
             List<Map<String, Object>> orders = orderService.getOrderHistory(userId);
             Map<String, Object> response = new HashMap<>();
             response.put("code", 200);

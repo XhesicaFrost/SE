@@ -6,11 +6,14 @@ import com.blm.takeout.entity.User;
 import com.blm.takeout.entity.Shop;
 import com.blm.takeout.entity.Address;
 import com.blm.takeout.entity.CartItem;
+import com.blm.takeout.entity.OrderItem;
 import com.blm.takeout.repository.OrderRepository;
 import com.blm.takeout.repository.UserRepository;
 import com.blm.takeout.repository.ShopRepository;
 import com.blm.takeout.repository.CartItemRepository;
 import com.blm.takeout.repository.AddressRepository;
+import com.blm.takeout.repository.OrderItemRepository;
+import com.blm.takeout.repository.ItemRepository;
 import com.blm.takeout.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,7 @@ import java.util.UUID;
 import java.util.Random;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
@@ -41,6 +45,12 @@ public class PaymentServiceImpl implements PaymentService {
     
     @Autowired
     private AddressRepository addressRepository;
+    
+    @Autowired
+    private OrderItemRepository orderItemRepository;
+    
+    @Autowired
+    private ItemRepository itemRepository;
     
     @Override
     @Transactional
@@ -109,6 +119,28 @@ public class PaymentServiceImpl implements PaymentService {
             
             // 保存订单
             orderRepository.save(order);
+            
+            // 创建订单项
+            List<OrderItem> orderItems = paymentDTO.getItems().stream()
+                .map(item -> {
+                    Map<String, Object> product = (Map<String, Object>) item.get("product");
+                    Integer itemId = ((Number) product.get("id")).intValue();
+                    int quantity = ((Number) item.get("quantity")).intValue();
+                    double price = ((Number) product.get("price")).doubleValue();
+                    
+                    OrderItem orderItem = new OrderItem();
+                    orderItem.setOrder(order);
+                    orderItem.setItem(itemRepository.findById(itemId).orElseThrow(() -> new RuntimeException("商品不存在")));
+                    orderItem.setQuantity(quantity);
+                    orderItem.setUnitPrice(BigDecimal.valueOf(price));
+                    orderItem.setTotalPrice(BigDecimal.valueOf(price * quantity));
+                    
+                    return orderItem;
+                })
+                .collect(Collectors.toList());
+            
+            // 保存订单项
+            orderItemRepository.saveAll(orderItems);
             
             // 4. 删除购物车中已选中的商品
             System.err.println("开始删除购物车商品，用户ID: " + paymentDTO.getUserId() + ", 商家ID: " + paymentDTO.getShopId());

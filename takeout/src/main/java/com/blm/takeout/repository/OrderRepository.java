@@ -18,7 +18,8 @@ import java.util.Optional;
 public interface OrderRepository extends JpaRepository<Order, Integer> {
     List<Order> findByUser_Userid(Integer userId);
     Optional<Order> findByOrderNumber(String orderNumber);
-    Page<Order> findByUser_UseridOrderByCreatedAtDesc(Integer userId, Pageable pageable);
+    @Query("SELECT o FROM Order o WHERE o.user.userid = :userId ORDER BY o.createdAt DESC")
+    Page<Order> findByUser_UseridOrderByCreatedAtDesc(@Param("userId") Integer userId, Pageable pageable);
     @Query("SELECT o FROM Order o WHERE o.user.userid = :userId")
     List<Order> findByUserId(@Param("userId") Integer userId);
     @Query("SELECT o FROM Order o WHERE o.user.userid = :userId")

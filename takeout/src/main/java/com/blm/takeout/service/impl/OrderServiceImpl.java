@@ -9,12 +9,14 @@ import com.blm.takeout.repository.OrderRepository;
 import com.blm.takeout.repository.ShopRepository;
 import com.blm.takeout.repository.UserRepository;
 import com.blm.takeout.service.OrderService;
+import com.blm.takeout.util.FileUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -141,20 +143,48 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<Map<String, Object>> getOrderHistory(Integer userId) {
-        List<Order> orders = orderRepository.findByUserId(userId);
-        return orders.stream().map(order -> {
+        System.err.println("开始获取用户历史订单，用户ID: " + userId);
+        
+        // 检查用户是否存在
+        userRepository.findById(userId)
+                .orElseThrow(() -> {
+                    System.err.println("用户不存在: " + userId);
+                    return new RuntimeException("用户不存在");
+                });
+        
+        // 获取订单列表
+        List<Order> orders = orderRepository.findByUser_UseridOrderByCreatedAtDesc(userId, PageRequest.of(0, Integer.MAX_VALUE)).getContent();
+        System.err.println("查询到的订单数量: " + orders.size());
+        
+        if (orders.isEmpty()) {
+            System.err.println("未找到任何订单");
+            return new ArrayList<>();
+        }
+        
+        // 转换订单数据
+        List<Map<String, Object>> result = orders.stream().map(order -> {
+            System.err.println("处理订单: " + order.getId());
             Map<String, Object> orderMap = new HashMap<>();
             orderMap.put("id", order.getId());
-            orderMap.put("state", order.getStatus());
+            orderMap.put("state", order.getStatus().toString().toLowerCase());
             orderMap.put("fullAddress", order.getDeliveryAddress());
 
             Shop shop = shopRepository.findById(order.getShop().getId())
-                    .orElseThrow(() -> new RuntimeException("店铺不存在"));
+                    .orElseThrow(() -> {
+                        System.err.println("店铺不存在: " + order.getShop().getId());
+                        return new RuntimeException("店铺不存在");
+                    });
             
             Map<String, Object> shopMap = new HashMap<>();
             shopMap.put("id", shop.getId());
             shopMap.put("name", shop.getName());
-            shopMap.put("image", shop.getImage());
+            try {
+                String shopImageBase64 = FileUtils.convertImageToBase64(shop.getImage());
+                shopMap.put("image", shopImageBase64);
+            } catch (IOException e) {
+                System.err.println("转换店铺图片失败: " + e.getMessage());
+                shopMap.put("image", "");
+            }
             shopMap.put("address", shop.getAddress());
             orderMap.put("shop", shopMap);
 
@@ -165,17 +195,27 @@ public class OrderServiceImpl implements OrderService {
                         productMap.put("id", item.getItem().getId());
                         productMap.put("name", item.getItem().getName());
                         productMap.put("description", item.getItem().getDescription());
-                        productMap.put("price", item.getUnitPrice());
-                        productMap.put("image", item.getItem().getImage());
+                        productMap.put("price", item.getUnitPrice().doubleValue());
+                        try {
+                            String itemImageBase64 = FileUtils.convertImageToBase64(item.getItem().getImage());
+                            productMap.put("image", itemImageBase64);
+                        } catch (IOException e) {
+                            System.err.println("转换商品图片失败: " + e.getMessage());
+                            productMap.put("image", "");
+                        }
                         itemMap.put("product", productMap);
                         itemMap.put("quantity", item.getQuantity());
                         return itemMap;
                     })
                     .collect(Collectors.toList());
             orderMap.put("items", items);
-
+            
+            System.err.println("订单处理完成: " + order.getId() + ", 商品数量: " + items.size());
             return orderMap;
         }).collect(Collectors.toList());
+        
+        System.err.println("历史订单处理完成，返回数据条数: " + result.size());
+        return result;
     }
 
     @Override
