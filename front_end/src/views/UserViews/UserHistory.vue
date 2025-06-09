@@ -65,9 +65,10 @@ export default {
   components: { TopNav },
   data() {
     return {
+      orders: [],
       navInfo: { 
         title: '历史订单', 
-        pageReturn: () => { this.$router.go(-1) } 
+        pageReturn: () => { this.$router.push('/user/personal') } 
       },
       groupedOrderItems: [
       ]
