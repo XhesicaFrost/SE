@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.Random;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
@@ -47,8 +48,27 @@ public class PaymentServiceImpl implements PaymentService {
         try {
             System.err.println("Function init");
             // 1. 获取用户当前地址
-            Address currentAddress = addressRepository.findByUserIdAndCurrentTrue(paymentDTO.getUserId())
-                .orElseThrow(() -> new RuntimeException("未找到用户当前地址"));
+            Optional<Address> currentAddressOpt = addressRepository.findByUserIdAndCurrentTrue(paymentDTO.getUserId());
+            Address currentAddress;
+            
+            if (currentAddressOpt.isPresent()) {
+                // 情况3：正常获取到用户的当前地址
+                currentAddress = currentAddressOpt.get();
+                System.err.println("找到用户当前地址");
+            } else {
+                // 情况2：用户有地址但没有current=true的地址
+                List<Address> userAddresses = addressRepository.findByUserId(paymentDTO.getUserId());
+                if (userAddresses.isEmpty()) {
+                    // 情况1：用户没有地址
+                    throw new RuntimeException("未找到用户地址");
+                }
+                // 将第一个地址设置为当前地址
+                currentAddress = userAddresses.get(0);
+                currentAddress.setCurrent(true);
+                addressRepository.save(currentAddress);
+                System.err.println("已将用户第一个地址设置为当前地址");
+            }
+            
             System.err.println("User Address Get Success");
             // 2. 获取商家信息
             Shop shop = shopRepository.findById(paymentDTO.getShopId())

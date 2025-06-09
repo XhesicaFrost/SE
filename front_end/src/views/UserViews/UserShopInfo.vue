@@ -151,7 +151,8 @@ export default {
           this.$router.push('/login')
           return
         }
-        const params = new URLSearchParams({ userId: this.userInfo.userId }).toString()
+        const userId = this.$store.state.userStore.userInfo.userId
+        const params = new URLSearchParams({ userId: userId }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/address?${params}`, {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -280,7 +281,7 @@ export default {
     },
     toPayment(check) {
       if(check <= 0) return
-      if(addresses.length <= 0) {
+      if(this.addresses.length <= 0) {
         alert("您还没有设置收货地址！")
         this.$router.push(`/user/address`)
       }
