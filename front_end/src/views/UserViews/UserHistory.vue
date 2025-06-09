@@ -89,7 +89,7 @@ export default {
     // 获取历史订单数据
     async fetchOrderItems() {
       try {
-        const params = new URLSearchParams({ userId: this.$store.state.userStore.userId }).toString()
+        const params = new URLSearchParams({ userId: this.$store.state.userStore.userInfo.userId }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/history?${params}`)
         const result = await response.json()
         if (result.code === 200 && Array.isArray(result.data)) {

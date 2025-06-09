@@ -284,6 +284,7 @@ export default {
       if(this.addresses.length <= 0) {
         alert("您还没有设置收货地址！")
         this.$router.push(`/user/address`)
+        return
       }
       this.$router.push(`/user/payment/${this.$route.params.shopId}`)
     }
