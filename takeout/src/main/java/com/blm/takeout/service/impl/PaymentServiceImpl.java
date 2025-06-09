@@ -4,17 +4,24 @@ import com.blm.takeout.dto.PaymentDTO;
 import com.blm.takeout.entity.Order;
 import com.blm.takeout.entity.User;
 import com.blm.takeout.entity.Shop;
+import com.blm.takeout.entity.Address;
+import com.blm.takeout.entity.CartItem;
 import com.blm.takeout.repository.OrderRepository;
 import com.blm.takeout.repository.UserRepository;
 import com.blm.takeout.repository.ShopRepository;
+import com.blm.takeout.repository.CartItemRepository;
+import com.blm.takeout.repository.AddressRepository;
 import com.blm.takeout.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Map;
+import java.util.List;
 import java.util.UUID;
+import java.util.Random;
+import java.util.Map;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
@@ -28,56 +35,83 @@ public class PaymentServiceImpl implements PaymentService {
     @Autowired
     private ShopRepository shopRepository;
     
+    @Autowired
+    private CartItemRepository cartItemRepository;
+    
+    @Autowired
+    private AddressRepository addressRepository;
+    
     @Override
+    @Transactional
     public boolean processPayment(PaymentDTO paymentDTO) {
         try {
-            System.out.println("开始处理支付请求：" + paymentDTO);
-            
-            // 获取用户和店铺信息
-            User user = userRepository.findById(paymentDTO.getUserId()).orElseThrow();
-            Shop shop = shopRepository.findById(paymentDTO.getShopId()).orElseThrow();
-
-            // 计算订单总金额
-            double totalAmount = paymentDTO.getItems().stream()
-                .mapToDouble(item -> {
-                    Map<String, Object> product = (Map<String, Object>) item.get("product");
-                    double price = ((Number) product.get("price")).doubleValue();
-                    int quantity = ((Number) item.get("quantity")).intValue();
-                    return price * quantity;
-                })
-                .sum();
-
-            System.out.println("订单总金额：" + totalAmount);
-
-            // 创建订单
+            System.err.println("Function init");
+            // 1. 获取用户当前地址
+            Address currentAddress = addressRepository.findByUserIdAndCurrentTrue(paymentDTO.getUserId())
+                .orElseThrow(() -> new RuntimeException("未找到用户当前地址"));
+            System.err.println("User Address Get Success");
+            // 2. 获取商家信息
+            Shop shop = shopRepository.findById(paymentDTO.getShopId())
+                .orElseThrow(() -> new RuntimeException("未找到商家信息"));
+            System.err.println("Shop Get Success");
+            // 3. 创建订单
             Order order = new Order();
-            order.setOrderNumber(UUID.randomUUID().toString().replace("-", "").substring(0, 16));
-            order.setUser(user);
+            order.setUser(userRepository.findById(paymentDTO.getUserId()).orElseThrow());
             order.setShop(shop);
-            order.setTotalAmount(BigDecimal.valueOf(totalAmount));
             order.setStatus(Order.OrderStatus.PREPARING);
-            
-            // 设置配送信息
-            order.setDeliveryAddress("默认地址");
-            order.setDeliveryPhone(user.getPhonenumber());
-            order.setDeliveryName(user.getUsername());
+            order.setDeliveryAddress(currentAddress.getFullAddress());
             order.setDeliveryLatitude(shop.getLatitude());
             order.setDeliveryLongitude(shop.getLongitude());
-
-            // 设置时间信息
+            order.setDeliveryPhone(currentAddress.getPhone());
+            order.setDeliveryName(currentAddress.getName());
+            
+            // 设置时间字段
             LocalDateTime now = LocalDateTime.now();
             order.setCreatedAt(now);
             order.setUpdatedAt(now);
-
+            order.setCreateTime(now);
+            order.setUpdateTime(now);
+            
+            System.err.println("Order create success");
+            // 计算总金额
+            BigDecimal totalAmount = paymentDTO.getItems().stream()
+                .map(item -> {
+                    Map<String, Object> product = (Map<String, Object>) item.get("product");
+                    double price = ((Number) product.get("price")).doubleValue();
+                    int quantity = ((Number) item.get("quantity")).intValue();
+                    return BigDecimal.valueOf(price).multiply(BigDecimal.valueOf(quantity));
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+            order.setTotalAmount(totalAmount);
+            
+            // 生成订单号
+            order.setOrderNumber(generateOrderNumber());
+            
             // 保存订单
-            Order savedOrder = orderRepository.save(order);
-            System.out.println("订单保存成功：" + savedOrder.getId());
-
+            orderRepository.save(order);
+            
+            // 4. 删除购物车中已选中的商品
+            System.err.println("开始删除购物车商品，用户ID: " + paymentDTO.getUserId() + ", 商家ID: " + paymentDTO.getShopId());
+            List<CartItem> cartItems = cartItemRepository.findByUserIdAndShopId(paymentDTO.getUserId(), paymentDTO.getShopId());
+            System.err.println("找到购物车商品数量: " + cartItems.size());
+            
+            // 直接删除该商家的所有购物车项
+            cartItems.forEach(cartItem -> {
+                System.err.println("正在删除购物车商品ID: " + cartItem.getId());
+                cartItemRepository.delete(cartItem);
+            });
+            System.err.println("CartItem delete success");
+            // 模拟支付成功
             return true;
         } catch (Exception e) {
-            System.out.println("支付处理异常：" + e.getMessage());
             e.printStackTrace();
-            return true; // 直接返回支付成功
+            // 即使发生异常也返回支付成功
+            return true;
         }
+    }
+    
+    private String generateOrderNumber() {
+        // 生成订单号：时间戳 + 6位随机数
+        return System.currentTimeMillis() + String.format("%06d", new Random().nextInt(1000000));
     }
 } 

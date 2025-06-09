@@ -71,6 +71,12 @@ public class Order {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
     
+    @Column(name = "create_time")
+    private LocalDateTime createTime;
+    
+    @Column(name = "update_time")
+    private LocalDateTime updateTime;
+    
     @Column(name = "estimated_delivery_time")
     private LocalDateTime estimatedDeliveryTime;
     

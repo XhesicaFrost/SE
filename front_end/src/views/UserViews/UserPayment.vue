@@ -126,7 +126,7 @@ export default {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            userId: this.$store.state.userStore.userId,
+            userId: this.$store.state.userStore.userInfo.userId,
             shopId: this.$route.params.shopId,
             items: this.cart,
           }),

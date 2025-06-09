@@ -20,5 +20,5 @@ public class CartItem {
 
     private Integer quantity;
     private Double price;
-    private Boolean selected;
+    private Boolean selected = true;
 } 
