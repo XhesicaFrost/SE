@@ -69,7 +69,7 @@ export default {
         const result = await response.json()
         if (result.success) {
           alert('地址添加成功！')
-          this.$router.push('/user/address')
+          this.$router.go(-1)
         } else {
           alert('地址添加失败，请重试！')
         }
