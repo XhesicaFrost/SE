@@ -2,7 +2,12 @@
   <TopNav :navInfo="navInfo" />
   <div class="user-home">
     <div class="user-personal-edit">
-      <form @submit.prevent="submitEdit">
+      <!-- ✅ 新增：加载状态提示 -->
+      <div v-if="!isDataLoaded" class="loading-message">
+        <p>正在加载个人信息...</p>
+      </div>
+
+      <form v-else @submit.prevent="submitEdit">
         <div class="form-group">
           <label for="name">姓名</label>
           <input type="text" id="name" v-model="formData.name" placeholder="请输入姓名" />
@@ -49,6 +54,7 @@ export default {
       // ✅ 新增：图片上传相关数据
       avatarFile: null,    // 保存选择的文件对象
       avatarUrl: '',       // 预览图片URL
+      isDataLoaded: false  // ✅ 新增：数据加载状态
     }
   },
   computed: {
@@ -79,7 +85,7 @@ export default {
       }
     },
 
-    // ✅ 修改：提交方法，参考 SellerShopEdit 的实现
+    // ✅ 修改：提交方法，允许空值提交
     async submitEdit() {
       try {
         console.log('🚀 提交个人资料修改:', this.formData)
@@ -90,16 +96,27 @@ export default {
           return
         }
 
+        if (!this.userInfo || !this.userInfo.userId) {
+          alert('用户信息异常，请重新登录')
+          this.$router.push('/login')
+          return
+        }
+
         // ✅ 使用 FormData（与 SellerShopEdit 相同）
         const formData = new FormData()
         formData.append('id', this.userInfo.userId)
-        formData.append('name', this.formData.name)
-        formData.append('phone', this.formData.phone)
+        
+        // ✅ 允许空值提交，使用 trim() 处理但不验证
+        formData.append('name', (this.formData.name || '').trim())
+        formData.append('phone', (this.formData.phone || '').trim())
         
         // ✅ 关键：只有选择了新图片才添加到表单
         if (this.avatarFile) {
           formData.append('avatar', this.avatarFile)
+          console.log('📷 添加新头像到表单')
         }
+
+        console.log('📤 发送请求到服务器...')
 
         const response = await fetchWithTimeout(`${BASE_URL}/personal/edit`, {
           method: 'POST',
@@ -117,8 +134,8 @@ export default {
           
           // ✅ 构建完整的更新数据
           const updatedUserInfo = {
-            userName: this.formData.name,
-            userPhone: this.formData.phone
+            userName: (this.formData.name || '').trim(),
+            userPhone: (this.formData.phone || '').trim()
           }
           
           // ✅ 处理头像更新 - 关键修改
@@ -142,19 +159,21 @@ export default {
           
           this.$router.push('/user/personal');
         } else {
+          console.error('❌ 服务器返回失败:', result)
           alert('个人资料修改失败: ' + (result.message || '未知错误'));
         }
       } catch (error) {
-        console.error('修改个人资料时发生错误:', error);
+        console.error('❌ 修改个人资料时发生错误:', error);
         alert('网络错误，请稍后重试');
       }
     },
 
-    // ✅ 修正：初始化用户数据
+    // ✅ 修改：初始化用户数据，预先加载 userInfo 中的值
     initUserData() {
-      console.log('🔧 初始化用户数据:', this.userInfo)
+      console.log('🔧 开始初始化用户数据:', this.userInfo)
       
       if (this.userInfo) {
+        // ✅ 预先加载 userInfo 中保存的值
         this.formData.name = this.userInfo.userName || ''
         this.formData.phone = this.userInfo.userPhone || ''
         
@@ -167,13 +186,67 @@ export default {
         
         console.log('✅ 表单数据初始化完成:', this.formData)
         console.log('🖼️ 头像URL:', this.avatarUrl)
+      } else {
+        console.warn('⚠️ 用户信息为空，使用默认空值')
+        // 保持默认空值
+        this.formData.name = ''
+        this.formData.phone = ''
+        this.avatarUrl = ''
       }
+      
+      // ✅ 标记数据已加载
+      this.isDataLoaded = true
+    },
+
+    // ✅ 新增：等待用户信息加载
+    async waitForUserInfo() {
+      console.log('⏳ 等待用户信息加载...')
+      
+      // 如果用户信息已存在，直接初始化
+      if (this.userInfo) {
+        this.initUserData()
+        return
+      }
+      
+      // 否则等待最多3秒
+      let attempts = 0
+      const maxAttempts = 30 // 3秒，每100ms检查一次
+      
+      const checkUserInfo = () => {
+        attempts++
+        
+        if (this.userInfo) {
+          console.log('✅ 用户信息加载完成')
+          this.initUserData()
+        } else if (attempts < maxAttempts) {
+          setTimeout(checkUserInfo, 100)
+        } else {
+          console.warn('⚠️ 用户信息加载超时，使用空值初始化')
+          this.initUserData()
+        }
+      }
+      
+      setTimeout(checkUserInfo, 100)
     }
   },
 
-  // ✅ 新增：组件挂载时初始化数据
+  // ✅ 修改：组件挂载时等待并加载数据
   mounted() {
-    this.initUserData()
+    console.log('📱 UserPersonalEdit 组件挂载')
+    this.waitForUserInfo()
+  },
+
+  // ✅ 新增：监听 userInfo 变化
+  watch: {
+    userInfo: {
+      handler(newUserInfo) {
+        if (newUserInfo && !this.isDataLoaded) {
+          console.log('👁️ 检测到用户信息更新，重新初始化')
+          this.initUserData()
+        }
+      },
+      immediate: true
+    }
   }
 }
 </script>
@@ -193,6 +266,14 @@ export default {
   padding: 1em;
   background: #fff;
   min-height: 100vh;
+}
+
+/* ✅ 新增：加载状态样式 */
+.loading-message {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-style: italic;
 }
 
 .form-group {
