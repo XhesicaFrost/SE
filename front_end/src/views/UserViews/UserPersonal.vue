@@ -6,8 +6,8 @@
         <img :src="userInfo.image"/>
       </div>
       <div class="user-info">
-        <div class="user-name">{{ userInfo.name }}</div>
-        <div class="user-phone">{{ userInfo.phone }}</div>
+        <div class="user-name">{{ userInfo.userName }}</div>
+        <div class="user-phone">{{ userInfo.userPhone }}</div>
         <button class="edit-btn" @click="goToEdit">编辑资料</button>
       </div>
     </div>
@@ -95,9 +95,6 @@ export default {
           // 调用 userStore 的 logout action
           await this.logout()
           
-          // 可选：清除商家相关信息
-          this.SET_seller_ID('')
-          this.SET_seller_NAME('')
           
           // 显示提示信息
           alert('已成功退出登录')
@@ -112,7 +109,11 @@ export default {
         alert('退出登录失败，请重试')
       }
     }
-  }
+  },
+    mounted() {
+        // 检查用户是否登录
+        console.log('输出用户信息:', this.userInfo)
+    }
 }
 </script>
 

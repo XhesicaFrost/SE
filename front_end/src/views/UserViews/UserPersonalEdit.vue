@@ -73,6 +73,12 @@ export default {
         const result = await response.json();
         if (result.status === 'success') {
           alert('个人资料修改成功');
+          this.$store.commit('userStore/setUserInfo', {
+            userId: this.userInfo.userId,
+            name: this.formData.name,
+            phone: this.formData.phone,
+            image: this.formData.image
+          });
           this.$router.push('/user/personal');
         } else {
           alert('个人资料修改失败');
