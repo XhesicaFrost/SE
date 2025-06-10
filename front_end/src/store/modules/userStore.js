@@ -15,8 +15,29 @@ export default {
   }),
   mutations: {
     SET_USER_INFO(state, payload) {
+      console.log('📝 设置用户信息到 state:', {
+        ...payload,
+        userImage: payload.userImage ? `[Base64 数据，长度: ${payload.userImage.length}]` : '无头像'
+      })
+      
+      // ✅ 新增：处理 base64 头像数据
+      const processedPayload = { ...payload }
+      
+      // 确保头像数据格式正确
+      if (processedPayload.userImage && !processedPayload.userImage.startsWith('data:image/')) {
+        if (processedPayload.userImage.match(/^[A-Za-z0-9+/]+=*$/)) {
+          processedPayload.userImage = `data:image/jpeg;base64,${processedPayload.userImage}`
+        }
+      }
+      
+      // ✅ 同时设置 image 字段以保持兼容性
+      if (processedPayload.userImage) {
+        processedPayload.image = processedPayload.userImage
+      }
+      
       // 使用 Object.assign 来确保响应式更新
-      Object.assign(state.userInfo, payload)
+      Object.assign(state.userInfo, processedPayload)
+      
       // ✅ 保留原有的手动持久化
       try {
         localStorage.setItem('userInfo', JSON.stringify(state.userInfo))
@@ -63,8 +84,23 @@ export default {
         if (savedUserInfo) {
           const userInfo = JSON.parse(savedUserInfo)
           if (userInfo && userInfo.userId) {
+            // ✅ 确保头像数据格式正确
+            if (userInfo.userImage && !userInfo.userImage.startsWith('data:image/')) {
+              if (userInfo.userImage.match(/^[A-Za-z0-9+/]+=*$/)) {
+                userInfo.userImage = `data:image/jpeg;base64,${userInfo.userImage}`
+              }
+            }
+            
+            // ✅ 保持兼容性
+            if (userInfo.userImage) {
+              userInfo.image = userInfo.userImage
+            }
+            
             Object.assign(state.userInfo, userInfo)
-            console.log('🔄 从手动存储恢复用户信息:', userInfo)
+            console.log('🔄 从手动存储恢复用户信息:', {
+              ...userInfo,
+              userImage: userInfo.userImage ? `[Base64 数据，长度: ${userInfo.userImage.length}]` : '无头像'
+            })
           }
         }
         
@@ -76,7 +112,6 @@ export default {
     }
   },
   actions: {
-    // ✅ 保留所有原有的 actions 代码
     async registerUser({ commit }, userData) {
       try {
         const params = new URLSearchParams(userData).toString()
@@ -91,13 +126,29 @@ export default {
           if (isNaN(userId)) {
             throw new Error('无效的用户ID')
           }
+
+          // ✅ 新增：处理 base64 头像
+          let userImage = ''
+          if (result.data?.userImage) {
+            // 检查是否是 base64 编码
+            if (result.data.userImage.startsWith('data:image/')) {
+              // 已经是完整的 data URL，直接使用
+              userImage = result.data.userImage
+              console.log('✅ 注册时获取到完整的 base64 头像')
+            } else {
+              // 如果只是 base64 字符串，添加前缀
+              userImage = `data:image/jpeg;base64,${result.data.userImage}`
+              console.log('✅ 注册时获取到 base64 字符串，已添加前缀')
+            }
+          }
+
           commit('SET_USER_INFO', {
             userId: userId,
             userName: userData.username || result.data?.username || '',
             userKind: userData.role || result.data?.role || '',
             userPhone: userData.phonenumber || result.data?.phonenumber || '',
-            token: token, // ✅ 修改：使用提取的 token
-            userImage: userData.userImage || ''
+            token: token,
+            userImage: userImage // ✅ 修改：使用处理后的头像
           })
           commit('SET_ERROR', '')
           return { 
@@ -129,7 +180,7 @@ export default {
         const params = new URLSearchParams(loginData).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/login?${params}`)
         const result = await response.json()
-        console.log('Login result:', result)
+        console.log('🔍 登录响应:', result)
 
         if (result.code === 200) {
           const token = result.data?.token || result.token || ''
@@ -142,28 +193,41 @@ export default {
           if (isNaN(userId)) {
             throw new Error('无效的用户ID')
           }
+
+          // ✅ 新增：处理 base64 头像
+          let userImage = ''
+          if (result.data?.userImage) {
+            // 检查是否是 base64 编码
+            if (result.data.userImage.startsWith('data:image/')) {
+              // 已经是完整的 data URL，直接使用
+              userImage = result.data.userImage
+              console.log('✅ 登录时获取到完整的 base64 头像')
+            } else {
+              // 如果只是 base64 字符串，添加前缀
+              userImage = `data:image/jpeg;base64,${result.data.userImage}`
+              console.log('✅ 登录时获取到 base64 字符串，已添加前缀')
+            }
+            console.log('🖼️ 头像数据长度:', userImage.length)
+          } else {
+            console.log('⚠️ 服务器未返回头像数据')
+          }
           
-          commit('SET_USER_INFO', {
+          const userInfo = {
             userId: userId,
             userName: loginData.username || result.data?.username || '',
             userKind: loginData.role || result.data?.role || '',
             userPhone: loginData.phonenumber || result.data?.phonenumber || '',
-            token: token, // ✅ 修改：使用提取的 token
-            userImage: loginData.userImage || '' // ✅ 新增：设置 userImage
-          })
-          // 检查获得的token是否有效
-          console.log('🚀 登录成功，保存用户信息:', 
-            {
-              userId: userId,
-              userName: loginData.username || result.data?.username || '',
-              userKind: loginData.role || result.data?.role || '',
-              userPhone: loginData.phonenumber || result.data?.phonenumber || '',
-              userImage: loginData.userImage || '',
-              token: token
-            }
-          )
+            token: token,
+            userImage: userImage // ✅ 修改：使用处理后的头像
+          }
+
+          commit('SET_USER_INFO', userInfo)
           
-          console.log('🚀 登录成功，保存用户信息')
+          console.log('🚀 登录成功，保存用户信息:', {
+            ...userInfo,
+            userImage: userImage ? `[Base64 数据，长度: ${userImage.length}]` : '无头像'
+          })
+          
           commit('SET_ERROR', '')
           return { 
             code: result.code, 
@@ -196,21 +260,33 @@ export default {
     // ✅ 保留原有的退出登录
     logout({ commit }) {
       console.log('🚪 用户退出登录')
-      // 清除localStorage中的token
-      // ✅ 新增：清除 localStorage 中的 token
       localStorage.removeItem('token')
       commit('CLEAR_USER_INFO')
     },
     
-    // ✅ 新增：更新用户信息 action
-    updateUserInfo({ commit }, updatedInfo) {
+    // ✅ 修改：更新用户信息 action，支持 base64 头像处理
+    updateUserInfo({ commit, state }, updatedInfo) {
       console.log('🔄 更新用户信息:', updatedInfo)
-      console.log('🔍 当前用户信息:', this.state.userStore.userInfo)
+      console.log('🔍 当前用户信息:', state.userInfo)
       
-      // ✅ 调用 SET_USER_INFO mutation 来更新
-      commit('SET_USER_INFO', updatedInfo)
+      // ✅ 新增：处理头像数据
+      const processedInfo = { ...updatedInfo }
       
-      console.log('✅ 用户信息更新完成')
+      // 如果有头像数据，确保格式正确
+      if (processedInfo.userImage && !processedInfo.userImage.startsWith('data:image/')) {
+        // 如果是纯 base64 字符串，添加前缀
+        if (processedInfo.userImage.match(/^[A-Za-z0-9+/]+=*$/)) {
+          processedInfo.userImage = `data:image/jpeg;base64,${processedInfo.userImage}`
+        }
+      }
+      
+      // 同时设置 image 字段以保持兼容性
+      if (processedInfo.userImage) {
+        processedInfo.image = processedInfo.userImage
+      }
+      
+      commit('SET_USER_INFO', processedInfo)
+      console.log('✅ 用户信息更新成功')
     }
   }
 }
