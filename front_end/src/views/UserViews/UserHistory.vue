@@ -23,10 +23,10 @@
           <h3>{{ group.shop.name }}</h3>
           <p class="shop-address">{{ group.shop.address }}</p>
         </div>
-        <div class="arrive-info" v-if="group.state === 'arrived'">
+        <div class="arrive-info" v-if="group.state === 'completed'">
           <span class="arrive-text">订单已送达</span>
         </div>
-        <div class="arrive-info" v-if="group.state !== 'arrived'">
+        <div class="arrive-info" v-if="group.state !== 'completed'">
           <span class="arrive-text">订单处理中</span>
         </div>
       </div>
