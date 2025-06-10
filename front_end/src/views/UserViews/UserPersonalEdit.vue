@@ -82,6 +82,7 @@ export default {
     // ✅ 修改：提交方法，参考 SellerShopEdit 的实现
     async submitEdit() {
       try {
+        console.log('🚀 提交个人资料修改:', this.formData)
         const token = localStorage.getItem('token')
         if (!token) {
           alert('请先登录')
@@ -97,26 +98,47 @@ export default {
         
         // ✅ 关键：只有选择了新图片才添加到表单
         if (this.avatarFile) {
-          formData.append('avatar', this.avatarFile)  // 使用文件对象，不是字符串
+          formData.append('avatar', this.avatarFile)
         }
 
         const response = await fetchWithTimeout(`${BASE_URL}/personal/edit`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`
-            // ✅ 不设置 Content-Type，让浏览器自动处理 FormData
           },
-          body: formData  // 直接发送 FormData
+          body: formData
         });
         
         const result = await response.json();
+        console.log('📋 服务器响应:', result)
+        
         if (result.status === 'success' || result.code === 200) {
           alert('个人资料修改成功');
-          // ✅ 更新 Vuex 中的用户信息
-          this.$store.dispatch('userStore/updateUserInfo', {
+          
+          // ✅ 构建完整的更新数据
+          const updatedUserInfo = {
             userName: this.formData.name,
             userPhone: this.formData.phone
-          });
+          }
+          
+          // ✅ 处理头像更新 - 关键修改
+          if (result.data && result.data.avatarUrl) {
+            // 情况1：服务器返回新的头像URL
+            updatedUserInfo.image = result.data.avatarUrl
+            updatedUserInfo.userImage = result.data.avatarUrl  // 保持两个字段同步
+            console.log('✅ 使用服务器返回的头像URL:', result.data.avatarUrl)
+          } else if (this.avatarFile && this.avatarUrl) {
+            // 情况2：用户上传了新头像，使用本地预览URL
+            updatedUserInfo.image = this.avatarUrl
+            updatedUserInfo.userImage = this.avatarUrl
+            console.log('✅ 使用本地预览头像URL:', this.avatarUrl)
+          }
+          // 情况3：没有新头像，保持原有头像（不需要额外处理）
+          
+          console.log('🔄 更新用户信息:', updatedUserInfo)
+          
+          // ✅ 更新 Vuex 中的用户信息
+          await this.$store.dispatch('userStore/updateUserInfo', updatedUserInfo);
           
           this.$router.push('/user/personal');
         } else {
@@ -128,15 +150,23 @@ export default {
       }
     },
 
-    // ✅ 新增：初始化用户数据
+    // ✅ 修正：初始化用户数据
     initUserData() {
+      console.log('🔧 初始化用户数据:', this.userInfo)
+      
       if (this.userInfo) {
-        this.formData.name = this.userInfo.username || ''
-        this.formData.phone = this.userInfo.phone || ''
-        // 如果有现有头像，显示预览
-        if (this.userInfo.avatarUrl) {
-          this.avatarUrl = this.userInfo.avatarUrl
+        this.formData.name = this.userInfo.userName || ''
+        this.formData.phone = this.userInfo.userPhone || ''
+        
+        // ✅ 显示现有头像（兼容两种字段名）
+        if (this.userInfo.image) {
+          this.avatarUrl = this.userInfo.image
+        } else if (this.userInfo.userImage) {
+          this.avatarUrl = this.userInfo.userImage
         }
+        
+        console.log('✅ 表单数据初始化完成:', this.formData)
+        console.log('🖼️ 头像URL:', this.avatarUrl)
       }
     }
   },
