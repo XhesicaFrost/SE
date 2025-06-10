@@ -122,7 +122,6 @@ export default {
   height: auto;
   width: auto;
   display: flex;
-  align-items: center;
   padding: 10px 15px;
   background: #fff;
   border-bottom: 1px solid #eee;
@@ -134,6 +133,11 @@ export default {
   border-radius: 50%;
   object-fit: cover;
   margin-right: 10px;
+}
+
+.shop-info {
+    width: 100%;
+    text-align: left;
 }
 
 .shop-info h3 {
