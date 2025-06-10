@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import com.blm.takeout.entity.*;
 import com.blm.takeout.exception.BusinessException;
+import com.blm.takeout.repository.OrderRepository;
 import com.blm.takeout.repository.SellerRepository;
 import com.blm.takeout.repository.UserRepository;
 import com.blm.takeout.repository.ShopRepository;
@@ -23,6 +24,7 @@ public class SellerService {
     private final SellerRepository sellerRepository;
     private final UserRepository userRepository;
     private final ShopRepository shopRepository;
+    private final OrderRepository orderRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Transactional
@@ -102,5 +104,9 @@ public class SellerService {
 
     public Seller getSellerById(Integer sellerId) {
         return sellerRepository.findById(sellerId).orElse(null);
+    }
+
+    public List<Order> getOrders(Integer sellerId) {
+        return orderRepository.findByShopId(sellerId);
     }
 }

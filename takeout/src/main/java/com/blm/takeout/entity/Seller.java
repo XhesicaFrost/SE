@@ -31,6 +31,7 @@ public class Seller {
     @Column(name = "tag")
     private List<String> tags;
 
+
     @ManyToOne
     @JoinColumn(name = "userId", nullable = false, referencedColumnName = "userid")
     private User user;

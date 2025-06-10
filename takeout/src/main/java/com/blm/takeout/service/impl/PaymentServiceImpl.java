@@ -3,9 +3,11 @@ package com.blm.takeout.service.impl;
 import com.blm.takeout.dto.PaymentDTO;
 import com.blm.takeout.entity.Order;
 import com.blm.takeout.entity.User;
+import com.blm.takeout.exception.BusinessException;
 import com.blm.takeout.entity.Shop;
 import com.blm.takeout.entity.Address;
 import com.blm.takeout.entity.CartItem;
+import com.blm.takeout.entity.Item;
 import com.blm.takeout.entity.OrderItem;
 import com.blm.takeout.repository.OrderRepository;
 import com.blm.takeout.repository.UserRepository;
@@ -127,7 +129,10 @@ public class PaymentServiceImpl implements PaymentService {
                     Integer itemId = ((Number) product.get("id")).intValue();
                     int quantity = ((Number) item.get("quantity")).intValue();
                     double price = ((Number) product.get("price")).doubleValue();
-                    
+                    Item itemEntity = itemRepository.findById(itemId)
+                        .orElseThrow(() -> new BusinessException("商品不存在"));
+                    itemEntity.setSales(itemEntity.getSales() + quantity);
+                    itemRepository.save(itemEntity);
                     OrderItem orderItem = new OrderItem();
                     orderItem.setOrder(order);
                     orderItem.setItem(itemRepository.findById(itemId).orElseThrow(() -> new RuntimeException("商品不存在")));

@@ -1,6 +1,9 @@
 package com.blm.takeout.controller;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +19,7 @@ import com.blm.takeout.service.ShopService;
 import com.blm.takeout.util.FileUtils;
 import com.blm.takeout.entity.Seller;
 import com.blm.takeout.entity.Shop;
+import com.blm.takeout.entity.Order;
 import com.blm.takeout.repository.ShopRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -100,6 +104,26 @@ public class SellerController {
             } 
         } catch (Exception e) {
             return ApiResponse.error(HttpStatus.INSUFFICIENT_STORAGE.value(), e.getMessage());
+        }
+    }
+
+    @GetMapping("/order")
+    public ApiResponse<?> getOrders(@RequestParam Integer sellerId) {
+        try {
+            List<Order> orders = sellerService.getOrders(sellerId);
+            List<Map<String, Object>> response = orders.stream().map(order -> Map.of(
+                "id", order.getId(),
+                "totalPrice", order.getTotalAmount(),
+                "status", order.getStatus(),
+                "items", order.getOrderItems().stream().map(item -> Map.of(
+                    "name", item.getItem().getName(),
+                    "count", item.getQuantity(),
+                    "price", item.getUnitPrice()
+                )).collect(Collectors.toList())
+            )).collect(Collectors.toList());
+            return ApiResponse.success(response);
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
         }
     }
 }
