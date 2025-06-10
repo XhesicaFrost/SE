@@ -59,9 +59,9 @@ public class AuthController {
             Map<String, Object> map = new HashMap<>();
             try {
                 String base64Image = FileUtils.convertImageToBase64(response.getAvatarurl());
-                map.put("image", base64Image); 
+                map.put("userImage", base64Image); 
             } catch (IOException e) {
-                map.put("image", null);
+                map.put("userImage", null);
             }
             map.put("id", response.getUserid());
             map.put("username", response.getUsername());
