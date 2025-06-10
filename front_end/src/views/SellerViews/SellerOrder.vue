@@ -82,7 +82,6 @@ export default {
   components: { BottomNav, TopNav },
   data() {
     return {
-      // ✅ 恢复：清空本地示例数据
       orders: [],
       page: 1,
       pageSize: 10,
@@ -96,10 +95,9 @@ export default {
       ],
       navInfo: { title: '管理订单', pageReturn: () => { this.$router.push('/seller') } },
       expandedOrderId: null,
-      // ✅ 订单状态配置
+      // ✅ 修改：废弃 PAID 字段，调整状态配置
       statusOptions: [
         { value: null, label: '全部' },
-        { value: 'PAID', label: '已支付' },
         { value: 'PREPARING', label: '备餐中' },
         { value: 'READY', label: '已出餐' },
         { value: 'ACCEPTED', label: '已接单' },
@@ -174,11 +172,9 @@ export default {
       return statusConfig ? statusConfig.label : status
     },
 
-    // ✅ 新增：获取按钮文本
+    // ✅ 修改：获取按钮文本，废弃 PAID 状态
     getActionButtonText(status) {
       switch (status) {
-        case 'PAID':
-          return '开始备餐'
         case 'PREPARING':
           return '出餐'
         case 'READY':
@@ -196,10 +192,9 @@ export default {
       }
     },
 
-    // ✅ 新增：获取按钮样式类
+    // ✅ 修改：获取按钮样式类，废弃 PAID 状态
     getStatusButtonClass(status) {
       switch (status) {
-        case 'PAID':
         case 'PREPARING':
           return 'action-available'
         case 'READY':
@@ -228,18 +223,32 @@ export default {
       // 其他状态下只是展示，不做操作
     },
 
-    // ✅ 恢复：后端请求获取订单
+    // ✅ 修复：后端请求获取订单，修复数据解析问题
     async fetchOrders() {
       try {
+        console.log('🔍 当前商家ID:', this.sellerId)
+        
+        if (!this.sellerId) {
+          console.warn('⚠️ 商家ID不存在，无法获取订单')
+          this.orders = []
+          return
+        }
+
         const params = new URLSearchParams({ sellerId: this.sellerId }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/seller/order?${params}`)
         const result = await response.json()
         
-        console.log('📋 获取订单响应:', result)
+        console.log('📋 获取订单完整响应:', result)
         
-        if (result.success && Array.isArray(result.data)) {
+        // ✅ 修复：根据实际返回格式解析数据
+        if (result.code === 200 && Array.isArray(result.data)) {
           this.orders = result.data
           console.log('✅ 订单加载成功，共', this.orders.length, '个订单')
+          console.log('📦 订单详情:', this.orders)
+        } else if (result.success && Array.isArray(result.data)) {
+          // 兼容 success 字段的响应格式
+          this.orders = result.data
+          console.log('✅ 订单加载成功（success格式），共', this.orders.length, '个订单')
         } else {
           console.warn('⚠️ 订单数据格式异常:', result)
           this.orders = []
@@ -264,7 +273,8 @@ export default {
         const result = await response.json()
         console.log('📤 出餐操作响应:', result)
         
-        if (result.success) {
+        // ✅ 兼容两种响应格式
+        if (result.success || result.code === 200) {
           alert('出餐成功！')
           await this.fetchOrders() // 重新获取订单列表
           console.log('✅ 出餐成功，已刷新订单列表')
@@ -338,7 +348,19 @@ export default {
     console.log('👤 当前用户ID:', this.userId)
     console.log('🏪 当前商家ID:', this.sellerId)
     
-    await this.fetchOrders()
+    // ✅ 确保有商家ID后再获取订单
+    if (this.sellerId) {
+      await this.fetchOrders()
+    } else {
+      console.warn('⚠️ 商家ID未就绪，稍后重试')
+      // 等待 Vuex 加载完成
+      setTimeout(async () => {
+        if (this.sellerId) {
+          await this.fetchOrders()
+        }
+      }, 1000)
+    }
+    
     this.startAlertTimer()
   },
 

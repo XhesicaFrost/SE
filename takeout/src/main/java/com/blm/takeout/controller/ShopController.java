@@ -41,6 +41,11 @@ public class ShopController {
             List<Map<String, Object>> shopList = new ArrayList<>();
             
             for (ShopDTO shop : shops) {
+                // 只处理状态为"正常"的店铺
+                if (!"正常".equals(shop.getStatus())) {
+                    continue;
+                }
+                
                 Map<String, Object> shopMap = new HashMap<>();
                 shopMap.put("id", shop.getId());
                 shopMap.put("name", shop.getName());
