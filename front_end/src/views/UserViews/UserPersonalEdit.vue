@@ -11,9 +11,14 @@
           <label for="phone">手机号</label>
           <input type="text" id="phone" v-model="formData.phone" placeholder="请输入手机号" />
         </div>
+        <!-- ✅ 修改：改为文件上传，参考 SellerShopEdit -->
         <div class="form-group">
-          <label for="image">头像</label>
-          <input type="text" id="image" v-model="formData.image" placeholder="请输入头像" />
+          <label for="avatar">头像</label>
+          <input type="file" accept="image/*" @change="onImageChange" />
+          <!-- ✅ 新增：图片预览功能 -->
+          <div v-if="avatarUrl" class="preview-img">
+            <img :src="avatarUrl" alt="头像预览" />
+          </div>
         </div>
         <button type="submit" class="submit-btn">保存</button>
       </form>
@@ -40,7 +45,10 @@ export default {
         name: '',
         phone: '',
         image: ''
-      }
+      },
+      // ✅ 新增：图片上传相关数据
+      avatarFile: null,    // 保存选择的文件对象
+      avatarUrl: '',       // 预览图片URL
     }
   },
   computed: {
@@ -49,6 +57,29 @@ export default {
     })
   },
   methods: {
+    // ✅ 新增：图片选择处理方法（参考 SellerShopEdit）
+    onImageChange(e) {
+      const file = e.target.files[0]
+      if (file) {
+        // 验证文件类型
+        if (!file.type.startsWith('image/')) {
+          alert('请选择图片文件')
+          return
+        }
+        
+        // 验证文件大小（限制为2MB）
+        if (file.size > 2 * 1024 * 1024) {
+          alert('图片大小不能超过2MB，请选择较小的图片')
+          return
+        }
+
+        // 保存文件对象和创建预览URL
+        this.avatarFile = file
+        this.avatarUrl = URL.createObjectURL(file)
+      }
+    },
+
+    // ✅ 修改：提交方法，参考 SellerShopEdit 的实现
     async submitEdit() {
       try {
         const token = localStorage.getItem('token')
@@ -57,40 +88,62 @@ export default {
           this.$router.push('/login')
           return
         }
+
+        // ✅ 使用 FormData（与 SellerShopEdit 相同）
         const formData = new FormData()
         formData.append('id', this.userInfo.userId)
         formData.append('name', this.formData.name)
         formData.append('phone', this.formData.phone)
-        formData.append('image', this.formData.image)
+        
+        // ✅ 关键：只有选择了新图片才添加到表单
+        if (this.avatarFile) {
+          formData.append('avatar', this.avatarFile)  // 使用文件对象，不是字符串
+        }
 
         const response = await fetchWithTimeout(`${BASE_URL}/personal/edit`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`
+            // ✅ 不设置 Content-Type，让浏览器自动处理 FormData
           },
-          body: formData
+          body: formData  // 直接发送 FormData
         });
+        
         const result = await response.json();
-        if (result.status === 'success') {
+        if (result.status === 'success' || result.code === 200) {
           alert('个人资料修改成功');
+          // ✅ 更新 Vuex 中的用户信息
+          this.$store.dispatch('userStore/updateUserInfo', {
+            userName: this.formData.name,
+            userPhone: this.formData.phone
+          });
+          
           this.$router.push('/user/personal');
         } else {
-          alert('个人资料修改失败');
+          alert('个人资料修改失败: ' + (result.message || '未知错误'));
         }
       } catch (error) {
         console.error('修改个人资料时发生错误:', error);
         alert('网络错误，请稍后重试');
       }
     },
-    createFormData(data) {
-      const formData = new FormData();
-      for (const key in data) {
-        if (data[key]) {
-          formData.append(key, data[key]);
+
+    // ✅ 新增：初始化用户数据
+    initUserData() {
+      if (this.userInfo) {
+        this.formData.name = this.userInfo.username || ''
+        this.formData.phone = this.userInfo.phone || ''
+        // 如果有现有头像，显示预览
+        if (this.userInfo.avatarUrl) {
+          this.avatarUrl = this.userInfo.avatarUrl
         }
       }
-      return formData;
     }
+  },
+
+  // ✅ 新增：组件挂载时初始化数据
+  mounted() {
+    this.initUserData()
   }
 }
 </script>
@@ -127,6 +180,19 @@ input {
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
+}
+
+/* ✅ 新增：图片预览样式（参考 SellerShopEdit） */
+.preview-img {
+  margin-top: 0.5em;
+}
+
+.preview-img img {
+  max-width: 100%;
+  max-height: 120px;
+  border-radius: 6px;
+  border: 1px solid #eee;
+  object-fit: cover;
 }
 
 .submit-btn {

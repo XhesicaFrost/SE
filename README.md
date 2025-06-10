@@ -946,7 +946,7 @@ GET /seller/order?sellerId=xxx
     {
       "id": 1005,
       "totalPrice": 58.5,
-      "served": false,
+      "status": COMPLETED,
       "items": [
         { "name": "汉堡", "count": 2, "price": 15 },
         { "name": "薯条", "count": 1, "price": 8.5 },

@@ -200,6 +200,17 @@ export default {
       // ✅ 新增：清除 localStorage 中的 token
       localStorage.removeItem('token')
       commit('CLEAR_USER_INFO')
+    },
+    
+    // ✅ 新增：更新用户信息 action
+    updateUserInfo({ commit }, updatedInfo) {
+      console.log('🔄 更新用户信息:', updatedInfo)
+      console.log('🔍 当前用户信息:', this.state.userStore.userInfo)
+      
+      // ✅ 调用 SET_USER_INFO mutation 来更新
+      commit('SET_USER_INFO', updatedInfo)
+      
+      console.log('✅ 用户信息更新完成')
     }
   }
 }
