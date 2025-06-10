@@ -33,3 +33,4 @@ node_modules/
 front_end/node_modules/
 
 takeout/src/main/resources/application.properties
+takeout/target/classes/application.properties

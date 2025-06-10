@@ -10,7 +10,7 @@ import java.util.Base64;
 import org.springframework.web.multipart.MultipartFile;
 
 public class FileUtils {
-    private static final String IMAGE_UPLOAD_DIR = "/takeout/uploads/";
+    private static final String IMAGE_UPLOAD_DIR = "takeout/uploads/";
     public static String saveImage(MultipartFile imageFile) throws IOException {
         if (imageFile.isEmpty()) {
             throw new IOException("图片不能为空");
@@ -22,7 +22,7 @@ public class FileUtils {
         String fileName = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
         Path filePath = uploadPath.resolve(fileName);
         Files.copy(imageFile.getInputStream(), filePath);
-        return "/uploads/" + fileName;
+        return "/" + IMAGE_UPLOAD_DIR + fileName;
     }
 
     public static String convertImageToBase64(String imagePath) throws IOException {

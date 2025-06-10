@@ -4,6 +4,7 @@ import com.blm.takeout.dto.UserDTO;
 import com.blm.takeout.entity.User;
 import com.blm.takeout.repository.UserRepository;
 import com.blm.takeout.service.UserService;
+import com.blm.takeout.util.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -147,24 +148,7 @@ public class UserServiceImpl implements UserService {
         }
 
         try {
-            // 创建上传目录
-            Path uploadPath = Paths.get(uploadDir);
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
-
-            // 生成唯一文件名
-            String originalFilename = file.getOriginalFilename();
-            String extension = originalFilename != null ? 
-                originalFilename.substring(originalFilename.lastIndexOf(".")) : ".jpg";
-            String filename = UUID.randomUUID().toString() + extension;
-
-            // 保存文件
-            Path filePath = uploadPath.resolve(filename);
-            Files.copy(file.getInputStream(), filePath);
-
-            logger.debug("Image saved successfully at: {}", filePath);
-            return "/uploads/" + filename;
+            return FileUtils.saveImage(file);
         } catch (Exception e) {
             logger.error("Error saving image: {}", e.getMessage());
             throw new IOException("保存图片失败: " + e.getMessage());
