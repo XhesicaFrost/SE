@@ -90,6 +90,14 @@ public class SellerService {
         }
     }
 
+    @Transactional
+    public void serveOrder(Integer orderId) throws Exception {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new BusinessException("订单不存在"));
+        order.setStatus(Order.OrderStatus.READY);
+        orderRepository.save(order);
+    }
+
     public List<String> parseTags(String shopTags) throws Exception {
         return objectMapper.readValue(shopTags, new TypeReference<List<String>>() {});
     }

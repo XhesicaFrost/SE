@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -124,6 +125,23 @@ public class SellerController {
             return ApiResponse.success(response);
         } catch (Exception e) {
             return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
+        }
+    }
+
+    @PostMapping("/order/serve")
+    public ApiResponse<?> serveOrder(@RequestBody Map<String, String> request) {
+        try {
+            String orderIdStr = request.get("orderId");
+            if (orderIdStr == null) {
+                return ApiResponse.error(HttpStatus.BAD_REQUEST.value(), "订单ID不能为空");
+            }
+
+            Integer orderId = Integer.parseInt(orderIdStr);
+            sellerService.serveOrder(orderId);
+
+            return ApiResponse.success(Map.of("success", true));
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "操作失败: " + e.getMessage());
         }
     }
 }

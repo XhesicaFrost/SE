@@ -10,8 +10,11 @@ import com.blm.takeout.dto.UserRegisterDto;
 import com.blm.takeout.entity.User;
 import com.blm.takeout.service.AuthService;
 import com.blm.takeout.exception.BusinessException;
+import com.blm.takeout.util.FileUtils;
 import lombok.RequiredArgsConstructor;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -53,14 +56,19 @@ public class AuthController {
             loginDto.setRole(userrole);
             loginDto.setPassword(password);
             LoginResponseDto response = authService.login(loginDto);
-            return ApiResponse.success("登录成功", 
-                Map.of(
-                    "id", response.getUserid(),
-                    "username", response.getUsername(),
-                    "phonenumber", response.getPhonenumber(),
-                    "role", response.getRole(),
-                    "token", response.getToken()
-                ));
+            Map<String, Object> map = new HashMap<>();
+            try {
+                String base64Image = FileUtils.convertImageToBase64(response.getAvatarurl());
+                map.put("userImage", base64Image); 
+            } catch (IOException e) {
+                map.put("userImage", null);
+            }
+            map.put("id", response.getUserid());
+            map.put("username", response.getUsername());
+            map.put("phonenumber", response.getPhonenumber());
+            map.put("role", response.getRole());
+            map.put("token", response.getToken());
+            return ApiResponse.success("登录成功", map);
         } catch (Exception e) {
             e.printStackTrace();
             return ApiResponse.error(HttpStatus.UNAUTHORIZED.value(), "用户名或密码错误");
