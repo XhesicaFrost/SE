@@ -37,7 +37,7 @@ public class ShopController {
     @GetMapping
     public ResponseEntity<?> getAllShops() {
         try {
-            List<ShopDTO> shops = shopService.getRecommendedShops(1); // 暂时使用固定用户ID
+            List<ShopDTO> shops = shopService.getAllShops();
             List<Map<String, Object>> shopList = new ArrayList<>();
             
             for (ShopDTO shop : shops) {
@@ -89,10 +89,10 @@ public class ShopController {
                 shopList.add(shopMap);
             }
             
-            return ResponseEntity.ok(new ApiResponse<>(200, "获取推荐店铺成功", shopList));
+            return ResponseEntity.ok(new ApiResponse<>(200, "获取所有店铺成功", shopList));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiResponse<>(500, "获取推荐店铺失败: " + e.getMessage(), null));
+                .body(new ApiResponse<>(500, "获取所有店铺失败: " + e.getMessage(), null));
         }
     }
 
