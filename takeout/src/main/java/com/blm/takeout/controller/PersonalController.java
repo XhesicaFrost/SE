@@ -40,10 +40,8 @@ public class PersonalController {
             logger.info("成功获取用户信息 - 用户名: {}", userDTO.getUsername());
 
             // 更新用户名
-            if (name != null && !name.isEmpty()) {
-                logger.info("更新用户名: {} -> {}", userDTO.getUsername(), name);
-                userDTO.setUsername(name);
-            }
+            logger.info("更新用户名: {} -> {}", userDTO.getUsername(), name);
+            userDTO.setUsername(name);
 
             // 更新手机号
             if (phone != null && !phone.isEmpty()) {
