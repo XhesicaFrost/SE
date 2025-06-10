@@ -10,7 +10,7 @@ import java.util.Base64;
 import org.springframework.web.multipart.MultipartFile;
 
 public class FileUtils {
-    private static final String IMAGE_UPLOAD_DIR = "takeout/uploads/";
+    private static final String IMAGE_UPLOAD_DIR = "uploads/";
     public static String saveImage(MultipartFile imageFile) throws IOException {
         if (imageFile.isEmpty()) {
             throw new IOException("图片不能为空");
