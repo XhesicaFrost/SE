@@ -65,4 +65,5 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
         @Param("merchantName") String merchantName,
         @Param("userAddress") String userAddress
     );
+    List<Order> findByShopIdAndCreatedAtBetween(Integer sellerId, LocalDateTime start, LocalDateTime end);
 } 

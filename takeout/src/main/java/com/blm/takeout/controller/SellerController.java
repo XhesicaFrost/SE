@@ -33,6 +33,8 @@ public class SellerController {
     private final ShopService shopService;
     private final ShopRepository shopRepository;
 
+    
+
     @PostMapping("/register")
     public ApiResponse<?> registerSeller(@RequestParam String shopName,
                                          @RequestParam String shopAddress,
@@ -142,6 +144,19 @@ public class SellerController {
             return ApiResponse.success(Map.of("success", true));
         } catch (Exception e) {
             return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "操作失败: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/data/sales")
+    public ApiResponse<?> getSalesData(
+            @RequestParam Integer sellerId,
+            @RequestParam String startDate,
+            @RequestParam String endDate) {
+        try {
+            Map<String, Object> salesData = sellerService.getSalesData(sellerId, startDate, endDate);
+            return ApiResponse.success(salesData);
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "获取销售数据失败: " + e.getMessage());
         }
     }
 }

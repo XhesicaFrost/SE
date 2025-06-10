@@ -1,6 +1,13 @@
 package com.blm.takeout.service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -98,6 +105,71 @@ public class SellerService {
         orderRepository.save(order);
     }
 
+    @Transactional(readOnly = true)
+    public Map<String, Object> getTodayStats(Integer sellerId) throws Exception {
+        Seller seller = sellerRepository.findById(sellerId)
+        .orElseThrow(() -> new BusinessException("商家不存在"));
+
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfDay = today.atStartOfDay();
+        LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
+
+        List<Order> todayOrders = orderRepository.findByShopIdAndCreatedAtBetween(sellerId, startOfDay, endOfDay);
+        BigDecimal todayRevenue = todayOrders.stream()
+            .map(Order::getTotalAmount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        int todayOrderCount = todayOrders.size();
+
+        return Map.of(
+            "todayRevenue", todayRevenue,
+            "todayOrderCount", todayOrderCount,
+            "latestComments", List.of()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> getSalesData(Integer sellerId, String startDate, String endDate) throws Exception {
+        Seller seller = sellerRepository.findById(sellerId)
+            .orElseThrow(() -> new BusinessException("商家不存在"));
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+
+        List<String> labels = start.datesUntil(end.plusDays(1))
+            .map(LocalDate::toString)
+            .collect(Collectors.toList());
+
+        List<Map<String, Object>> series = new ArrayList<>();
+        BigDecimal totalSales = BigDecimal.ZERO;
+        int totalOrders = 0;
+
+        for (LocalDate date : start.datesUntil(end.plusDays(1)).collect(Collectors.toList())) {
+            LocalDateTime startOfDay = date.atStartOfDay();
+            LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+            List<Order> dailyOrders = orderRepository.findByShopIdAndCreatedAtBetween(sellerId, startOfDay, endOfDay);
+
+            BigDecimal dailySales = dailyOrders.stream()
+                .map(Order::getTotalAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            int dailyOrderCount = dailyOrders.size();
+
+            totalSales = totalSales.add(dailySales);
+            totalOrders += dailyOrderCount;
+
+            series.add(Map.of(
+                "sales", dailySales,
+                "orders", dailyOrderCount
+            ));
+        }
+
+        return Map.of(
+            "totalSales", totalSales,
+            "totalOrders", totalOrders,
+            "labels", labels,
+            "series", series
+        );
+    }
     public List<String> parseTags(String shopTags) throws Exception {
         return objectMapper.readValue(shopTags, new TypeReference<List<String>>() {});
     }
