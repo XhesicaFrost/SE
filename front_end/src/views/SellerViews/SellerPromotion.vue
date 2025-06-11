@@ -80,7 +80,7 @@ export default {
     editPromotion(promotionId) {
       this.$router.push({ 
         name: 'sellerPromotionEdit', 
-        params: { id: promotionId } 
+        params: { promotionId: promotionId } 
       })
     }
   },
