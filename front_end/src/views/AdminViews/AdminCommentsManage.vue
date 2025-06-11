@@ -21,7 +21,7 @@
           {{ comment.content }}
         </div>
         <div class="comment-images" v-if="comment.image">
-          <img :src="getImageUrl(image)" alt="订单图片" />
+          <img :src="getImageUrl(comment.image)" alt="订单图片" />
         </div>
         <div class="comment-actions">
           <button 
