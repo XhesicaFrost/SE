@@ -167,6 +167,18 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
     
+    @Override
+    public double calculateOriginalPrice(PaymentDTO paymentDTO) {
+        return paymentDTO.getItems().stream()
+            .map(item -> {
+                Map<String, Object> product = (Map<String, Object>) item.get("product");
+                double price = ((Number) product.get("price")).doubleValue();
+                int quantity = ((Number) item.get("quantity")).intValue();
+                return price * quantity;
+            })
+            .reduce(0.0, Double::sum);
+    }
+    
     private String generateOrderNumber() {
         // 生成订单号：时间戳 + 6位随机数
         return System.currentTimeMillis() + String.format("%06d", new Random().nextInt(1000000));

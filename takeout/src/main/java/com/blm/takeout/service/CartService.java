@@ -18,4 +18,5 @@ public interface CartService {
     List<CartDTO> getCartItems(Integer userId);
     void deleteCartItem(Integer userId, Integer itemId);
     void clearCart(Integer userId);
+    double calculatePromotionPrice(Integer shopId, double originalPrice);
 } 

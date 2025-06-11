@@ -55,15 +55,12 @@ export default {
         deliveryTime: ''
       },
       cart: [],
-      discountedPrice: null
+      discountedPrice: null,
+      totalPrice: 0
     }
   },
   computed: {
     ...mapState('userStore', ['userId']),
-    totalPrice() {
-      return Object.values(this.cart).reduce((total, item) => 
-        total + (item.product.price * item.quantity), 0)
-    }
   },
   methods: {
     getImageUrl(img) {
@@ -124,24 +121,24 @@ export default {
     },
     async fetchDiscountedPrice() {
       try {
-        const response = await fetchWithTimeout(`${BASE_URL}/discount`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            shopId: this.$route.params.shopId,
-            totalPrice: this.totalPrice()
-          }),
-        });
+        const response = await fetchWithTimeout(`${BASE_URL}/cart_items/user/shopcart?userId=${this.$store.state.userStore.userInfo.userId}`);
         const result = await response.json();
         if (result.code === 200) {
-          this.discountedPrice = result.data.discountedPrice;
+          // 找到当前店铺的购物车数据
+          const shopCart = result.data.find(shopCart => 
+            String(this.$route.params.shopId) === String(shopCart.shop.id)
+          );
+          if (shopCart) {
+            this.discountedPrice = shopCart.shop.discountedPrice;
+            this.totalPrice = shopCart.shop.totalPrice;
+          }
         } else {
           console.error('获取折扣价格失败:', result.message);
-          this.discountedPrice = null
+          this.discountedPrice = null;
         }
       } catch (error) {
         console.error('获取折扣价格失败:', error);
-          this.discountedPrice = null
+        this.discountedPrice = null;
       }
     },
     async handlePayment() {

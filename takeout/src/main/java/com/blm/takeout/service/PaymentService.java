@@ -4,4 +4,5 @@ import com.blm.takeout.dto.PaymentDTO;
  
 public interface PaymentService {
     boolean processPayment(PaymentDTO paymentDTO);
+    double calculateOriginalPrice(PaymentDTO paymentDTO);
 } 

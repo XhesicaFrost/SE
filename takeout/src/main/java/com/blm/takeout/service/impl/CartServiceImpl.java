@@ -3,9 +3,11 @@ package com.blm.takeout.service.impl;
 import com.blm.takeout.entity.CartItem;
 import com.blm.takeout.entity.Item;
 import com.blm.takeout.entity.Shop;
+import com.blm.takeout.entity.Promotion;
 import com.blm.takeout.repository.CartItemRepository;
 import com.blm.takeout.repository.ItemRepository;
 import com.blm.takeout.repository.ShopRepository;
+import com.blm.takeout.repository.PromotionRepository;
 import com.blm.takeout.service.CartService;
 import com.blm.takeout.dto.CartDTO;
 import com.blm.takeout.dto.CartItemDTO;
@@ -17,6 +19,7 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -26,14 +29,17 @@ public class CartServiceImpl implements CartService {
     private final CartItemRepository cartItemRepository;
     private final ItemRepository itemRepository;
     private final ShopRepository shopRepository;
+    private final PromotionRepository promotionRepository;
 
     @Autowired
     public CartServiceImpl(CartItemRepository cartItemRepository, 
                           ItemRepository itemRepository,
-                          ShopRepository shopRepository) {
+                          ShopRepository shopRepository,
+                          PromotionRepository promotionRepository) {
         this.cartItemRepository = cartItemRepository;
         this.itemRepository = itemRepository;
         this.shopRepository = shopRepository;
+        this.promotionRepository = promotionRepository;
     }
 
     @Override
@@ -63,6 +69,23 @@ public class CartServiceImpl implements CartService {
         }
 
         return cartItemRepository.save(cartItem);
+    }
+
+    @Override
+    public double calculatePromotionPrice(Integer shopId, double originalPrice) {
+        LocalDateTime now = LocalDateTime.now();
+        List<Promotion> promotions = promotionRepository.findBySellerId(shopId);
+        
+        double maxDiscount = 0;
+        for (Promotion promotion : promotions) {
+            if (now.isAfter(promotion.getStartTime()) && 
+                now.isBefore(promotion.getEndTime()) && 
+                originalPrice >= promotion.getFull()) {
+                maxDiscount = Math.max(maxDiscount, promotion.getMinus());
+            }
+        }
+        
+        return originalPrice - maxDiscount;
     }
 
     @Override
@@ -103,6 +126,8 @@ public class CartServiceImpl implements CartService {
             
             // 设置商品信息
             List<CartItemDTO> items = new ArrayList<>();
+            double totalPrice = 0;
+            
             for (CartItem cartItem : entry.getValue()) {
                 CartItemDTO itemDTO = new CartItemDTO();
                 Item item = cartItem.getItem();
@@ -128,7 +153,18 @@ public class CartServiceImpl implements CartService {
                 itemDTO.setProduct(productInfo);
                 itemDTO.setQuantity(cartItem.getQuantity());
                 items.add(itemDTO);
+                
+                // 计算总价
+                totalPrice += item.getPrice() * cartItem.getQuantity();
             }
+            
+            // 计算促销价格
+            double discountedPrice = calculatePromotionPrice(shop.getId(), totalPrice);
+            
+            // 添加价格信息到店铺信息中
+            shopInfo.put("totalPrice", totalPrice);
+            shopInfo.put("discountedPrice", discountedPrice);
+            
             cartDTO.setItems(items);
             result.add(cartDTO);
         }
