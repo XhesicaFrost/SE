@@ -76,4 +76,20 @@ public class RiderController {
             return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "状态更新失败: " + e.getMessage());
         }
     }
+
+    @PostMapping("/chooseorder")
+    public ApiResponse<?> chooseOrder(@RequestBody Map<String, Object> request) {
+        try {
+            Integer riderId = Integer.parseInt(request.get("riderId").toString());
+            Integer orderId = Integer.parseInt(request.get("orderId").toString());
+            boolean success = riderService.chooseOrder(riderId, orderId);
+            if (success) {
+                return ApiResponse.success(Map.of("success", true));
+            } else {
+                return ApiResponse.error(HttpStatus.BAD_REQUEST.value(), "该订单可能已被其他骑手接取");
+            }
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "抢单失败: " + e.getMessage());
+        }
+    }
 }

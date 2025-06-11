@@ -11,8 +11,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import com.blm.takeout.dto.LoginResponseDto;
 import com.blm.takeout.dto.UserLoginDto;
 import com.blm.takeout.dto.UserRegisterDto;
+import com.blm.takeout.entity.Rider;
 import com.blm.takeout.entity.User;
 import com.blm.takeout.exception.BusinessException;
+import com.blm.takeout.repository.RiderRepository;
 import com.blm.takeout.repository.UserRepository;
 import com.blm.takeout.security.JwtUtils;
 
@@ -23,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
+    private final RiderRepository riderRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
 
@@ -39,8 +42,17 @@ public class AuthService {
         user.setEmail(registerDto.getEmail());
         user.setRole(registerDto.getRole());
         user.setAvatarurl(registerDto.getAvatarurl());
+        user = userRepository.save(user);
         
-        return userRepository.save(user);
+        if (registerDto.getRole() == User.Role.rider) {
+            Rider rider = new Rider();
+            rider.setUser(user);
+            rider.setCurrentLatitude(0.0);
+            rider.setCurrentLongitude(0.0);
+            riderRepository.save(rider);
+        }
+        
+        return user;
     }
 
     public LoginResponseDto login(UserLoginDto loginDto) {

@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.blm.takeout.entity.Order;
 import com.blm.takeout.entity.Rider;
 import com.blm.takeout.entity.Shop;
+import com.blm.takeout.entity.Order.OrderStatus;
 import com.blm.takeout.exception.BusinessException;
 import com.blm.takeout.repository.OrderRepository;
 import com.blm.takeout.repository.RiderRepository;
@@ -199,8 +200,8 @@ public class RiderService {
         }
 
         // 更新订单状态和骑手信息
-        order.setStatus(Order.OrderStatus.ACCEPTED);
         order.setRiderId(riderId);
+        order.setStatus(OrderStatus.ACCEPTED);
         orderRepository.save(order);
 
         return true;

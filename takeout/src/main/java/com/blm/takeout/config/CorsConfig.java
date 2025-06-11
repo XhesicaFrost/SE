@@ -11,7 +11,7 @@ public class CorsConfig implements WebMvcConfigurer {
     public void addCorsMappings(@NonNull CorsRegistry registry) {
         registry.addMapping("/**") // 允许所有路径
                 .allowedOrigins(
-                    "http://localhost:8083",
+                    "http://localhost:12345",
                     "http://localhost:8080",
                     "http://127.0.0.1:8083",
                     "http://10.193.160.55:8080"
