@@ -1,7 +1,6 @@
 package com.blm.takeout.controller;
 
 import com.blm.takeout.dto.UserDTO;
-import com.blm.takeout.entity.User;
 import com.blm.takeout.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
