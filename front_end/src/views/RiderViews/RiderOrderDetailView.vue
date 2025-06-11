@@ -386,23 +386,25 @@ export default {
           this.orderDetail.status = nextStatus
           
           if (nextStatus === 'COMPLETED') {
-            this.isNavigating = false
+            // 订单完成，停止导航
+            this.stopNavigation()
             alert('订单完成！3秒后返回主页')
             setTimeout(() => {
               this.$router.push('/rider')
             }, 3000)
           } else {
             alert('状态更新成功！')
+            // 如果正在导航，重新规划到用户地址的路线
             if (this.isNavigating && this.routeInfo.currentPosition) {
               this.planRoute(this.routeInfo.currentPosition)
             }
           }
         } else {
-          console.error('❌ 状态更新失败:', result)
+          console.error('状态更新失败:', result)
           alert('状态更新失败：' + (result.message || '未知错误'))
         }
       } catch (error) {
-        console.error('❌ 状态更新失败:', error)
+        console.error('状态更新失败:', error)
         if (error.name === 'AbortError') {
           alert('请求超时，请重试')
         } else {
@@ -413,7 +415,74 @@ export default {
       }
     },
 
+    async startNavigation() {
+      if (!this.mapInitialized) {
+        alert('地图尚未初始化完成，请稍后重试')
+        return
+      }
+
+      if (!this.orderDetail.id) {
+        alert('订单信息缺失')
+        return
+      }
+
+      try {
+        console.log('开始导航...')
+        this.isNavigating = true
+
+        // 获取当前位置
+        await this.getCurrentPositionAndPlan()
+        
+        // 开始实时位置追踪
+        this.startRealTimeTracking()
+        
+        console.log('导航已启动')
+      } catch (error) {
+        console.error('启动导航失败:', error)
+        this.isNavigating = false
+        alert('启动导航失败：' + error.message)
+      }
+    },
+
+
+    async getCurrentPositionAndPlan() {
+      return new Promise((resolve, reject) => {
+        if (!this.geolocation) {
+          reject(new Error('定位服务未初始化'))
+          return
+        }
+
+        this.geolocation.getCurrentPosition((status, result) => {
+          if (status === 'complete') {
+            console.log('获取到当前位置:', result.position)
+            this.planRoute(result.position)
+            resolve(result.position)
+          } else {
+            const error = this.getLocationError(result)
+            console.error('获取位置失败:', error)
+            reject(new Error(error))
+          }
+        })
+      })
+    },
+
+    getLocationError(result) {
+      const errorMap = {
+        'PERMISSION_DENIED': '用户拒绝了地理位置请求，请在浏览器设置中允许位置权限',
+        'POSITION_UNAVAILABLE': '位置信息不可用，请检查GPS或网络连接',
+        'TIMEOUT': '获取位置请求超时，请重试',
+        'NOT_SUPPORTED': '浏览器不支持地理定位'
+      }
+      return errorMap[result.info] || '获取位置失败：' + result.message
+    },
+
     planRoute(currentPosition) {
+      if (!this.AMap || !this.driving) {
+        console.error('地图或路径规划服务未初始化')
+        return
+      }
+
+      // 根据当前订单状态确定目标地址
       const targetAddress = this.orderDetail.status === 'ACCEPTED' 
         ? this.orderDetail.sellerAddress 
         : this.orderDetail.userAddress
@@ -422,39 +491,98 @@ export default {
         ? this.orderDetail.sellerName 
         : '用户地址'
 
+      console.log('规划路线:', {
+        from: `${currentPosition.lng}, ${currentPosition.lat}`,
+        to: targetAddress,
+        target: targetName
+      })
+
+      // 使用地理编码将地址转换为坐标
       this.AMap.plugin('AMap.Geocoder', () => {
         const geocoder = new this.AMap.Geocoder({
-          city: '北京',
-          radius: 1000
+          city: '全国', // 扩大搜索范围
+          radius: 5000
         })
         
         geocoder.getLocation(targetAddress, (status, result) => {
           if (status === 'complete' && result.geocodes.length > 0) {
             const targetCoords = result.geocodes[0].location
+            console.log('目标坐标:', targetCoords.lng, targetCoords.lat)
+            
+            // 清除地图上的之前标记
             this.navMap.clearMap()
             
+            // 开始路径规划
             this.driving.search(
               [currentPosition.lng, currentPosition.lat],
               [targetCoords.lng, targetCoords.lat],
               (status, result) => {
-                if (status === 'complete') {
+                if (status === 'complete' && result.routes && result.routes.length > 0) {
                   const route = result.routes[0]
+                  console.log(' 路线规划成功:', route)
+                  
+                  // 更新路线信息
                   this.routeInfo = {
                     time: Math.round(route.time / 60) + ' 分钟',
                     distance: (route.distance / 1000).toFixed(1) + ' 公里',
                     currentPosition: currentPosition
                   }
+                  
+                  // 添加标记
                   this.addCustomMarkers(currentPosition, targetCoords.lng, targetCoords.lat, targetName)
+                  
+                  console.log('路线信息更新:', this.routeInfo)
                 } else {
-                  alert('路线规划失败')
+                  console.error('路线规划失败:', result)
+                  alert('路线规划失败，请检查地址是否正确')
                 }
               }
             )
           } else {
-            alert(`无法解析地址：${targetAddress}`)
+            console.error('地址解析失败:', result)
+            alert(`无法解析地址：${targetAddress}，请检查地址是否正确`)
           }
         })
       })
+    },
+
+
+    startLocationTimer() {
+      if (this.locationUpdateTimer) {
+        clearInterval(this.locationUpdateTimer)
+      }
+
+      this.locationUpdateTimer = setInterval(() => {
+        if (this.isNavigating && this.geolocation) {
+          this.geolocation.getCurrentPosition((status, result) => {
+            if (status === 'complete') {
+              console.log('⏰ 定时位置更新:', result.position)
+              this.routeInfo.currentPosition = result.position
+            }
+          })
+        }
+      }, 30000) // 每30秒更新一次
+
+      console.log('启动定时位置更新')
+    },
+
+
+    stopNavigation() {
+      console.log(' 停止导航')
+      this.isNavigating = false
+      
+      if (this.locationUpdateTimer) {
+        clearInterval(this.locationUpdateTimer)
+        this.locationUpdateTimer = null
+      }
+      
+      if (this.geolocation) {
+        try {
+          this.geolocation.clearWatch()
+        } catch (e) {
+          console.warn('清除位置监听失败:', e)
+        }
+      }
     },
 
     // 添加自定义标记
@@ -549,11 +677,10 @@ export default {
   },
 
   beforeUnmount() {
+    this.stopNavigation()
+    
     if (this.navMap) {
       this.navMap.destroy()
-    }
-    if (this.locationUpdateTimer) {
-      clearInterval(this.locationUpdateTimer)
     }
   }
 }
