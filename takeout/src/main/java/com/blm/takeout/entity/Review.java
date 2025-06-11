@@ -4,36 +4,40 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
 
-@Data
 @Entity
 @Table(name = "reviews")
+@Data
 public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Integer userId;
+    @Column(name = "user_id")
+    private Long userId;
 
-    @Column(nullable = false)
-    private Integer itemId;
+    @Column(name = "shop_id")
+    private Integer shopId;
 
-    @Column(nullable = false)
-    private Integer orderId;
-
-    @Column(nullable = false)
-    private Integer rating;
-
-    @Column(length = 1000)
-    private String comment;
+    @Column(name = "order_id")
+    private Long orderId;
 
     @Column
-    private String images;
+    private String type;
 
+    @Column
+    private String detail;
+
+    @Column
+    private String image;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    private ReviewStatus status = ReviewStatus.PENDING;
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @PrePersist
@@ -46,4 +50,4 @@ public class Review {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-} 
+}

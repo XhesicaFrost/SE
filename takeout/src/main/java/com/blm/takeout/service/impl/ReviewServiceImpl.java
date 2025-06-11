@@ -2,93 +2,52 @@ package com.blm.takeout.service.impl;
 
 import com.blm.takeout.dto.ReviewDTO;
 import com.blm.takeout.entity.Review;
+import com.blm.takeout.entity.Order;
 import com.blm.takeout.repository.ReviewRepository;
+import com.blm.takeout.repository.OrderRepository;
 import com.blm.takeout.service.ReviewService;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import com.blm.takeout.util.FileUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.blm.takeout.entity.User;
-import com.blm.takeout.repository.UserRepository;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @Service
 public class ReviewServiceImpl implements ReviewService {
-    private final ReviewRepository reviewRepository;
-    private final UserRepository userRepository;
 
-    public ReviewServiceImpl(ReviewRepository reviewRepository, UserRepository userRepository) {
-        this.reviewRepository = reviewRepository;
-        this.userRepository = userRepository;
-    }
+    @Autowired
+    private ReviewRepository reviewRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
 
     @Override
     @Transactional
-    public ReviewDTO createReview(ReviewDTO reviewDTO) {
+    public Review addReview(ReviewDTO reviewDTO) {
+        // 验证订单是否存在
+        Order order = orderRepository.findById(reviewDTO.getOrderId())
+                .orElseThrow(() -> new RuntimeException("订单不存在"));
+
+        // 创建评论实体
         Review review = new Review();
         review.setUserId(reviewDTO.getUserId());
-        review.setItemId(reviewDTO.getItemId());
+        review.setShopId(order.getShop().getId());
         review.setOrderId(reviewDTO.getOrderId());
-        review.setRating(reviewDTO.getRating());
-        review.setComment(reviewDTO.getComment());
-        review.setImages(reviewDTO.getImages());
-        
-        Review savedReview = reviewRepository.save(review);
-        return convertToDTO(savedReview);
-    }
+        review.setType(reviewDTO.getType());
+        review.setDetail(reviewDTO.getDetail());
 
-    @Override
-    public Page<ReviewDTO> getItemReviews(Integer itemId, Pageable pageable) {
-        return reviewRepository.findByItemIdOrderByCreatedAtDesc(itemId, pageable)
-                .map(this::convertToDTO);
-    }
-
-    @Override
-    public Page<ReviewDTO> getUserReviews(Integer userId, Pageable pageable) {
-        return reviewRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable)
-                .map(this::convertToDTO);
-    }
-
-    @Override
-    @Transactional
-    public void deleteReview(Long reviewId, Integer userId) {
-        Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new RuntimeException("评价不存在"));
-        
-        if (!review.getUserId().equals(userId)) {
-            throw new RuntimeException("无权删除此评价");
-        }
-        
-        reviewRepository.delete(review);
-    }
-
-    @Override
-    @Transactional
-    public void adminDeleteReview(Long reviewId, Integer adminId) {
-        // 验证管理员存在且具有管理员权限
-        User admin = userRepository.findById(adminId)
-                .orElseThrow(() -> new RuntimeException("管理员不存在"));
-        if (!"ADMIN".equals(admin.getRole())) {
-            throw new RuntimeException("无管理员权限");
+        // 处理图片
+        if (reviewDTO.getImage() != null && !reviewDTO.getImage().isEmpty()) {
+            try {
+                String imagePath = FileUtils.saveImage(reviewDTO.getImage());
+                review.setImage(imagePath);
+            } catch (IOException e) {
+                throw new RuntimeException("图片保存失败", e);
+            }
         }
 
-        // 删除评价
-        Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new RuntimeException("评价不存在"));
-        
-        reviewRepository.delete(review);
-    }
-
-    private ReviewDTO convertToDTO(Review review) {
-        ReviewDTO dto = new ReviewDTO();
-        dto.setId(review.getId());
-        dto.setUserId(review.getUserId());
-        dto.setItemId(review.getItemId());
-        dto.setOrderId(review.getOrderId());
-        dto.setRating(review.getRating());
-        dto.setComment(review.getComment());
-        dto.setImages(review.getImages());
-        dto.setCreatedAt(review.getCreatedAt());
-        dto.setUpdatedAt(review.getUpdatedAt());
-        return dto;
+        return reviewRepository.save(review);
     }
 } 
