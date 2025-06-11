@@ -1,7 +1,7 @@
 <template>
   <TopNav :navInfo="navInfo" />
   <div class="seller-order-view">
-    <!-- ✅ 新增：状态选择栏 -->
+    <!-- ✅ 修改：状态选择栏，只在特定状态显示红点 -->
     <div class="status-filter">
      <button
         v-for="status in statusOptions"
@@ -10,8 +10,9 @@
         @click="selectStatus(status.value)"
       >
         {{ status.label }}
-        <span v-if="getOrderCountByStatus(status.value) > 0" class="count-badge">
-          {{ getOrderCountByStatus(status.value) }}
+        <!-- ✅ 修改：只有"全部"和"备餐中"显示红点，且数量都是备餐中的订单数 -->
+        <span v-if="shouldShowBadge(status.value)" class="count-badge">
+          {{ getPreparingOrderCount() }}
         </span>
       </button>
     </div>
@@ -153,17 +154,26 @@ export default {
     }
   },
   methods: {
+    // ✅ 新增：判断是否显示红点徽章
+    shouldShowBadge(statusValue) {
+      // 只有"全部"(null)和"备餐中"('PREPARING')显示红点
+      const shouldShow = statusValue === null || statusValue === 'PREPARING'
+      // 且备餐中订单数量大于0
+      const hasPreparingOrders = this.getPreparingOrderCount() > 0
+      
+      return shouldShow && hasPreparingOrders
+    },
+
+    // ✅ 新增：获取备餐中订单数量
+    getPreparingOrderCount() {
+      return this.orders.filter(order => order.status === 'PREPARING').length
+    },
+
     // ✅ 新增：选择状态
     selectStatus(status) {
       this.selectedStatus = status
       this.page = 1 // 重置到第一页
       this.jumpPage = 1
-    },
-
-    // ✅ 新增：获取状态对应的订单数量
-    getOrderCountByStatus(status) {
-      if (!status) return this.orders.length
-      return this.orders.filter(order => order.status === status).length
     },
 
     // ✅ 新增：获取状态标签
@@ -244,11 +254,12 @@ export default {
         if (result.code === 200 && Array.isArray(result.data)) {
           this.orders = result.data
           console.log('✅ 订单加载成功，共', this.orders.length, '个订单')
-          console.log('📦 订单详情:', this.orders)
+          console.log('🍽️ 其中备餐中订单:', this.getPreparingOrderCount(), '个') // 新增日志
         } else if (result.success && Array.isArray(result.data)) {
           // 兼容 success 字段的响应格式
           this.orders = result.data
           console.log('✅ 订单加载成功（success格式），共', this.orders.length, '个订单')
+          console.log('🍽️ 其中备餐中订单:', this.getPreparingOrderCount(), '个') // 新增日志
         } else {
           console.warn('⚠️ 订单数据格式异常:', result)
           this.orders = []
