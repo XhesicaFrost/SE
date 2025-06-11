@@ -16,4 +16,6 @@ public class Address {
     private String phone;
     private String fullAddress;
     private Boolean current;
+    private Double latitude;
+    private Double longitude;
 } 

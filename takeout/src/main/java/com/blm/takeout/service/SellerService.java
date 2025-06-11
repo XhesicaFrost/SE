@@ -32,6 +32,7 @@ public class SellerService {
     private final UserRepository userRepository;
     private final ShopRepository shopRepository;
     private final OrderRepository orderRepository;
+    private final GeoService geoService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Transactional
@@ -53,6 +54,10 @@ public class SellerService {
         seller.setUser(user);
         sellerRepository.save(seller);
 
+        Map<String, Double> coordinates = geoService.getCoordinates(shopAddress);
+        Double latitude = coordinates.get("latitude");
+        Double longitude = coordinates.get("longitude");
+
         // 创建店铺记录
         Shop shop = new Shop();
         shop.setName(shopName);
@@ -69,8 +74,8 @@ public class SellerService {
         shop.setRating(5.0);       // 初始评分
         shop.setSales(0);          // 初始销量
         shop.setIsOpen(true);      // 默认营业状态
-        shop.setLatitude(0.0);     // 默认纬度
-        shop.setLongitude(0.0);    // 默认经度
+        shop.setLatitude(latitude);     // 默认纬度
+        shop.setLongitude(longitude);    // 默认经度
         shopRepository.save(shop);
     }
 
@@ -89,10 +94,17 @@ public class SellerService {
         seller.setSellerStatus(Seller.Status.审批中);  // 设置状态为审批中
         sellerRepository.save(seller);
 
+        Map<String, Double> coordinates = geoService.getCoordinates(shopAddress);
+        Double latitude = coordinates.get("latitude");
+        Double longitude = coordinates.get("longitude");
+        System.out.println(latitude);
+        System.out.println(longitude);
         // 同步更新shop的状态
         Shop shop = shopRepository.findByUserId(seller.getUser().getUserid());
         if (shop != null) {
             shop.setStatus(Shop.Status.审批中);
+            shop.setLatitude(latitude);
+            shop.setLongitude(longitude);
             shopRepository.save(shop);
         }
     }

@@ -30,7 +30,7 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     
     Page<Order> findByRiderId(Integer riderId, Pageable pageable);
     
-    List<Order> findByRiderIdAndStatusIn(Integer riderId, List<OrderStatus> statuses);
+    List<Order> findByRiderIdAndStatusIn(Integer riderId, List<Order.OrderStatus> statuses);
     
     long countByRiderIdAndStatusIn(Integer riderId, List<OrderStatus> statuses);
     
@@ -66,4 +66,9 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
         @Param("userAddress") String userAddress
     );
     List<Order> findByShopIdAndCreatedAtBetween(Integer sellerId, LocalDateTime start, LocalDateTime end);
-} 
+
+    @Query("SELECT o FROM Order o WHERE o.status = 'READY'")
+    List<Order> findReadyOrders();
+
+    Optional<Order> findById(Integer orderId);
+}
