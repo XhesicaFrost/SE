@@ -1,13 +1,14 @@
 package com.blm.takeout.repository;
 
 import com.blm.takeout.entity.Review;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-    Page<Review> findByItemIdOrderByCreatedAtDesc(Integer itemId, Pageable pageable);
-    Page<Review> findByUserIdOrderByCreatedAtDesc(Integer userId, Pageable pageable);
+    List<Review> findByShopId(Integer shopId);
+    List<Review> findByOrderId(Long orderId);
+    List<Review> findByUserId(Long userId);
 } 

@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface OrderRepository extends JpaRepository<Order, Integer> {
+public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByUser_Userid(Integer userId);
     Optional<Order> findByOrderNumber(String orderNumber);
     @Query("SELECT o FROM Order o WHERE o.user.userid = :userId ORDER BY o.createdAt DESC")
