@@ -1,10 +1,6 @@
 package com.blm.takeout.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -27,21 +23,12 @@ public class GeoService {
             System.out.println("调用高德地图 API，URL: " + url);
 
             RestTemplate restTemplate = new RestTemplate();
-            Map<String, Object> response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<Map<String, Object>>() {}
-            ).getBody();
+            Map<String, Object> response = restTemplate.getForObject(url, Map.class);
 
             System.out.println("高德地图 API 响应: " + response);
 
             if (response != null && "1".equals(response.get("status"))) {
-                ObjectMapper mapper = new ObjectMapper();
-                List<Map<String, Object>> geocodes = mapper.convertValue(
-                    response.get("geocodes"),
-                    new TypeReference<List<Map<String, Object>>>() {}
-                );
+                List<Map<String, Object>> geocodes = (List<Map<String, Object>>) response.get("geocodes");
                 if (geocodes != null && !geocodes.isEmpty()) {
                     String[] location = ((String) geocodes.get(0).get("location")).split(",");
                     return Map.of(

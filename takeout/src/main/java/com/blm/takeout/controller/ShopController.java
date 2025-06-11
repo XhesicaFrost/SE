@@ -1,6 +1,7 @@
 package com.blm.takeout.controller;
 
 import com.blm.takeout.dto.ShopDTO;
+import com.blm.takeout.dto.ItemDTO;
 import com.blm.takeout.dto.ProductImageDTO;
 import com.blm.takeout.entity.Shop;
 import com.blm.takeout.service.ShopService;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -1,5 +1,6 @@
 package com.blm.takeout.service.impl;
 
+import com.blm.takeout.dto.ItemDTO;
 import com.blm.takeout.entity.Item;
 import com.blm.takeout.entity.Shop;
 import com.blm.takeout.entity.ItemReview;
@@ -167,5 +168,15 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<Item> getAllItems() {
         return itemRepository.findAll();
+    }
+
+    private ItemDTO convertToDTO(Item item) {
+        ItemDTO dto = new ItemDTO();
+        dto.setId(item.getId());
+        dto.setImage(item.getImage());
+        dto.setName(item.getName());
+        dto.setDescription(item.getDescription());
+        dto.setPrice(item.getPrice());
+        return dto;
     }
 } 

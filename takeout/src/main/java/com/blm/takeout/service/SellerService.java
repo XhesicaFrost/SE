@@ -119,6 +119,9 @@ public class SellerService {
 
     @Transactional(readOnly = true)
     public Map<String, Object> getTodayStats(Integer sellerId) throws Exception {
+        Seller seller = sellerRepository.findById(sellerId)
+        .orElseThrow(() -> new BusinessException("商家不存在"));
+
         LocalDate today = LocalDate.now();
         LocalDateTime startOfDay = today.atStartOfDay();
         LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
@@ -139,6 +142,8 @@ public class SellerService {
 
     @Transactional(readOnly = true)
     public Map<String, Object> getSalesData(Integer sellerId, String startDate, String endDate) throws Exception {
+        Seller seller = sellerRepository.findById(sellerId)
+            .orElseThrow(() -> new BusinessException("商家不存在"));
         LocalDate start = LocalDate.parse(startDate);
         LocalDate end = LocalDate.parse(endDate);
 

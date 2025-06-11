@@ -1,6 +1,7 @@
 package com.blm.takeout.controller;
 
 import com.blm.takeout.dto.UserDTO;
+import com.blm.takeout.entity.User;
 import com.blm.takeout.service.UserService;
 import com.blm.takeout.service.ShopService;
 import com.blm.takeout.util.FileUtils;
@@ -139,10 +140,7 @@ public class UserController {
     public ResponseEntity<Map<String, Object>> getUserInfo(HttpServletRequest request) {
         try {
             String token = request.getHeader("Authorization");
-            if (token == null) {
-                throw new RuntimeException("未找到认证令牌");
-            }
-            if (token.startsWith("Bearer ")) {
+            if (token != null && token.startsWith("Bearer ")) {
                 token = token.substring(7);
             }
             Integer userId = Integer.parseInt(token.split("\\.")[1]); // 简单解析，实际应该使用JWT工具类
@@ -199,7 +197,7 @@ public class UserController {
             // 从 token 中获取用户 ID
             String userIdStr = token.split("\\.")[1];
             String decodedPayload = new String(java.util.Base64.getDecoder().decode(userIdStr));
-            Map<String, Object> payload = new com.fasterxml.jackson.databind.ObjectMapper().readValue(decodedPayload, new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
+            Map<String, Object> payload = new com.fasterxml.jackson.databind.ObjectMapper().readValue(decodedPayload, Map.class);
             Integer userId = (Integer) payload.get("userid");
 
             // 获取推荐店铺

@@ -9,10 +9,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.blm.takeout.entity.Order;
 import com.blm.takeout.entity.Rider;
+import com.blm.takeout.entity.Shop;
 import com.blm.takeout.entity.Order.OrderStatus;
 import com.blm.takeout.exception.BusinessException;
 import com.blm.takeout.repository.OrderRepository;
 import com.blm.takeout.repository.RiderRepository;
+import com.blm.takeout.repository.ShopRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,6 +26,7 @@ import java.util.*;
 public class RiderService {
     private final RiderRepository riderRepository;
     private final OrderRepository orderRepository;
+    private final ShopRepository shopRepository;
 
     @Transactional
     public void updateLocaction(Integer userId, Double latitude, Double longtitude) throws Exception {

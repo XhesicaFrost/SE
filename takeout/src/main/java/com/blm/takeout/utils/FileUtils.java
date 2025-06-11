@@ -20,9 +20,6 @@ public class FileUtils {
 
         // 生成唯一文件名
         String originalFilename = file.getOriginalFilename();
-        if (originalFilename == null) {
-            throw new IllegalArgumentException("文件名不能为空");
-        }
         String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
         String newFilename = UUID.randomUUID().toString() + extension;
 

@@ -2,6 +2,7 @@ package com.blm.takeout.controller;
 
 import com.blm.takeout.entity.Review;
 import com.blm.takeout.entity.ReviewStatus;
+import com.blm.takeout.entity.User;
 import com.blm.takeout.repository.ReviewRepository;
 import com.blm.takeout.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

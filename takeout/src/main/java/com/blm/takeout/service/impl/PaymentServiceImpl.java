@@ -2,6 +2,7 @@ package com.blm.takeout.service.impl;
 
 import com.blm.takeout.dto.PaymentDTO;
 import com.blm.takeout.entity.Order;
+import com.blm.takeout.entity.User;
 import com.blm.takeout.exception.BusinessException;
 import com.blm.takeout.entity.Shop;
 import com.blm.takeout.entity.Address;
@@ -16,8 +17,6 @@ import com.blm.takeout.repository.AddressRepository;
 import com.blm.takeout.repository.OrderItemRepository;
 import com.blm.takeout.repository.ItemRepository;
 import com.blm.takeout.service.PaymentService;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.Random;
 import java.util.Map;
 import java.util.Optional;
@@ -106,10 +106,9 @@ public class PaymentServiceImpl implements PaymentService {
             
             System.err.println("Order create success");
             // 计算总金额
-            ObjectMapper mapper = new ObjectMapper();
             BigDecimal totalAmount = paymentDTO.getItems().stream()
                 .map(item -> {
-                    Map<String, Object> product = mapper.convertValue(item.get("product"), new TypeReference<Map<String, Object>>() {});
+                    Map<String, Object> product = (Map<String, Object>) item.get("product");
                     double price = ((Number) product.get("price")).doubleValue();
                     int quantity = ((Number) item.get("quantity")).intValue();
                     return BigDecimal.valueOf(price).multiply(BigDecimal.valueOf(quantity));
@@ -126,7 +125,7 @@ public class PaymentServiceImpl implements PaymentService {
             // 创建订单项
             List<OrderItem> orderItems = paymentDTO.getItems().stream()
                 .map(item -> {
-                    Map<String, Object> product = mapper.convertValue(item.get("product"), new TypeReference<Map<String, Object>>() {});
+                    Map<String, Object> product = (Map<String, Object>) item.get("product");
                     Integer itemId = ((Number) product.get("id")).intValue();
                     int quantity = ((Number) item.get("quantity")).intValue();
                     double price = ((Number) product.get("price")).doubleValue();
