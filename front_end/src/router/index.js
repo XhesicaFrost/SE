@@ -88,6 +88,13 @@ const routes = [
     meta: { allow: ['user'] }
   },
   {
+    path: '/user/comments/add/:orderId',
+    name: 'UserCommentsAdd',
+    component: () => import('@/views/UserViews/UserCommentsAdd.vue'),
+    meta: { allow: ['user'] },
+    props: true
+  },
+  {
     path: '/seller',
     name: 'sellerHome',
     component: () => import('@/views/SellerViews/SellerHome.vue'),

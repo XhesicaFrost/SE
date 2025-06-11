@@ -50,6 +50,14 @@
         <div class="shop-total">
           店铺合计: <span class="total-price">¥{{ calculateShopTotal(group.items).toFixed(2) }}</span>
         </div>
+        <div class="comment-btn-wrap">
+          <button
+            class="shop-btn"
+            @click="$router.push(`/user/comments/add/${group.id}`)"
+          >
+            去评论
+          </button>
+        </div>
       </div>
     </div>
     
@@ -112,7 +120,7 @@ export default {
     }
   },
   mounted() {
-    this.fetchOrderItems()
+    //this.fetchOrderItems()
   }
 }
 </script>
@@ -349,5 +357,16 @@ export default {
 .cart-total {
   font-size: 1em;
   margin-left: 10px;
+}
+
+.comment-btn-warp {
+  position: absolute;
+  right:0;
+  top:0;
+  width: 200px;
+  height: 200px;
+  background-color: #fff;
+  text-align: right;
+  padding: 0 15px 10px;
 }
 </style>
