@@ -9,6 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -39,10 +43,22 @@ public class AdminCommentController {
                     reviewMap.put("type", review.getType());
                     reviewMap.put("content", review.getDetail());
                     
-                    // 将现有的image转换为base64
-                    String image = review.getImage();
-                    if (image != null && !image.isEmpty()) {
-                        reviewMap.put("image", Base64.getEncoder().encodeToString(image.getBytes()));
+                    // 处理图片
+                    String imagePath = review.getImage();
+                    if (imagePath != null && !imagePath.isEmpty()) {
+                        try {
+                            System.out.println("原始图片路径: " + imagePath);
+                            Path fullPath = Paths.get("D:", "Programing", "codes", "gitee", "BP", "software-engineering-big-work", imagePath);
+                            System.out.println("完整图片路径: " + fullPath.toAbsolutePath());
+                            System.out.println("文件是否存在: " + Files.exists(fullPath));
+                            
+                            byte[] imageBytes = Files.readAllBytes(fullPath);
+                            reviewMap.put("image", Base64.getEncoder().encodeToString(imageBytes));
+                        } catch (IOException e) {
+                            System.err.println("图片处理失败: " + e.getMessage());
+                            e.printStackTrace();
+                            reviewMap.put("image", null);
+                        }
                     } else {
                         reviewMap.put("image", null);
                     }
