@@ -1,5 +1,5 @@
 // 应用配置（直接请求后端，不使用代理）
-export const BASE_URL = 'http://localhost:12345'  // 修正：添加了缺失的 //
+export const BASE_URL = 'http://localhost:8083'  // 修正：添加了缺失的 //
 
 export const FETCH_TIMEOUT = 8000; // 超时时间（毫秒）
 export const debug_seller = false; // 是否启用商家调试模式

@@ -34,8 +34,9 @@
           
           <div class="order-footer">
             <div class="create-time">下单时间：{{ order.createTime }}</div>
-            <div class="status-badge completed">
-              已完成
+            <!-- ✅ 修改：状态徽章适配全大写 -->
+            <div class="status-badge" :class="getStatusClass(order.status)">
+              {{ getStatusText(order.status) }}
             </div>
           </div>
         </div>
@@ -113,7 +114,7 @@ export default {
     // 获取历史订单列表
     async fetchHistoryOrders() {
       if (!this.userId) {
-        console.error('用户ID不存在')
+        console.error('❌ 用户ID不存在')
         return
       }
 
@@ -128,23 +129,45 @@ export default {
         const response = await fetchWithTimeout(`${BASE_URL}/rider/history?${params}`)
         const result = await response.json()
         
-        if (result.success && result.data) {
-          this.historyOrders = result.data.orders || []
-          this.totalCount = result.data.total || 0
-          this.totalPages = Math.ceil(this.totalCount / this.pageSize)
+        console.log('📋 获取历史订单响应:', result)
+        
+        // ✅ 适配 ApiResponse 格式
+        const isSuccess = response.ok || result.code === 200 || result.success === true
+        
+        if (isSuccess && result.data) {
+          // 处理分页数据
+          if (Array.isArray(result.data)) {
+            // 如果 data 直接是数组
+            this.historyOrders = result.data
+            this.totalCount = result.total || result.data.length
+          } else if (result.data.orders && Array.isArray(result.data.orders)) {
+            // 如果 data 是包含 orders 数组的对象
+            this.historyOrders = result.data.orders
+            this.totalCount = result.data.total || result.data.orders.length
+          } else {
+            this.historyOrders = []
+            this.totalCount = 0
+          }
           
-          console.log('历史订单获取成功:', {
+          this.totalPages = Math.ceil(this.totalCount / this.pageSize) || 1
+          
+          console.log('✅ 历史订单获取成功:', {
             orders: this.historyOrders.length,
             page: this.currentPage,
-            total: this.totalCount
+            total: this.totalCount,
+            totalPages: this.totalPages
           })
         } else {
-          console.error('获取历史订单失败:', result.message)
+          console.error('❌ 获取历史订单失败:', result.message || '未知错误')
           this.historyOrders = []
+          this.totalCount = 0
+          this.totalPages = 1
         }
-      } catch (e) {
-        console.error('网络错误，获取历史订单失败:', e)
+      } catch (error) {
+        console.error('❌ 网络错误，获取历史订单失败:', error)
         this.historyOrders = []
+        this.totalCount = 0
+        this.totalPages = 1
       } finally {
         this.loading = false
       }
@@ -175,7 +198,33 @@ export default {
     refreshList() {
       this.currentPage = 1
       this.fetchHistoryOrders()
-    }
+    },
+
+    // ✅ 新增：获取状态文本
+    getStatusText(status) {
+      const statusMap = {
+        ACCEPTED: '已接单',
+        PICKED: '已取餐',
+        COMPLETED: '已完成',
+        PREPARING: '备餐中',
+        READY: '已出餐',
+        DELIVERING: '配送中'
+      }
+      return statusMap[status] || '已完成'
+    },
+
+    // ✅ 新增：获取状态样式类
+    getStatusClass(status) {
+      const classMap = {
+        ACCEPTED: 'accepted',
+        PICKED: 'picked', 
+        COMPLETED: 'completed',
+        PREPARING: 'preparing',
+        READY: 'ready',
+        DELIVERING: 'delivering'
+      }
+      return classMap[status] || 'completed'
+    },
   },
 
   async mounted() {
@@ -293,9 +342,35 @@ export default {
   font-weight: bold;
 }
 
+/* ✅ 修改：更新状态样式类名 */
 .status-badge.completed {
   background: #e8f5e9;
   color: #4caf50;
+}
+
+.status-badge.accepted {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.status-badge.picked {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
+.status-badge.preparing {
+  background: #fce4ec;
+  color: #c2185b;
+}
+
+.status-badge.ready {
+  background: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.status-badge.delivering {
+  background: #e0f2f1;
+  color: #00695c;
 }
 
 .empty-state {

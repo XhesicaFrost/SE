@@ -15,10 +15,14 @@
           </div>
           <button 
             class="action-btn" 
-            :class="{ 'pickup-btn': order.status === 'accepted', 'complete-btn': order.status === 'picked' }"
+            :class="{ 
+              'pickup-btn': order.status === 'ACCEPTED', 
+              'complete-btn': order.status === 'PICKED' 
+            }"
             @click.stop="updateOrderStatus(order.id)"
           >
-            {{ order.status === 'accepted' ? '接餐' : '完成' }}
+            <!-- ✅ 修改：使用全大写状态判断 -->
+            {{ order.status === 'ACCEPTED' ? '接餐' : '完成' }}
           </button>
         </div>
         <div v-if="acceptedOrders.length === 0" class="empty-tip">暂无已接订单</div>
@@ -128,7 +132,7 @@ export default {
       // 每5秒执行一次
       this.alertTimer = setInterval(() => {
         this.fetchAlertMessage()
-      }, 5000) // 5000ms = 5秒
+      }, 500000) // 5000ms = 5秒
     },
     
     // ✅ 新增：停止定时器
@@ -220,12 +224,13 @@ export default {
         const params = new URLSearchParams({ riderId: this.userInfo.userId }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/rider/acceptedorders?${params}`)
         const result = await response.json()
-        if (result.success && Array.isArray(result.data)) {
+        
+        // ✅ 修复：兼容 ApiResponse 格式
+        if ((result.code === 200 || result.success) && Array.isArray(result.data)) {
           this.acceptedOrders = result.data
         } else {
           this.acceptedOrders = []
         }
-        // 检查并更新位置追踪状态
         this.checkAndUpdateLocationTracking()
       } catch (e) {
         console.error('获取已接订单失败', e)
@@ -249,16 +254,15 @@ export default {
         
         const response = await fetchWithTimeout(`${BASE_URL}/rider/recommendedorders?${params}`)
         const result = await response.json()
-        if (result.success && Array.isArray(result.data)) {
-          this.recommendedOrders = result.data.slice(0, 10) // 最多10条
+        
+        // ✅ 修复：兼容 ApiResponse 格式
+        if ((result.code === 200 || result.success) && Array.isArray(result.data)) {
+          this.recommendedOrders = result.data.slice(0, 10)
         } else {
           this.recommendedOrders = []
         }
       } catch (e) {
         console.error('获取推荐订单失败', e)
-        if (e.message.includes('地理位置')) {
-          alert('无法获取地理位置，请允许浏览器访问位置信息')
-        }
         this.recommendedOrders = []
       }
     },
@@ -274,7 +278,8 @@ export default {
       const order = this.acceptedOrders.find(o => o.id === orderId)
       if (!order) return
 
-      const nextStatus = order.status === 'accepted' ? 'picked' : 'completed'
+      // ✅ 修改：使用全大写状态
+      const nextStatus = order.status === 'ACCEPTED' ? 'PICKED' : 'COMPLETED'
       
       try {
         const response = await fetchWithTimeout(`${BASE_URL}/rider/updateorder`, {
@@ -287,9 +292,12 @@ export default {
           })
         })
         const result = await response.json()
-        if (result.success) {
-          if (nextStatus === 'picked') {
-            order.status = 'picked'
+        
+        // ✅ 修复：兼容 ApiResponse 格式
+        if (result.code === 200 || result.success) {
+          // ✅ 修改：使用全大写状态判断
+          if (nextStatus === 'PICKED') {
+            order.status = 'PICKED'
           } else {
             // 订单完成，从已接订单中移除
             const index = this.acceptedOrders.findIndex(o => o.id === orderId)
@@ -320,9 +328,10 @@ export default {
           })
         })
         const result = await response.json()
-        if (result.success) {
+        
+        // ✅ 修复：兼容 ApiResponse 格式  
+        if (result.code === 200 || result.success) {
           alert('抢单成功！')
-          // 重新获取订单列表
           await this.fetchAcceptedOrders()
           await this.fetchRecommendedOrders()
         } else {
