@@ -1,7 +1,7 @@
 <template>
   <TopNav :navInfo="navInfo" />
   <div class="seller-order-view">
-    <!-- ✅ 修改：状态选择栏，只在特定状态显示红点 -->
+    <!--状态选择栏，只在特定状态显示红点 -->
     <div class="status-filter">
      <button
         v-for="status in statusOptions"
@@ -10,7 +10,7 @@
         @click="selectStatus(status.value)"
       >
         {{ status.label }}
-        <!-- ✅ 修改：只有"全部"和"备餐中"显示红点，且数量都是备餐中的订单数 -->
+        <!-- 只有"全部"和"备餐中"显示红点，且数量都是备餐中的订单数 -->
         <span v-if="shouldShowBadge(status.value)" class="count-badge">
           {{ getPreparingOrderCount() }}
         </span>
@@ -88,7 +88,7 @@ export default {
       pageSize: 10,
       jumpPage: 1,
       alertTimer: null,
-      selectedStatus: 'PREPARING', // ✅ 默认显示备餐中的订单
+      selectedStatus: 'PREPARING', 
       navItems: [
         { label: '管理店铺', action: () => { this.$router.push('/seller/shop') } },
         { label: '管理订单', action: () => { this.$router.push('/seller/order') }, isActive: true },
@@ -96,7 +96,7 @@ export default {
       ],
       navInfo: { title: '管理订单', pageReturn: () => { this.$router.push('/seller') } },
       expandedOrderId: null,
-      // ✅ 修改：废弃 PAID 字段，调整状态配置
+
       statusOptions: [
         { value: null, label: '全部' },
         { value: 'PREPARING', label: '备餐中' },
@@ -114,7 +114,6 @@ export default {
     userId() {
       return this.userInfo?.userId || this.sellerId
     },
-    // ✅ 修改：根据选择的状态过滤和排序订单
     filteredOrders() {
       let filtered = this.orders
       
@@ -125,7 +124,7 @@ export default {
       
       // 排序逻辑
       return [...filtered].sort((a, b) => {
-        // ✅ 在全部状态下，PREPARING 订单优先级最高
+        // 在全部状态下，PREPARING 订单优先级最高
         if (!this.selectedStatus) {
           // 如果 a 是 PREPARING，b 不是，a 排前面
           if (a.status === 'PREPARING' && b.status !== 'PREPARING') {
@@ -154,35 +153,29 @@ export default {
     }
   },
   methods: {
-    // ✅ 新增：判断是否显示红点徽章
     shouldShowBadge(statusValue) {
-      // 只有"全部"(null)和"备餐中"('PREPARING')显示红点
       const shouldShow = statusValue === null || statusValue === 'PREPARING'
-      // 且备餐中订单数量大于0
       const hasPreparingOrders = this.getPreparingOrderCount() > 0
       
       return shouldShow && hasPreparingOrders
     },
 
-    // ✅ 新增：获取备餐中订单数量
     getPreparingOrderCount() {
       return this.orders.filter(order => order.status === 'PREPARING').length
     },
 
-    // ✅ 新增：选择状态
     selectStatus(status) {
       this.selectedStatus = status
       this.page = 1 // 重置到第一页
       this.jumpPage = 1
     },
 
-    // ✅ 新增：获取状态标签
     getStatusLabel(status) {
       const statusConfig = this.statusOptions.find(s => s.value === status)
       return statusConfig ? statusConfig.label : status
     },
 
-    // ✅ 修改：获取按钮文本，废弃 PAID 状态
+
     getActionButtonText(status) {
       switch (status) {
         case 'PREPARING':
@@ -202,7 +195,6 @@ export default {
       }
     },
 
-    // ✅ 修改：获取按钮样式类，废弃 PAID 状态
     getStatusButtonClass(status) {
       switch (status) {
         case 'PREPARING':
@@ -220,12 +212,10 @@ export default {
       }
     },
 
-    // ✅ 新增：判断是否可操作
     isActionable(status) {
       return status === 'PREPARING' // 只有备餐中状态可以点击
     },
 
-    // ✅ 新增：处理订单操作
     handleOrderAction(order) {
       if (order.status === 'PREPARING') {
         this.serveOrder(order.id)
@@ -233,13 +223,12 @@ export default {
       // 其他状态下只是展示，不做操作
     },
 
-    // ✅ 修复：后端请求获取订单，修复数据解析问题
     async fetchOrders() {
       try {
-        console.log('🔍 当前商家ID:', this.sellerId)
+        console.log('当前商家ID:', this.sellerId)
         
         if (!this.sellerId) {
-          console.warn('⚠️ 商家ID不存在，无法获取订单')
+          console.warn('商家ID不存在，无法获取订单')
           this.orders = []
           return
         }
@@ -248,29 +237,22 @@ export default {
         const response = await fetchWithTimeout(`${BASE_URL}/seller/order?${params}`)
         const result = await response.json()
         
-        console.log('📋 获取订单完整响应:', result)
+        console.log('获取订单完整响应:', result)
         
-        // ✅ 修复：根据实际返回格式解析数据
         if (result.code === 200 && Array.isArray(result.data)) {
           this.orders = result.data
-          console.log('✅ 订单加载成功，共', this.orders.length, '个订单')
-          console.log('🍽️ 其中备餐中订单:', this.getPreparingOrderCount(), '个') // 新增日志
         } else if (result.success && Array.isArray(result.data)) {
-          // 兼容 success 字段的响应格式
           this.orders = result.data
-          console.log('✅ 订单加载成功（success格式），共', this.orders.length, '个订单')
-          console.log('🍽️ 其中备餐中订单:', this.getPreparingOrderCount(), '个') // 新增日志
         } else {
-          console.warn('⚠️ 订单数据格式异常:', result)
+          console.warn('订单数据格式异常:', result)
           this.orders = []
         }
       } catch (error) {
-        console.error('❌ 获取订单失败:', error)
+        console.error('获取订单失败:', error)
         this.orders = []
       }
     },
 
-    // ✅ 恢复：后端请求出餐操作
     async serveOrder(orderId) {
       try {
         console.log('🍽️ 开始出餐操作，订单ID:', orderId)
@@ -284,26 +266,24 @@ export default {
         const result = await response.json()
         console.log('📤 出餐操作响应:', result)
         
-        // ✅ 兼容两种响应格式
         if (result.success || result.code === 200) {
           alert('出餐成功！')
           await this.fetchOrders() // 重新获取订单列表
-          console.log('✅ 出餐成功，已刷新订单列表')
+          console.log('出餐成功，已刷新订单列表')
         } else {
-          console.error('❌ 出餐失败:', result.message)
+          console.error('出餐失败:', result.message)
           alert('操作失败：' + (result.message || '未知错误'))
         }
       } catch (error) {
-        console.error('❌ 出餐操作网络错误:', error)
+        console.error('出餐操作网络错误:', error)
         alert('网络错误，操作失败')
       }
     },
 
-    // ✅ 恢复：后端请求提醒消息
     async fetchAlertMessage() {
       try {
         if (!this.userId) {
-          console.warn('⚠️ 用户ID不存在，跳过提醒消息检查')
+          console.warn('用户ID不存在，跳过提醒消息检查')
           return
         }
         
@@ -311,23 +291,23 @@ export default {
         const response = await fetchWithTimeout(`${BASE_URL}/alertMessage?${params}`)
         const result = await response.json()
         
-        console.log('📢 提醒消息检查:', result)
+        console.log('提醒消息检查:', result)
         
         if (result.success && result.alertMessage && result.alertMessage.trim()) {
-          alert(`📢 系统提醒：\n${result.alertMessage}`)
-          console.log('✅ 显示提醒消息:', result.alertMessage)
+          alert(`系统提醒：\n${result.alertMessage}`)
+          console.log('显示提醒消息:', result.alertMessage)
         } else if (result.code === 200 && result.alertMessage && result.alertMessage.trim()) {
-          alert(`📢 系统提醒：\n${result.alertMessage}`)
-          console.log('✅ 显示提醒消息:', result.alertMessage)
+          alert(`系统提醒：\n${result.alertMessage}`)
+          console.log('显示提醒消息:', result.alertMessage)
         }
         
       } catch (error) {
-        console.warn('⚠️ 获取提醒消息失败:', error.message)
+        console.warn('获取提醒消息失败:', error.message)
       }
     },
 
     startAlertTimer() {
-      console.log('🔔 启动提醒消息定时器')
+      console.log('启动提醒消息定时器')
       this.fetchAlertMessage()
       this.alertTimer = setInterval(() => {
         this.fetchAlertMessage()
@@ -336,7 +316,7 @@ export default {
 
     stopAlertTimer() {
       if (this.alertTimer) {
-        console.log('🔕 停止提醒消息定时器')
+        console.log(' 停止提醒消息定时器')
         clearInterval(this.alertTimer)
         this.alertTimer = null
       }
@@ -355,15 +335,14 @@ export default {
   },
 
   async mounted() {
-    console.log('🚀 SellerOrder 页面挂载')
-    console.log('👤 当前用户ID:', this.userId)
-    console.log('🏪 当前商家ID:', this.sellerId)
+    console.log('SellerOrder 页面挂载')
+    console.log('当前用户ID:', this.userId)
+    console.log('当前商家ID:', this.sellerId)
     
-    // ✅ 确保有商家ID后再获取订单
     if (this.sellerId) {
       await this.fetchOrders()
     } else {
-      console.warn('⚠️ 商家ID未就绪，稍后重试')
+      console.warn('商家ID未就绪，稍后重试')
       // 等待 Vuex 加载完成
       setTimeout(async () => {
         if (this.sellerId) {
@@ -376,7 +355,7 @@ export default {
   },
 
   beforeUnmount() {
-    console.log('🚪 SellerOrder 页面销毁')
+    console.log(' SellerOrder 页面销毁')
     this.stopAlertTimer()
   }
 }
@@ -391,7 +370,6 @@ export default {
   min-height: 100vh;
 }
 
-/* ✅ 新增：状态选择栏样式 */
 .status-filter {
   display: flex;
   flex-wrap: wrap;
@@ -482,7 +460,6 @@ export default {
   font-size: 0.9em;
 }
 
-/* ✅ 修改：按钮样式根据状态变化 */
 .action-btn {
   border: none;
   border-radius: 6px;

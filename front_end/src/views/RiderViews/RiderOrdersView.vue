@@ -78,10 +78,8 @@ export default {
     }
   },
   computed: {
-    // ✅ 修复：正确映射 userInfo 而不是直接映射 userId
     ...mapState('userStore', ['userInfo']),
     
-    // ✅ 添加 userId 计算属性
     userId() {
       return this.userInfo?.userId || ''
     },
@@ -133,10 +131,9 @@ export default {
       this.jumpPage = p
     },
     
-    // ✅ 修改：抢单 - 适配 ApiResponse
     async grabOrder(orderId) {
       try {
-        console.log('🚀 开始抢单，订单ID:', orderId, '骑手ID:', this.userId)
+        console.log('开始抢单，订单ID:', orderId, '骑手ID:', this.userId)
         
         const response = await fetchWithTimeout(`${BASE_URL}/rider/chooseorder`, {
           method: 'POST',
@@ -148,29 +145,27 @@ export default {
         })
         const result = await response.json()
         
-        console.log('📋 抢单响应:', result)
+        console.log('抢单响应:', result)
         
-        // ✅ 适配 ApiResponse 格式
         const isSuccess = response.ok || result.code === 200 || result.success === true
         
         if (isSuccess) {
           alert('抢单成功！')
-          console.log('✅ 抢单成功，开始位置追踪')
+          console.log('抢单成功，开始位置追踪')
           
           // 抢单成功后开始位置追踪
           this.startLocationTracking()
           await this.fetchOrders()
         } else {
-          console.error('❌ 抢单失败:', result.message || '未知错误')
+          console.error('抢单失败:', result.message || '未知错误')
           alert('抢单失败：' + (result.message || '该订单可能已被其他骑手接取'))
         }
       } catch (error) {
-        console.error('❌ 抢单网络错误:', error)
+        console.error('抢单网络错误:', error)
         alert('网络错误，抢单失败')
       }
     },
     
-    // ✅ 修改：获取订单列表 - 适配 ApiResponse
     async fetchOrders() {
       try {
         console.log('🔍 获取订单列表，用户ID:', this.userId)
@@ -184,20 +179,20 @@ export default {
         const response = await fetchWithTimeout(`${BASE_URL}/rider/orderfiltered?${params}`)
         const result = await response.json()
         
-        console.log('📋 获取订单列表响应:', result)
+        console.log('获取订单列表响应:', result)
         
-        // ✅ 适配 ApiResponse 格式
+
         const isSuccess = response.ok || result.code === 200 || result.success === true
         
         if (isSuccess && Array.isArray(result.data)) {
           this.allOrders = result.data
-          console.log('✅ 订单列表获取成功，共', this.allOrders.length, '个订单')
+          console.log('订单列表获取成功，共', this.allOrders.length, '个订单')
         } else {
-          console.warn('⚠️ 订单列表数据格式异常或为空:', result)
+          console.warn('订单列表数据格式异常或为空:', result)
           this.allOrders = []
         }
       } catch (error) {
-        console.error('❌ 获取订单列表失败:', error)
+        console.error('获取订单列表失败:', error)
         this.allOrders = []
       }
     }

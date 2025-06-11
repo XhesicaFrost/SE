@@ -75,7 +75,6 @@ export default {
       shopAddress: '',
       shopImage: null,
       shopImageUrl: '',
-      // ✅ 新增：店铺标签相关数据
       shopTags: [], // 选中的标签数组
       availableTags: [
         '快餐', '奶茶', '咖啡', '甜品', '火锅', '烧烤', 
@@ -121,7 +120,6 @@ export default {
         if ( result.code === 200 && result.data) {
           this.shopName = result.data.shopName
           this.shopAddress = result.data.shopAddress
-          // ✅ 修复：根据后端返回的实际数据类型处理
           this.shopTags = Array.isArray(result.data.shopTags) 
             ? result.data.shopTags 
             : (result.data.shopTags ? JSON.parse(result.data.shopTags) : [])
@@ -138,7 +136,6 @@ export default {
       }
     },
     async handleEdit() {
-      // ✅ 更新验证逻辑，包含标签验证
       if (!this.shopName || !this.shopAddress) {
         this.errorMessage = '请填写完整信息'
         return
@@ -149,7 +146,6 @@ export default {
       }
       
       this.errorMessage = ''
-      // 构造 FormData
       const formData = new FormData()
       formData.append('name', this.shopName)
       formData.append('address', this.shopAddress)
@@ -157,7 +153,6 @@ export default {
         formData.append('image', this.shopImage)
       }
       formData.append('sellerId', this.sellerId)
-      // ✅ 新增：添加标签数据到表单
       formData.append('shopTags', JSON.stringify(this.shopTags))
 
       try {

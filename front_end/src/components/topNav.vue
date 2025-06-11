@@ -1,4 +1,3 @@
-<!-- filepath: front_end/src/components/topNav.vue -->
 <template>
   <div class="top-bg"></div>
   <div class="top-nav">

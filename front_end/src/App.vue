@@ -3,27 +3,18 @@
 </template>
 
 <script>
-import * as config from '@/config.js'
 
 export default {
   name: 'App',
   mounted() {
-    console.log('🚀 App 组件已挂载')
     
-    // 打印调试信息
-    Object.entries(config)
-      .filter(([key]) => key.startsWith('debug'))
-      .forEach(([key, value]) => {
-        console.log(`${key}:`, value)
-      })
     
-    // ✅ 检查数据恢复情况
     this.$nextTick(() => {
       const userInfo = this.$store.state.userStore.userInfo
       if (userInfo.userId) {
-        console.log('✅ 用户信息已恢复:', userInfo.userName)
+        console.log('用户信息已恢复:', userInfo.userName)
       } else {
-        console.log('📝 当前无登录用户')
+        console.log('当前无登录用户')
       }
     })
   }

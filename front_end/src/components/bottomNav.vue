@@ -1,4 +1,3 @@
-<!-- filepath: front_end/src/components/bottomNav.vue -->
 <template>
   <div class="bottom-nav">
     <button
@@ -19,7 +18,6 @@ export default {
     navItems: {
       type: Array,
       required: true
-      // 每项格式: { label: '显示内容', action: Function }
     }
   },
   methods: {
@@ -30,7 +28,6 @@ export default {
     }
   },
     mounted() {
-        // 这里可以添加一些初始化逻辑
         console.log('BottomNav mounted', this.navItems)
         
     }   

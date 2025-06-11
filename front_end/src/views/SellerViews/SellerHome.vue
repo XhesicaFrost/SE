@@ -73,7 +73,7 @@ export default {
         try {
           // 确认对话框
           if (confirm('确定要退出登录吗？')) {
-            console.log('🚪 执行退出登录流程')
+            console.log('执行退出登录流程')
             
             // 调用 userStore 的 logout action
             await this.logout()
@@ -88,10 +88,10 @@ export default {
             // 导航到登录页
             this.$router.push('/login')
             
-            console.log('✅ 退出登录流程完成')
+            console.log(' 退出登录流程完成')
           }
         } catch (error) {
-          console.error('❌ 退出登录失败:', error)
+          console.error(' 退出登录失败:', error)
           alert('退出登录失败，请重试')
         }
       } else if (type === 'shop') {
@@ -144,11 +144,9 @@ export default {
         const response = await fetchWithTimeout(`${BASE_URL}/userToseller?${params}`)
         console.log('fetchsellerInfo response:', response)
         
-        // ✅ 修复：正确的JSON解析方式
         const result = await response.json()  // 先解析JSON
         console.log('fetchsellerInfo result:', result)
         
-        // ✅ 然后检查和访问数据
         if (result.code === 200) {
           this.SET_seller_ID(result.data.sellerId || '')
           this.SET_seller_NAME(result.data.sellerName || '')
@@ -190,14 +188,13 @@ export default {
               { label: '查看数据', action: () => this.goTo('data') },
               { label: '退出登录', action: () => this.goTo('logout') }
             ]
-            // ✅ 修复：使用result.data.sellerId
             this.fetchsellerHomeData(result.data.sellerId)
           }
         } else {
           this.$toast && this.$toast(result.message || '商家信息获取失败')
         }
       } catch (error) {
-        console.error('❌ fetchsellerInfo 错误:', error)
+        console.error('fetchsellerInfo 错误:', error)
         this.$toast && this.$toast('网络异常，商家信息获取失败')
       }
       

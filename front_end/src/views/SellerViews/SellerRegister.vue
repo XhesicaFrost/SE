@@ -91,8 +91,7 @@ export default {
       shopAddress: '',
       shopImage: null,
       shopImageUrl: '',
-      // ✅ 新增：店铺标签相关数据
-      shopTags: [], // 选中的标签数组
+      shopTags: [], 
       availableTags: [
         '快餐', '奶茶', '咖啡', '甜品', '火锅', '烧烤', 
         '中式', '西式', '日式', '韩式', '泰式', '川菜',
@@ -131,7 +130,6 @@ export default {
       }
     },
     async handleRegister() {
-      // ✅ 更新验证逻辑，包含标签验证
       if (!this.shopName || !this.shopAddress || !this.shopImage) {
         this.errorMessage = '请填写完整信息并上传图片'
         return
@@ -148,7 +146,6 @@ export default {
       formData.append('shopAddress', this.shopAddress)
       formData.append('shopImage', this.shopImage)
       formData.append('userId', this.userId)
-      // ✅ 新增：添加标签数据到表单
       formData.append('shopTags', JSON.stringify(this.shopTags))
 
       try {
@@ -164,7 +161,6 @@ export default {
           this.submitStatus = 'success'
         } else {
           this.errorMessage = '未能成功发送，请重试'
-          // ✅ 清空所有已填信息（包含标签）
           this.shopName = ''
           this.shopAddress = ''
           this.shopImage = null
@@ -173,7 +169,6 @@ export default {
         }
       } catch (e) {
         this.errorMessage = '网络错误，未能成功发送'
-        // ✅ 清空所有已填信息（包含标签）
         this.shopName = ''
         this.shopAddress = ''
         this.shopImage = null
@@ -224,7 +219,6 @@ input[type="text"], input[type="file"] {
   margin-top: 0.3em;
 }
 
-/* ✅ 新增：标签相关样式 */
 .tag-hint {
   font-size: 0.85em;
   color: #666;

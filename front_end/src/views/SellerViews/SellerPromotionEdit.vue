@@ -69,7 +69,6 @@ export default {
   },
   methods: {
     async fetchPromotionInfo() {
-      // 获取当前促销活动信息用于预填充
       try {
         const params = new URLSearchParams({ promotionId: this.promotionId }).toString()
         const response = await fetchWithTimeout(`${BASE_URL}/seller/promotion/detail?${params}`)
