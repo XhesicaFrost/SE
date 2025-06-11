@@ -18,6 +18,7 @@ public class AddressServiceImpl implements AddressService {
     @Autowired
     private AddressRepository addressRepository;
 
+    @Autowired
     private GeoService geoService;
 
     @Override
@@ -33,7 +34,13 @@ public class AddressServiceImpl implements AddressService {
         
         if (name != null) address.setName(name);
         if (phone != null) address.setPhone(phone);
-        if (fullAddress != null) address.setFullAddress(fullAddress);
+        if (fullAddress != null) {
+            address.setFullAddress(fullAddress);
+            // 更新地理坐标
+            Map<String, Double> coordinates = geoService.getCoordinates(fullAddress);
+            address.setLatitude(coordinates.get("latitude"));
+            address.setLongitude(coordinates.get("longitude"));
+        }
         if (current != null && current) {
             // 将其他地址设置为非当前地址
             addressRepository.findByUserId(address.getUserId()).forEach(a -> {
