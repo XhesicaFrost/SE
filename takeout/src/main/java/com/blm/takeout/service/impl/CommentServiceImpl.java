@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.lang.NonNull;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -40,7 +41,7 @@ public class CommentServiceImpl implements CommentService {
 
     private static class CommentRowMapper implements RowMapper<Comment> {
         @Override
-        public Comment mapRow(ResultSet rs, int rowNum) throws SQLException {
+        public Comment mapRow(@NonNull ResultSet rs, int rowNum) throws SQLException {
             Comment comment = new Comment();
             comment.setId(rs.getInt("id"));
             comment.setShopId(rs.getInt("shop_id"));

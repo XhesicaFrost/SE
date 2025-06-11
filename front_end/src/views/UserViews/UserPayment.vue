@@ -21,7 +21,9 @@
 
     <!-- 总价格 -->
     <div class="total-price">
-      总价格: ¥{{ totalPrice.toFixed(2) }}
+      <span class="original-price" v-if="discountedPrice">¥{{ totalPrice.toFixed(2) }}</span>
+      <span class="discounted-price" v-if="discountedPrice">¥{{ discountedPrice.toFixed(2) }}</span>
+      <span v-else>总价格: ¥{{ totalPrice.toFixed(2) }}</span>
     </div>
 
     <!-- 付款按钮 -->
@@ -52,8 +54,8 @@ export default {
         monthlySales: 0,
         deliveryTime: ''
       },
-      cart: [
-      ]
+      cart: [],
+      discountedPrice: null
     }
   },
   computed: {
@@ -120,6 +122,28 @@ export default {
         console.error('获取购物车数据失败:', error);
       }
     },
+    async fetchDiscountedPrice() {
+      try {
+        const response = await fetchWithTimeout(`${BASE_URL}/discount`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            shopId: this.$route.params.shopId,
+            totalPrice: this.totalPrice()
+          }),
+        });
+        const result = await response.json();
+        if (result.code === 200) {
+          this.discountedPrice = result.data.discountedPrice;
+        } else {
+          console.error('获取折扣价格失败:', result.message);
+          this.discountedPrice = null
+        }
+      } catch (error) {
+        console.error('获取折扣价格失败:', error);
+          this.discountedPrice = null
+      }
+    },
     async handlePayment() {
       try {
         const response = await fetchWithTimeout(`${BASE_URL}/payment`, {
@@ -147,6 +171,7 @@ export default {
   mounted() {
     this.fetchShopInfo()
     this.fetchCartItems()
+    this.fetchDiscountedPrice()
   },
 }
 </script>
@@ -204,6 +229,15 @@ export default {
   font-size: 1.2em;
   font-weight: bold;
   margin-bottom: 1.5em;
+}
+.original-price {
+  text-decoration: line-through;
+  color: #888;
+  margin-right: 0.5em;
+}
+.discounted-price {
+  color: #e63946;
+  font-weight: bold;
 }
 .payment-btn {
   background: #1249d5;
