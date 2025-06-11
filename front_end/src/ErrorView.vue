@@ -1,17 +1,14 @@
 <template>
   <div class="error-page">
     <div class="error-content">
-      <!-- Logo图片 -->
       <div class="logo-container">
         <img src="@/assets/logo.jpg" alt="Logo" class="logo" />
       </div>
       
-      <!-- 错误信息 -->
       <div class="error-message">
         <h2>奶龙偷走了你的页面</h2>
       </div>
       
-      <!-- 倒计时显示 -->
       <div class="countdown">
         {{ countdown }}s 后回到上一页面
       </div>

@@ -156,7 +156,7 @@ export default {
         userLat: null,
         userPhone: '',
         createTime: '',
-        status: 'ACCEPTED' // ✅ 修改：默认状态改为全大写
+        status: 'ACCEPTED' 
       },
       
       // 地图相关
@@ -182,10 +182,8 @@ export default {
   },
   
   computed: {
-    // ✅ 修复：正确映射 userInfo 而不是直接映射 userId
     ...mapState('userStore', ['userInfo']),
     
-    // ✅ 添加 userId 计算属性
     userId() {
       return this.userInfo?.userId || ''
     },
@@ -229,7 +227,6 @@ export default {
         
         console.log('📋 获取订单详情响应:', result)
         
-        // ✅ 适配 ApiResponse 格式
         const isSuccess = response.ok || result.code === 200 || result.success === true
         
         if (isSuccess && result.data) {
@@ -237,14 +234,14 @@ export default {
             ...this.orderDetail,
             ...result.data
           }
-          console.log('✅ 订单详情加载成功:', this.orderDetail)
+          console.log('订单详情加载成功:', this.orderDetail)
         } else {
           this.hasError = true
           this.errorMessage = result.message || '服务器返回错误信息，请稍后重试'
-          console.error('❌ 获取订单详情失败:', result)
+          console.error('获取订单详情失败:', result)
         }
       } catch (error) {
-        console.error('❌ 获取订单详情失败:', error)
+        console.error('获取订单详情失败:', error)
         this.hasError = true
         
         if (error.name === 'AbortError') {
@@ -294,7 +291,6 @@ export default {
       if (!this.orderDetail.id) {
         return '订单信息缺失'
       }
-      // ✅ 修改：使用全大写状态
       return this.orderDetail.status === 'ACCEPTED' ? '确认接餐' : '确认送达'
     },
 
@@ -366,7 +362,6 @@ export default {
     async updateOrderStatus() {
       if (!this.orderDetail.id || this.isUpdatingStatus) return
 
-      // ✅ 修改：使用全大写状态
       const nextStatus = this.orderDetail.status === 'ACCEPTED' ? 'PICKED' : 'COMPLETED'
       
       try {
@@ -383,15 +378,13 @@ export default {
         })
         const result = await response.json()
         
-        console.log('📤 状态更新响应:', result)
+        console.log('状态更新响应:', result)
         
-        // ✅ 适配 ApiResponse 格式
         const isSuccess = response.ok || result.code === 200 || result.success === true
         
         if (isSuccess) {
           this.orderDetail.status = nextStatus
           
-          // ✅ 修改：使用全大写状态判断
           if (nextStatus === 'COMPLETED') {
             this.isNavigating = false
             alert('订单完成！3秒后返回主页')
@@ -420,9 +413,7 @@ export default {
       }
     },
 
-    // ✅ 修改：规划路线 - 适配全大写状态
     planRoute(currentPosition) {
-      // ✅ 修改：使用全大写状态判断
       const targetAddress = this.orderDetail.status === 'ACCEPTED' 
         ? this.orderDetail.sellerAddress 
         : this.orderDetail.userAddress
@@ -529,7 +520,6 @@ export default {
       return '订单已完成'
     },
 
-    // ✅ 修改：获取状态文本 - 适配全大写状态
     getStatusText(status) {
       const statusMap = {
         ACCEPTED: '已接单',
@@ -539,7 +529,6 @@ export default {
       return statusMap[status] || '状态未知'
     },
 
-    // ✅ 修改：获取状态样式类 - 适配全大写状态
     getStatusClass(status) {
       return {
         'status-accepted': status === 'ACCEPTED',

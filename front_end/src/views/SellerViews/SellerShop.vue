@@ -28,7 +28,7 @@
           <div class="goods-detail">
             <span class="goods-price">￥{{ item.price }}</span>
             <span class="goods-sales">销量：{{ item.sales }}</span>
-            <!-- ✅ 新增：显示商品状态 -->
+            <!--显示商品状态 -->
             <span class="goods-status" :class="getStatusClass(item.status)">
               {{ getStatusText(item.status) }}
             </span>
@@ -36,7 +36,7 @@
         </div>
         <div class="goods-actions">
           <button class="edit-btn" @click="editItem(item.id)">编辑</button>
-          <!-- ✅ 修改：根据状态动态显示上架/下架按钮 -->
+          <!--根据状态动态显示上架/下架按钮 -->
           <button 
             :class="item.status === '正常' ? 'offline-btn' : 'online-btn'"
             @click="toggleItemStatus(item)"
@@ -267,7 +267,6 @@ export default {
         return
       }
       
-      // ✅ Vue 3: 直接赋值，不使用 $set
       item.isUpdating = true
       
       try {
@@ -279,7 +278,6 @@ export default {
           await this.onlineItem(item.id)
         }
         
-        // 刷新商品列表
         await this.fetchGoods()
         
         this.$toast && this.$toast(`${action}成功`)
@@ -287,7 +285,6 @@ export default {
         console.error(`${action}失败:`, error)
         this.$toast && this.$toast(`${action}失败，请重试`)
       } finally {
-        // ✅ Vue 3: 直接赋值，不使用 $set
         item.isUpdating = false
       }
     },
@@ -297,7 +294,7 @@ export default {
      * @returns {Promise} 请求Promise
      */
     async offlineItem(itemId) {
-      console.log('🔽 执行下架商品:', itemId)
+      console.log('执行下架商品:', itemId)
       
       const response = await fetchWithTimeout(`${BASE_URL}/seller/item/offline`, {
         method: 'POST',
@@ -316,7 +313,7 @@ export default {
         throw new Error(result.message || '下架失败')
       }
       
-      console.log('✅ 下架成功:', result)
+      console.log('下架成功:', result)
       return result
     },
     /**
@@ -325,7 +322,7 @@ export default {
      * @returns {Promise} 请求Promise
      */
     async onlineItem(itemId) {
-      console.log('🔼 执行上架商品:', itemId)
+      console.log('执行上架商品:', itemId)
       
       const response = await fetchWithTimeout(`${BASE_URL}/seller/item/online`, {
         method: 'POST',
@@ -344,7 +341,7 @@ export default {
         throw new Error(result.message || '上架失败')
       }
       
-      console.log('✅ 上架成功:', result)
+      console.log('上架成功:', result)
       return result
     }
   },

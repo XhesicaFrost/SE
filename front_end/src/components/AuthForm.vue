@@ -53,7 +53,7 @@ export default {
     return {
       formData: {
         username: '',
-        phonenumber: '',      // 改为手机号
+        phonenumber: '', 
         password: '',
         role: 'user'
       }
@@ -71,7 +71,7 @@ export default {
 
 <style>
 .submit-btn {
-  background-color: #4caf50; /* 绿色 */
+  background-color: #4caf50;
   color: #fff;
   border: none;
   padding: 0.75em 2.5em;
@@ -80,7 +80,7 @@ export default {
   cursor: pointer;
 }
 .submit-btn:hover {
-  background-color: #43a047; /* 深一点的绿色 */
+  background-color: #43a047; 
 }
 
 input[type="text"],

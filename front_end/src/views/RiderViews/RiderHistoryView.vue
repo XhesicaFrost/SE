@@ -34,7 +34,6 @@
           
           <div class="order-footer">
             <div class="create-time">下单时间：{{ order.createTime }}</div>
-            <!-- ✅ 修改：状态徽章适配全大写 -->
             <div class="status-badge" :class="getStatusClass(order.status)">
               {{ getStatusText(order.status) }}
             </div>
@@ -114,7 +113,7 @@ export default {
     // 获取历史订单列表
     async fetchHistoryOrders() {
       if (!this.userId) {
-        console.error('❌ 用户ID不存在')
+        console.error('用户ID不存在')
         return
       }
 
@@ -129,9 +128,8 @@ export default {
         const response = await fetchWithTimeout(`${BASE_URL}/rider/history?${params}`)
         const result = await response.json()
         
-        console.log('📋 获取历史订单响应:', result)
+        console.log('获取历史订单响应:', result)
         
-        // ✅ 适配 ApiResponse 格式
         const isSuccess = response.ok || result.code === 200 || result.success === true
         
         if (isSuccess && result.data) {
@@ -151,20 +149,20 @@ export default {
           
           this.totalPages = Math.ceil(this.totalCount / this.pageSize) || 1
           
-          console.log('✅ 历史订单获取成功:', {
+          console.log('历史订单获取成功:', {
             orders: this.historyOrders.length,
             page: this.currentPage,
             total: this.totalCount,
             totalPages: this.totalPages
           })
         } else {
-          console.error('❌ 获取历史订单失败:', result.message || '未知错误')
+          console.error('获取历史订单失败:', result.message || '未知错误')
           this.historyOrders = []
           this.totalCount = 0
           this.totalPages = 1
         }
       } catch (error) {
-        console.error('❌ 网络错误，获取历史订单失败:', error)
+        console.error('网络错误，获取历史订单失败:', error)
         this.historyOrders = []
         this.totalCount = 0
         this.totalPages = 1
@@ -200,7 +198,6 @@ export default {
       this.fetchHistoryOrders()
     },
 
-    // ✅ 新增：获取状态文本
     getStatusText(status) {
       const statusMap = {
         ACCEPTED: '已接单',
@@ -213,7 +210,6 @@ export default {
       return statusMap[status] || '已完成'
     },
 
-    // ✅ 新增：获取状态样式类
     getStatusClass(status) {
       const classMap = {
         ACCEPTED: 'accepted',
@@ -342,7 +338,6 @@ export default {
   font-weight: bold;
 }
 
-/* ✅ 修改：更新状态样式类名 */
 .status-badge.completed {
   background: #e8f5e9;
   color: #4caf50;

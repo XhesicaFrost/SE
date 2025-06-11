@@ -21,7 +21,6 @@
             }"
             @click.stop="updateOrderStatus(order.id)"
           >
-            <!-- ✅ 修改：使用全大写状态判断 -->
             {{ order.status === 'ACCEPTED' ? '接餐' : '完成' }}
           </button>
         </div>
@@ -71,7 +70,6 @@ export default {
       acceptedOrders: [],
       recommendedOrders: [],
       userLocation: null,
-      // ✅ 新增：定时器相关变量
       alertTimer: null,
       navItems: [
         { label: '订单搜索', action: () => { this.$router.push('/rider/orders') } },
@@ -83,7 +81,6 @@ export default {
   computed: {
     ...mapState('userStore', ['userInfo']),
     
-    // ✅ 新增：获取用户ID
     userId() {
       return this.userInfo?.userId
     }
@@ -92,11 +89,10 @@ export default {
     ...mapActions('locationStore', ['startLocationTracking', 'stopLocationTracking']),
     ...mapActions('userStore', ['logout']),
     
-    // ✅ 新增：获取提醒消息的方法
     async fetchAlertMessage() {
       try {
         if (!this.userId) {
-          console.warn('⚠️ 骑手用户ID不存在，跳过提醒消息检查')
+          console.warn(' 骑手用户ID不存在，跳过提醒消息检查')
           return
         }
         
@@ -104,25 +100,22 @@ export default {
         const response = await fetchWithTimeout(`${BASE_URL}/alertMessage?${params}`)
         const result = await response.json()
         
-        console.log('🚴 骑手提醒消息检查:', result)
+        console.log('骑手提醒消息检查:', result)
         
-        // ✅ 检查 alertMessage 字段
         if (result.success && result.alertMessage && result.alertMessage.trim()) {
-          alert(`📢 骑手提醒：\n${result.alertMessage}`)
-          console.log('✅ 显示骑手提醒消息:', result.alertMessage)
+          alert(`骑手提醒：\n${result.alertMessage}`)
+          console.log('显示骑手提醒消息:', result.alertMessage)
         } else if (result.code === 200 && result.alertMessage && result.alertMessage.trim()) {
-          alert(`📢 骑手提醒：\n${result.alertMessage}`)
-          console.log('✅ 显示骑手提醒消息:', result.alertMessage)
+          alert(`骑手提醒：\n${result.alertMessage}`)
+          console.log('显示骑手提醒消息:', result.alertMessage)
         }
         // 如果 alertMessage 为空或不存在，什么都不做
         
       } catch (error) {
-        // ✅ 静默处理错误，不影响主功能
         console.warn('⚠️ 获取骑手提醒消息失败:', error.message)
       }
     },
     
-    // ✅ 新增：启动定时器
     startAlertTimer() {
       console.log('🔔 启动骑手提醒消息定时器')
       
@@ -135,7 +128,6 @@ export default {
       }, 500000) // 5000ms = 5秒
     },
     
-    // ✅ 新增：停止定时器
     stopAlertTimer() {
       if (this.alertTimer) {
         console.log('🔕 停止骑手提醒消息定时器')
@@ -152,25 +144,20 @@ export default {
           if (confirm('确定要退出登录吗？这将停止位置追踪和消息提醒。')) {
             console.log('🚪 执行骑手退出登录流程')
             
-            // ✅ 修改：退出时停止提醒定时器
             this.stopAlertTimer()
             
-            // 停止位置追踪
             this.stopLocationTracking()
             
-            // 调用 userStore 的 logout action
             await this.logout()
             
-            // 显示提示信息
             alert('已成功退出登录')
             
-            // 导航到登录页
             this.$router.push('/login')
             
-            console.log('✅ 骑手退出登录流程完成')
+            console.log('骑手退出登录流程完成')
           }
         } catch (error) {
-          console.error('❌ 骑手退出登录失败:', error)
+          console.error('骑手退出登录失败:', error)
           alert('退出登录失败，请重试')
         }
       }
@@ -210,10 +197,8 @@ export default {
     // 检查并更新位置追踪状态
     checkAndUpdateLocationTracking() {
       if (this.acceptedOrders.length > 0) {
-        // 如果有已接订单，开始位置追踪
         this.startLocationTracking()
       } else {
-        // 如果没有已接订单，停止位置追踪
         this.stopLocationTracking()
       }
     },
@@ -225,7 +210,6 @@ export default {
         const response = await fetchWithTimeout(`${BASE_URL}/rider/acceptedorders?${params}`)
         const result = await response.json()
         
-        // ✅ 修复：兼容 ApiResponse 格式
         if ((result.code === 200 || result.success) && Array.isArray(result.data)) {
           this.acceptedOrders = result.data
         } else {
@@ -255,7 +239,6 @@ export default {
         const response = await fetchWithTimeout(`${BASE_URL}/rider/recommendedorders?${params}`)
         const result = await response.json()
         
-        // ✅ 修复：兼容 ApiResponse 格式
         if ((result.code === 200 || result.success) && Array.isArray(result.data)) {
           this.recommendedOrders = result.data.slice(0, 10)
         } else {
@@ -278,7 +261,6 @@ export default {
       const order = this.acceptedOrders.find(o => o.id === orderId)
       if (!order) return
 
-      // ✅ 修改：使用全大写状态
       const nextStatus = order.status === 'ACCEPTED' ? 'PICKED' : 'COMPLETED'
       
       try {
@@ -293,9 +275,7 @@ export default {
         })
         const result = await response.json()
         
-        // ✅ 修复：兼容 ApiResponse 格式
         if (result.code === 200 || result.success) {
-          // ✅ 修改：使用全大写状态判断
           if (nextStatus === 'PICKED') {
             order.status = 'PICKED'
           } else {
@@ -329,7 +309,6 @@ export default {
         })
         const result = await response.json()
         
-        // ✅ 修复：兼容 ApiResponse 格式  
         if (result.code === 200 || result.success) {
           alert('抢单成功！')
           await this.fetchAcceptedOrders()
@@ -344,18 +323,14 @@ export default {
   },
   
   async mounted() {
-    console.log('🚀 RiderHome 页面挂载')
-    console.log('🚴 当前骑手用户ID:', this.userId)
     
     // 获取订单数据
     await this.fetchAcceptedOrders()
     await this.fetchRecommendedOrders()
     
-    // ✅ 启动提醒消息定时器
     this.startAlertTimer()
   },
   
-  // ✅ 新增：页面销毁时清理定时器
   beforeUnmount() {
     console.log('🚪 RiderHome 页面销毁')
     this.stopAlertTimer()
