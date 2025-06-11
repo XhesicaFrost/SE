@@ -10,4 +10,5 @@ import com.blm.takeout.entity.Rider;
 @Repository
 public interface RiderRepository extends JpaRepository<Rider, Integer> {
     Optional<Rider> findByUser_Userid(Integer userId);
+    
 }

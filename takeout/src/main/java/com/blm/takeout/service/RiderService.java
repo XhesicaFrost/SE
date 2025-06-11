@@ -1,5 +1,9 @@
 package com.blm.takeout.service;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +18,7 @@ import com.blm.takeout.repository.ShopRepository;
 
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -83,7 +88,7 @@ public class RiderService {
                             orders.get(j).getShop().getLatitude(), orders.get(j).getShop().getLongitude()
                     );
                 } else {
-                    graph[i][j] = Double.MAX_VALUE; // 自己到自己的距离设为无穷大
+                    graph[i][j] = Double.MAX_VALUE; 
                 }
             }
         }
@@ -180,6 +185,7 @@ public class RiderService {
                 break;
             case "completed":
                 order.setStatus(Order.OrderStatus.COMPLETED);
+                order.setCompletedTime(LocalDateTime.now());
                 break;
             default:
                 throw new BusinessException("无效的状态: " + status);
@@ -205,5 +211,58 @@ public class RiderService {
         orderRepository.save(order);
 
         return true;
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> getOrderDetail(Integer riderId, Integer orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new BusinessException("订单不存在"));
+
+        if (!order.getRiderId().equals(riderId)) {
+            throw new BusinessException("订单不存在或无权限访问");
+        }
+
+        Map<String, Object> orderDetail = new HashMap<>();
+        orderDetail.put("id", order.getId());
+        orderDetail.put("sellerName", order.getShop().getName());
+        orderDetail.put("sellerAddress", order.getShop().getAddress());
+        orderDetail.put("sellerLng", order.getShop().getLongitude());
+        orderDetail.put("sellerLat", order.getShop().getLatitude());
+        orderDetail.put("userAddress", order.getDeliveryAddress());
+        orderDetail.put("userLng", order.getDeliveryLongitude());
+        orderDetail.put("userLat", order.getDeliveryLatitude());
+        orderDetail.put("userPhone", order.getDeliveryPhone());
+        orderDetail.put("createTime", order.getCreateTime().toString());
+        orderDetail.put("status", order.getStatus().name());
+
+        return orderDetail;
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> getHistoryOrders(Integer userId, Integer page, Integer pageSize) {
+        // 分页查询历史订单
+        Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by(Sort.Direction.DESC, "completedTime"));
+        Page<Order> orderPage = orderRepository.findByRiderIdAndStatus(userId, Order.OrderStatus.COMPLETED, pageable);
+
+        List<Map<String, Object>> orders = orderPage.getContent().stream()
+                .map(order -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", order.getId());
+                    map.put("sellerName", order.getShop().getName());
+                    map.put("sellerAddress", order.getShop().getAddress());
+                    map.put("userAddress", order.getDeliveryAddress());
+                    map.put("userPhone", order.getDeliveryPhone());
+                    map.put("createTime", order.getCreateTime().toString());
+                    map.put("completeTime", order.getCompletedTime() != null ? order.getCompletedTime().toString() : null);
+                    return map;
+                })
+                .toList();
+
+        return Map.of(
+                "orders", orders,
+                "total", orderPage.getTotalElements(),
+                "page", page,
+                "pageSize", pageSize
+        );
     }
 }

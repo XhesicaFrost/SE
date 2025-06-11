@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.blm.takeout.common.ApiResponse;
+import com.blm.takeout.exception.BusinessException;
 import com.blm.takeout.service.OrderService;
 import com.blm.takeout.service.RiderService;
 
@@ -90,6 +91,33 @@ public class RiderController {
             }
         } catch (Exception e) {
             return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "抢单失败: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/orderdetail")
+    public ApiResponse<?> getOrderDetail(
+            @RequestParam Integer riderId,
+            @RequestParam Integer orderId) {
+        try {
+            Map<String, Object> orderDetail = riderService.getOrderDetail(riderId, orderId);
+            return ApiResponse.success(orderDetail);
+        } catch (BusinessException e) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "获取订单详情失败: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/history")
+    public ApiResponse<?> getHistoryOrders(
+            @RequestParam Integer userId,
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer pageSize) {
+        try {
+            Map<String, Object> historyOrders = riderService.getHistoryOrders(userId, page, pageSize);
+            return ApiResponse.success(historyOrders);
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "获取历史订单失败: " + e.getMessage());
         }
     }
 }
