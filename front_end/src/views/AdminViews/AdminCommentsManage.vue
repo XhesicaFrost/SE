@@ -13,12 +13,15 @@
             <span class="username">{{ comment.username }}</span>
             <span class="time">{{ formatTime(comment.createTime) }}</span>
           </div>
-          <div class="rating">
-            评分: {{ comment.rating }}星
+          <div class="rating" :class="comment.type">
+            {{ comment.type==='good' ? '好评' : '差评' }}
           </div>
         </div>
         <div class="comment-content">
           {{ comment.content }}
+        </div>
+        <div class="comment-images" v-if="comment.image">
+          <img :src="getImageUrl(image)" alt="订单图片" />
         </div>
         <div class="comment-actions">
           <button 
@@ -65,7 +68,8 @@ export default {
   components: { TopNav },
   data() {
     return {
-      comments: [],
+      comments: [
+      ],
       page: 1,
       pageSize: 10,
       jumpPage: 1,
@@ -85,6 +89,16 @@ export default {
     }
   },
   methods: {
+    getImageUrl(img) {
+      console.log('原始图片数据:', img)
+      if (!img) {
+        console.log('图片数据为空')
+        return ''
+      }
+      const base64Url = `data:image/jpeg;base64,${img}`
+      console.log('生成的base64 URL:', base64Url)
+      return base64Url
+    },
     formatTime(time) {
       if (!time) return ''
       const date = new Date(time)
@@ -197,13 +211,36 @@ export default {
 }
 
 .rating {
-  color: #ff9800;
   font-weight: bold;
+}
+
+.rating.good {
+  color: #12d012;
+}
+
+.rating.bad {
+  color: #cc1e1e;
 }
 
 .comment-content {
   margin: 0.5em 0;
   line-height: 1.5;
+}
+
+.comment-images {
+  position: relative;
+  left: 0;
+  top: 0;
+  margin: 0;
+  padding: 0;
+  height: 100px;
+  width: 100px;
+  overflow: hidden;
+}
+
+.comment-images img {
+  border-radius: 4px;
+  object-fit: cover;
 }
 
 .comment-actions {
@@ -238,7 +275,7 @@ export default {
 }
 
 .reject-btn:hover {
-  background: #d32f2f;
+  background: #9b0101;
 }
 
 .status {
