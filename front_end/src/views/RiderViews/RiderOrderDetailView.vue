@@ -108,8 +108,8 @@
         <button 
           class="status-update-btn"
           :class="{ 
-            'pickup-btn': orderDetail.status === 'accepted', 
-            'complete-btn': orderDetail.status === 'picked',
+            'pickup-btn': orderDetail.status === 'ACCEPTED', 
+            'complete-btn': orderDetail.status === 'PICKED',
             'disabled': !orderDetail.id
           }"
           @click="updateOrderStatus"
@@ -156,7 +156,7 @@ export default {
         userLat: null,
         userPhone: '',
         createTime: '',
-        status: 'accepted'
+        status: 'ACCEPTED' // ✅ 修改：默认状态改为全大写
       },
       
       // 地图相关
@@ -226,19 +226,25 @@ export default {
         
         const response = await fetchWithTimeout(`${BASE_URL}/rider/orderdetail?${params}`)
         const result = await response.json()
+        
+        console.log('📋 获取订单详情响应:', result)
+        
+        // ✅ 适配 ApiResponse 格式
         const isSuccess = response.ok || result.code === 200 || result.success === true
+        
         if (isSuccess && result.data) {
           this.orderDetail = {
             ...this.orderDetail,
             ...result.data
           }
-          console.log('订单详情加载成功:', this.orderDetail)
+          console.log('✅ 订单详情加载成功:', this.orderDetail)
         } else {
           this.hasError = true
           this.errorMessage = result.message || '服务器返回错误信息，请稍后重试'
+          console.error('❌ 获取订单详情失败:', result)
         }
       } catch (error) {
-        console.error('获取订单详情失败:', error)
+        console.error('❌ 获取订单详情失败:', error)
         this.hasError = true
         
         if (error.name === 'AbortError') {
@@ -288,7 +294,8 @@ export default {
       if (!this.orderDetail.id) {
         return '订单信息缺失'
       }
-      return this.orderDetail.status === 'accepted' ? '确认接餐' : '确认送达'
+      // ✅ 修改：使用全大写状态
+      return this.orderDetail.status === 'ACCEPTED' ? '确认接餐' : '确认送达'
     },
 
     // 初始化高德地图
@@ -359,7 +366,8 @@ export default {
     async updateOrderStatus() {
       if (!this.orderDetail.id || this.isUpdatingStatus) return
 
-      const nextStatus = this.orderDetail.status === 'accepted' ? 'picked' : 'completed'
+      // ✅ 修改：使用全大写状态
+      const nextStatus = this.orderDetail.status === 'ACCEPTED' ? 'PICKED' : 'COMPLETED'
       
       try {
         this.isUpdatingStatus = true
@@ -374,11 +382,17 @@ export default {
           })
         })
         const result = await response.json()
+        
+        console.log('📤 状态更新响应:', result)
+        
+        // ✅ 适配 ApiResponse 格式
         const isSuccess = response.ok || result.code === 200 || result.success === true
+        
         if (isSuccess) {
           this.orderDetail.status = nextStatus
           
-          if (nextStatus === 'completed') {
+          // ✅ 修改：使用全大写状态判断
+          if (nextStatus === 'COMPLETED') {
             this.isNavigating = false
             alert('订单完成！3秒后返回主页')
             setTimeout(() => {
@@ -391,10 +405,11 @@ export default {
             }
           }
         } else {
+          console.error('❌ 状态更新失败:', result)
           alert('状态更新失败：' + (result.message || '未知错误'))
         }
       } catch (error) {
-        console.error('状态更新失败:', error)
+        console.error('❌ 状态更新失败:', error)
         if (error.name === 'AbortError') {
           alert('请求超时，请重试')
         } else {
@@ -405,38 +420,14 @@ export default {
       }
     },
 
-    // 开始导航
-    async startNavigation() {
-      if (!this.AMap || !this.orderDetail.id || !this.canNavigate) {
-        return
-      }
-
-      this.isNavigating = true
-      
-      try {
-        this.geolocation.getCurrentPosition((status, result) => {
-          if (status === 'complete') {
-            this.routeInfo.currentPosition = result.position
-            this.planRoute(result.position)
-            this.startRealTimeTracking()
-          } else {
-            alert('无法获取当前位置，请检查定位权限')
-            this.isNavigating = false
-          }
-        })
-      } catch (error) {
-        alert('导航启动失败')
-        this.isNavigating = false
-      }
-    },
-
-    // 规划路线
+    // ✅ 修改：规划路线 - 适配全大写状态
     planRoute(currentPosition) {
-      const targetAddress = this.orderDetail.status === 'accepted' 
+      // ✅ 修改：使用全大写状态判断
+      const targetAddress = this.orderDetail.status === 'ACCEPTED' 
         ? this.orderDetail.sellerAddress 
         : this.orderDetail.userAddress
       
-      const targetName = this.orderDetail.status === 'accepted' 
+      const targetName = this.orderDetail.status === 'ACCEPTED' 
         ? this.orderDetail.sellerName 
         : '用户地址'
 
@@ -530,30 +521,30 @@ export default {
 
     // 获取当前目标
     getCurrentTarget() {
-      if (this.orderDetail.status === 'accepted') {
+      if (this.orderDetail.status === 'ACCEPTED') {
         return `前往 ${this.orderDetail.sellerName || '商家'} 取餐`
-      } else if (this.orderDetail.status === 'picked') {
+      } else if (this.orderDetail.status === 'PICKED') {
         return '前往用户地址送餐'
       }
       return '订单已完成'
     },
 
-    // 获取状态文本
+    // ✅ 修改：获取状态文本 - 适配全大写状态
     getStatusText(status) {
       const statusMap = {
-        accepted: '已接单',
-        picked: '已取餐',
-        completed: '已完成'
+        ACCEPTED: '已接单',
+        PICKED: '已取餐', 
+        COMPLETED: '已完成'
       }
       return statusMap[status] || '状态未知'
     },
 
-    // 获取状态样式类
+    // ✅ 修改：获取状态样式类 - 适配全大写状态
     getStatusClass(status) {
       return {
-        'status-accepted': status === 'accepted',
-        'status-picked': status === 'picked',
-        'status-completed': status === 'completed'
+        'status-accepted': status === 'ACCEPTED',
+        'status-picked': status === 'PICKED',
+        'status-completed': status === 'COMPLETED'
       }
     }
   },

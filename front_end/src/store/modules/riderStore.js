@@ -28,7 +28,7 @@ const actions = {
       try {
         // 获取当前位置
         const position = await getCurrentLocation()
-        
+        console.log('riderStore:当前位置:', position)
         // 发送位置到后端
         await fetchWithTimeout(`${BASE_URL}/rider/updateLocation`, {
           method: 'POST',
