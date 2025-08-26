@@ -60,7 +60,9 @@ export default {
       itemImage: null,
       itemImageUrl: '',
       itemPrice: '',
-      SellerItemEdit:'',
+      // 新增，避免渲染期警告
+      itemDescription: '',
+      SellerItemEdit: '',
       errorMessage: '',
       submitStatus: 'normal' // normal | success
     }
