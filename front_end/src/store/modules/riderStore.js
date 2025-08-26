@@ -18,7 +18,7 @@ const mutations = {
 }
 
 const actions = {
-  startLocationTracking({ commit, rootState }) {
+  startLocationTracking({ commit, rootState, state }) {
     if (state.isLocationTracking) return
     
     commit('SET_LOCATION_TRACKING', true)
@@ -45,11 +45,11 @@ const actions = {
   },
   
   // 停止位置追踪
-  stopLocationTracking({ commit }) {
+  stopLocationTracking({ commit, state }) {
     if (state.locationTimer) {
       clearInterval(state.locationTimer)
-      commit('SET_LOCATION_TIMER', null)
     }
+    commit('SET_LOCATION_TIMER', null)
     commit('SET_LOCATION_TRACKING', false)
   }
 }
