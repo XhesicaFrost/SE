@@ -1,4 +1,13 @@
-export const BASE_URL = 'http://localhost:12345'  
+// 根据环境动态设置 BASE_URL
+const getBaseUrl = () => {
+  // Docker 环境下后端服务名
+  if (process.env.NODE_ENV === 'production') {
+    return 'http://localhost:12345'  // 生产环境，通过宿主机端口访问
+  }
+  return 'http://localhost:12345'  // 开发环境
+}
+
+export const BASE_URL = getBaseUrl()
 
 export const FETCH_TIMEOUT = 8000; // 超时时间（毫秒）
 export const debug_seller = false; // 是否启用商家调试模式
