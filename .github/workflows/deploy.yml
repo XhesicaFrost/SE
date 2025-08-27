@@ -1,0 +1,48 @@
+name: Build, Test and Deploy
+
+on:
+  push:
+    branches: [ "xhy's-docker" ]
+  pull_request:
+    branches: [ "xhy's-docker" ]
+  workflow_dispatch:
+
+jobs:
+  build-test-deploy:
+    runs-on: self-hosted
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        ref: xhy's-docker
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: front_end/package-lock.json
+    
+    - name: Install frontend dependencies
+      working-directory: ./front_end
+      run: npm install
+    
+    - name: Run frontend tests
+      working-directory: ./front_end
+      run: npm test
+    
+    - name: Deploy with Kubernetes
+      working-directory: ./k8s
+      run: |
+        echo "Starting deployment..."
+        call deploy.bat
+      shell: cmd
+    
+    - name: Verify deployment
+      run: |
+        echo "Checking deployment status..."
+        kubectl get pods
+        kubectl get services
+      shell: cmd
+      continue-on-error: true
