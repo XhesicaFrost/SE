@@ -1,5 +1,10 @@
 // 根据环境动态设置 BASE_URL
 const getBaseUrl = () => {
+  // 检查是否有环境变量设置的API地址
+  if (process.env.VUE_APP_API_BASE_URL) {
+    return process.env.VUE_APP_API_BASE_URL
+  }
+  
   // Docker 环境下后端服务名
   if (process.env.NODE_ENV === 'production') {
     return 'http://localhost:12345'  // 生产环境，通过宿主机端口访问
