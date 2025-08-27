@@ -17,15 +17,10 @@ public class GeoService {
 
     public Map<String, Double> getCoordinates(String address) {
         try {
-            // 不对地址进行编码，直接使用中文
             String url = String.format("%s?address=%s&key=%s", GEOCODE_API_URL, address, amapApiKey);
-
-            System.out.println("调用高德地图 API，URL: " + url);
 
             RestTemplate restTemplate = new RestTemplate();
             Map<String, Object> response = restTemplate.getForObject(url, Map.class);
-
-            System.out.println("高德地图 API 响应: " + response);
 
             if (response != null && "1".equals(response.get("status"))) {
                 List<Map<String, Object>> geocodes = (List<Map<String, Object>>) response.get("geocodes");
