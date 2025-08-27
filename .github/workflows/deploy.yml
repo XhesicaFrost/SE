@@ -17,6 +17,15 @@ jobs:
       with:
         ref: xhy's-docker
     
+    - name: Check Docker and K8s
+      run: |
+        echo %PATH%
+        where docker
+        where kubectl
+        docker info
+        kubectl cluster-info
+      shell: cmd    
+    
     - name: Install frontend dependencies
       working-directory: ./front_end
       run: npm install
@@ -39,3 +48,5 @@ jobs:
         kubectl get services
       shell: cmd
       continue-on-error: true
+
+    
